@@ -383,17 +383,21 @@
       <button type="button" class="chip pin-chip" id="mode-approach" data-val="approach" aria-pressed="false">アプローチ</button>
       <button type="button" class="chip pin-chip" id="mode-putt" data-val="putt" aria-pressed="false">パター</button>
     </div>
+    <div class="choices c2" id="unitChoices" role="group" aria-label="距離の単位" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="unit-yd" data-val="yd" aria-pressed="true">ヤード</button>
+      <button type="button" class="chip pin-chip" id="unit-m" data-val="m" aria-pressed="false">メートル</button>
+    </div>
   </section>
 
   <section class="card" id="approachCard" hidden>
     <h2>アプローチ（ピンまでの距離）</h2>
     <div class="dist-row">
       <button type="button" class="stepper" id="apMinus">−1</button>
-      <div class="dist-value"><span id="apDistNum">20</span><small>ヤード</small></div>
+      <div class="dist-value"><span id="apDistNum">20</span><small id="unitLabelAp">ヤード</small></div>
       <button type="button" class="stepper" id="apPlus">＋1</button>
     </div>
     <input type="range" id="apDistSlider" min="5" max="50" step="1" value="20" aria-label="アプローチの距離">
-    <div class="scale"><span>5</span><span>20</span><span>35</span><span>50</span></div>
+    <div class="scale" id="scaleAp"><span>5</span><span>20</span><span>35</span><span>50</span></div>
     <div class="choices c3" id="apSlopeChoices" role="group" aria-label="グリーンの傾斜" style="margin-top:12px;">
       <button type="button" class="chip pin-chip" id="ap-slope-up" data-val="up" aria-pressed="false">上り</button>
       <button type="button" class="chip pin-chip" id="ap-slope-flat" data-val="flat" aria-pressed="true">平坦</button>
@@ -513,11 +517,11 @@
     <h2>残り距離</h2>
     <div class="dist-row">
       <button type="button" class="stepper" id="minus5">−5</button>
-      <div class="dist-value"><span id="distNum">150</span><small>ヤード</small></div>
+      <div class="dist-value"><span id="distNum">150</span><small id="unitLabelFull">ヤード</small></div>
       <button type="button" class="stepper" id="plus5">＋5</button>
     </div>
     <input type="range" id="distSlider" min="50" max="250" step="5" value="150" aria-label="残り距離">
-    <div class="scale"><span>50</span><span>100</span><span>150</span><span>200</span><span>250</span></div>
+    <div class="scale" id="scaleFull"><span>50</span><span>100</span><span>150</span><span>200</span><span>250</span></div>
     <div class="choices c3" id="lieChoices" role="group" aria-label="ライ" style="margin-top:12px;">
       <button type="button" class="chip pin-chip" id="lie-fw" data-val="fw" aria-pressed="true">フェアウェイ</button>
       <button type="button" class="chip pin-chip" id="lie-rough" data-val="rough" aria-pressed="false">ラフ<br><small>ロス約7%</small></button>
@@ -526,7 +530,11 @@
   </section>
 
   <section class="card" id="windCard">
-    <h2>風（手動入力・番手のめやす）</h2>
+    <h2>風と天気（番手のめやす）</h2>
+    <div class="gps-row" style="margin-bottom:10px;">
+      <button type="button" class="stepper" id="weatherBtn" style="flex:1;">🌤 現在地の天気を取得（風・気温）</button>
+    </div>
+    <div class="gps-out" id="weatherOut" style="margin-bottom:10px;">ボタンを押すと、GPS位置の風速・気温を自動取得して計算に反映します。</div>
     <div class="wind-grid">
       <div class="choices c3">
         <button type="button" class="chip pin-chip" id="wind-none" data-val="none" aria-pressed="true">無風</button>
@@ -599,8 +607,12 @@
     penalties: [],     // right / left / back / front（複数可）
     pin: null,         // center / right / left / back / front
     distance: 150,     // ヤード
+    unit: "yd",        // yd / m（表示単位・内部計算は常にヤード）
     windDir: "none",   // none / against / with
     windSpeed: 0,      // m/s
+    temp: null,        // 気温（℃・天気取得時のみ）
+    rain: false,       // 降水あり
+    weatherAt: 0,      // 天気を取得した時刻（ms）
     slope: "flat",     // up / flat / down（グリーンの傾斜）
     traj: "normal",    // low / normal / high（球の高さ）
     mode: "full",      // full / approach / putt
@@ -629,9 +641,45 @@
     center: { run: 1.0, h: 1.0,  name: "中心" },
     left:   { run: 0.7, h: 1.35, name: "左足寄り" }
   };
-  function greenK() { // グリーンの速さによるラン倍率（9.5ft基準）
+  // 単位ヘルパー（内部は常にヤード、表示だけ換算）
+  var YD2M = 0.9144;
+  function toDisp(yd) { return state.unit === "m" ? Math.round(yd * YD2M) : Math.round(yd); }
+  function toDisp1(yd) { var v = state.unit === "m" ? yd * YD2M : yd; return Math.round(v * 10) / 10; }
+  function fromDisp(v) { return state.unit === "m" ? v / YD2M : v; }
+  function unitName() { return state.unit === "m" ? "メートル" : "ヤード"; }
+  function uSfx() { return state.unit === "m" ? "m" : "yd"; }
+  function fmtD(yd) { return toDisp(yd) + uSfx(); }
+  function fmtD1(yd) { return toDisp1(yd) + uSfx(); }
+  function updateUnitUI() {
+    $("unit-yd").setAttribute("aria-pressed", state.unit === "yd" ? "true" : "false");
+    $("unit-m").setAttribute("aria-pressed", state.unit === "m" ? "true" : "false");
+    $("unitLabelFull").textContent = unitName();
+    $("unitLabelAp").textContent = unitName();
+    var fs = $("scaleFull").querySelectorAll("span");
+    [50, 100, 150, 200, 250].forEach(function (v, i) { fs[i].textContent = toDisp(v); });
+    var as = $("scaleAp").querySelectorAll("span");
+    [5, 20, 35, 50].forEach(function (v, i) { as[i].textContent = toDisp(v); });
+    $("distNum").textContent = toDisp(state.distance);
+    $("apDistNum").textContent = toDisp(state.apDist);
+    ensureClubDist();
+    CLUB_DEFAULTS.forEach(function (c) {
+      var inp = $("club-" + c[0]);
+      if (inp && typeof state.clubDist[c[0]] === "number") inp.value = toDisp(state.clubDist[c[0]]);
+    });
+  }
+
+  function weatherFresh() { // 天気データは6時間で無効化（古い値での誤計算を防ぐ）
+    return state.weatherAt && (Date.now() - state.weatherAt) < 6 * 3600 * 1000;
+  }
+  function greenK() { // グリーンの速さによるラン倍率（9.5ft基準・雨なら濡れて転がらない）
     var s = state.greenSpeed;
-    return (typeof s === "number" && s >= 6 && s <= 14) ? s / 9.5 : 1;
+    var k = (typeof s === "number" && s >= 6 && s <= 14) ? s / 9.5 : 1;
+    if (state.rain && weatherFresh()) k *= 0.85;
+    return k;
+  }
+  function tempAdjust(dist) { // 気温補正：20℃基準、1℃低いごとに飛距離約0.15%減
+    if (typeof state.temp !== "number" || !weatherFresh()) return 0;
+    return Math.round(dist * (20 - state.temp) * 0.0015);
   }
   // ライ：loss = 飛距離倍率、run = ラン倍率（スピンが減るぶん転がる）
   var LIE = {
@@ -813,7 +861,7 @@
   // ---------- 距離 ----------
   function setDistance(yd) {
     state.distance = Math.min(250, Math.max(50, yd));
-    $("distNum").textContent = state.distance;
+    $("distNum").textContent = toDisp(state.distance);
     $("distSlider").value = state.distance;
     update();
   }
@@ -849,11 +897,11 @@
       input.inputMode = "numeric";
       input.id = "club-" + name;
       input.min = 30; input.max = 320; input.step = 5;
-      input.value = state.clubDist[name];
+      input.value = toDisp(state.clubDist[name]);
       input.setAttribute("aria-label", name + "の飛距離（ヤード）");
       input.addEventListener("input", function () {
         var v = parseInt(input.value, 10);
-        if (!isNaN(v)) { state.clubDist[name] = v; renderWind(); renderDrop(); saveState(); }
+        if (!isNaN(v)) { state.clubDist[name] = Math.round(fromDisp(v)); renderWind(); renderDrop(); saveState(); }
       });
       cell.appendChild(b); cell.appendChild(input);
       grid.appendChild(cell);
@@ -875,7 +923,7 @@
         if (best === null || d > state.clubDist[best]) best = name;
       });
     }
-    return best ? best + "（" + state.clubDist[best] + "yd）" : "-";
+    return best ? best + "（" + fmtD(state.clubDist[best]) + "）" : "-";
   }
 
   function windAdjust() {
@@ -889,17 +937,20 @@
   function renderWind() {
     var lieF = LIE[state.lie] || LIE.fw;
     var adj = windAdjust();
-    var eff = Math.round((state.distance + adj) / lieF.loss); // 風＋ライのロスを織り込んだ「打つべき距離」
+    var tAdj = tempAdjust(state.distance);
+    var eff = Math.round((state.distance + adj + tAdj) / lieF.loss); // 風＋気温＋ライを織り込んだ「打つべき距離」
     var el = $("windVerdict");
     var club = suggestClub(eff);
     var conds = [];
     if (state.windDir === "against" && state.windSpeed > 0) conds.push("向かい風 " + state.windSpeed + "m/s");
     if (state.windDir === "with" && state.windSpeed > 0) conds.push("追い風 " + state.windSpeed + "m/s");
+    if (tAdj !== 0) conds.push("気温" + state.temp + "℃（" + (tAdj > 0 ? "+" : "-") + fmtD(Math.abs(tAdj)) + "相当）");
+    if (state.rain && weatherFresh()) conds.push("☔雨");
     if (state.lie !== "fw") conds.push(lieF.name + "（ロス約" + Math.round((1 - lieF.loss) * 100) + "%）");
     if (conds.length === 0) {
-      el.innerHTML = '表示どおり <strong>' + state.distance + '</strong> ヤードを打つ<span class="club">' + club + '</span>';
+      el.innerHTML = '表示どおり <strong>' + toDisp(state.distance) + '</strong> ' + unitName() + 'を打つ<span class="club">' + club + '</span>';
     } else {
-      el.innerHTML = conds.join("＋") + ' → <strong>' + eff + '</strong> ヤード相当を打つ<span class="club">' + club + '</span>';
+      el.innerHTML = conds.join("＋") + ' → <strong>' + toDisp(eff) + '</strong> ' + unitName() + '相当を打つ<span class="club">' + club + '</span>';
     }
   }
 
@@ -932,10 +983,10 @@
       var row = document.createElement("div");
       row.className = "drop-row" + (r.name === bestName ? " best" : "");
       var dropTxt = r.drop >= 1
-        ? "ピンの <strong>" + Math.round(r.drop) + "yd手前</strong> に落とす"
-        : "ピンの <strong>" + Math.round(-r.drop) + "yd奥</strong> に落ちる";
+        ? "ピンの <strong>" + fmtD(r.drop) + "手前</strong> に落とす"
+        : "ピンの <strong>" + fmtD(-r.drop) + "奥</strong> に落ちる";
       var d = Math.round(r.diff);
-      var resTxt = Math.abs(d) < 2 ? "◎ ピンで止まる" : (d > 0 ? "+" + d + "ydオーバー" : Math.abs(d) + "ydショート");
+      var resTxt = Math.abs(d) < 2 ? "◎ ピンで止まる" : (d > 0 ? "+" + fmtD(d) + "オーバー" : fmtD(Math.abs(d)) + "ショート");
       row.innerHTML = "<b>" + r.name + "</b><span class='place'>" + dropTxt + "</span><span class='result'>" + resTxt + "</span>";
       row.addEventListener("click", function () { playTrajectory(r); });
       tbl.appendChild(row);
@@ -1013,7 +1064,7 @@
     tsvg.appendChild(label(X(carry), dgy - 22, "ここに落とす", { fs: 9 }));
 
     // 見出し（番手・キャリー・ラン）
-    tsvg.appendChild(label(64, 14, r.name + "  キャリー" + Math.round(carry) + " + ラン" + Math.round(run), { fs: 10, wide: true }));
+    tsvg.appendChild(label(64, 14, r.name + "  キャリー" + toDisp(carry) + " + ラン" + toDisp(run), { fs: 10, wide: true }));
 
     // 弾道（放物線）：地面の高低差も考慮
     var launchY = y0; // 打ち出し（表示範囲の左端手前から）
@@ -1040,7 +1091,7 @@
     // 停止位置の結果ラベル
     function showResult() {
       var d = Math.round(r.diff);
-      var txt = Math.abs(d) < 2 ? "◎ ピンで止まる" : (d > 0 ? "+" + d + "ydオーバー" : Math.abs(d) + "ydショート");
+      var txt = Math.abs(d) < 2 ? "◎ ピンで止まる" : (d > 0 ? "+" + fmtD(d) + "オーバー" : fmtD(Math.abs(d)) + "ショート");
       var sgy = groundY(stop);
       tsvg.appendChild(el("circle", { cx: X(stop), cy: sgy - 4, r: 4.5, fill: "#fff", stroke: tok("--accent"), "stroke-width": 2 }));
       tsvg.appendChild(label(X(stop), sgy - 20, txt, {
@@ -1113,12 +1164,12 @@
       var row = document.createElement("div");
       row.className = "drop-row best";
       row.innerHTML = "<b>SW<br><small>砂</small></b>" +
-        "<span class='place'>ピンの <strong>" + (Math.round(bCarry >= D ? 0 : (D - bCarry) * 10) / 10) + "yd手前</strong> に落とす</span>" +
-        "<span class='result'>キャリー" + (Math.round(bCarry * 10) / 10) + "＋ラン" + (Math.round(bRun * 10) / 10) + "</span>";
+        "<span class='place'>ピンの <strong>" + fmtD1(Math.max(0, D - bCarry)) + "手前</strong> に落とす</span>" +
+        "<span class='result'>キャリー" + toDisp1(bCarry) + "＋ラン" + toDisp1(bRun) + "</span>";
       tbl.appendChild(row);
       var vd = document.createElement("div");
       vd.className = "verdict";
-      vd.innerHTML = "エクスプロージョン：砂が力を吸収するので、<strong>" + swing + "ヤード</strong> を打つつもりの振り幅（約2.5倍）。<br>ボールの2〜3cm手前の砂ごと打ち抜く。スピンが少なくランが出ます。";
+      vd.innerHTML = "エクスプロージョン：砂が力を吸収するので、<strong>" + toDisp(swing) + unitName() + "</strong> を打つつもりの振り幅（約2.5倍）。<br>ボールの2〜3cm手前の砂ごと打ち抜く。スピンが少なくランが出ます。";
       tbl.appendChild(vd);
       var bh = document.createElement("div");
       bh.style.cssText = "font-size:11px;margin-top:2px;";
@@ -1142,8 +1193,8 @@
       var row = document.createElement("div");
       row.className = "drop-row" + (cl.id === state.apClub ? " best" : "");
       row.innerHTML = "<b>" + cl.name + "</b>" +
-        "<span class='place'>ピンの <strong>" + (Math.round(r.drop * 10) / 10) + "yd手前</strong> に落とす</span>" +
-        "<span class='result'>キャリー" + (Math.round(carry * 10) / 10) + "＋ラン" + (Math.round(run * 10) / 10) + "</span>";
+        "<span class='place'>ピンの <strong>" + fmtD1(r.drop) + "手前</strong> に落とす</span>" +
+        "<span class='result'>キャリー" + toDisp1(carry) + "＋ラン" + toDisp1(run) + "</span>";
       row.addEventListener("click", function () {
         state.apClub = cl.id;
         renderApproach();
@@ -1217,7 +1268,7 @@
   // アプローチ距離
   function setApDist(yd) {
     state.apDist = Math.min(50, Math.max(5, yd));
-    $("apDistNum").textContent = state.apDist;
+    $("apDistNum").textContent = toDisp(state.apDist);
     $("apDistSlider").value = state.apDist;
     renderApproach();
     saveState();
@@ -1307,7 +1358,7 @@
 
     // 結果表示
     var vd = $("puttVerdict");
-    var touchTxt = "タッチ：<strong>" + touch + "フィート分</strong> 打つ";
+    var touchTxt = "タッチ：<strong>" + touch + "フィート分</strong>（約" + (Math.round(touch * 3.048) / 10) + "m）打つ";
     if (state.puttVert === "up") touchTxt += "（上りレベル" + lv + "で強め）";
     else if (state.puttVert === "down") touchTxt += "（下りレベル" + lv + "で弱め）";
     else touchTxt += "（平坦）";
@@ -1945,8 +1996,8 @@
     if (shift > 0.5) {
       var parts = [];
       var xYd = Math.round(Math.abs(shiftX) / 4), yYd = Math.round(Math.abs(shiftY) / 4);
-      if (xYd > 0) parts.push("約" + xYd + "ヤード" + (shiftX > 0 ? "右" : "左"));
-      if (yYd > 0) parts.push("約" + yYd + "ヤード" + (shiftY > 0 ? "手前" : "奥"));
+      if (xYd > 0) parts.push("約" + fmtD(xYd) + (shiftX > 0 ? "右" : "左"));
+      if (yYd > 0) parts.push("約" + fmtD(yYd) + (shiftY > 0 ? "手前" : "奥"));
       note.textContent = "ピン直狙いは散らばりがペナルティにかかります。ピンより" + parts.join("・") + "側を狙う。";
     } else if (state.penalties.length === 0) {
       note.textContent = "ペナルティなし。ピンをそのまま狙えます（選ぶ場合は複数タップできます）。";
@@ -1990,7 +2041,45 @@
     if (!gpsMarkPos) { out.textContent = "先に「ここを打点に記録」を押してください。"; return; }
     out.textContent = "測定中…";
     getPos(function (c) {
-      out.innerHTML = "飛距離：<strong>" + distYd(gpsMarkPos, c) + " ヤード</strong>（精度 約" + Math.round(c.accuracy) + "m）";
+      out.innerHTML = "飛距離：<strong>" + toDisp(distYd(gpsMarkPos, c)) + " " + unitName() + "</strong>（精度 約" + Math.round(c.accuracy) + "m）";
+    }, function (msg) { out.textContent = "⚠️ " + msg; });
+  });
+
+  // 単位チップ
+  ["unit-yd", "unit-m"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      state.unit = $(id).dataset.val;
+      updateUnitUI();
+      update();
+    });
+  });
+
+  // ---------- 天気の自動取得（Open-Meteo・無料/登録不要） ----------
+  $("weatherBtn").addEventListener("click", function () {
+    var out = $("weatherOut");
+    out.textContent = "位置情報を取得中…";
+    getPos(function (c) {
+      out.textContent = "天気を取得中…";
+      var url = "https://api.open-meteo.com/v1/forecast?latitude=" + c.latitude +
+        "&longitude=" + c.longitude +
+        "&current=temperature_2m,precipitation,wind_speed_10m,wind_direction_10m&wind_speed_unit=ms&timezone=auto";
+      fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+        var cur = d && d.current;
+        if (!cur) { out.textContent = "⚠️ 天気データを読み取れませんでした"; return; }
+        state.windSpeed = Math.round(cur.wind_speed_10m * 10) / 10;
+        state.temp = Math.round(cur.temperature_2m * 10) / 10;
+        state.rain = (cur.precipitation || 0) > 0;
+        state.weatherAt = Date.now();
+        $("windSpeed").value = state.windSpeed;
+        var dir16 = ["北", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南", "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西"];
+        var wd = dir16[Math.round((cur.wind_direction_10m || 0) / 22.5) % 16];
+        out.innerHTML = "✓ 🌡" + state.temp + "℃｜💨" + state.windSpeed + "m/s（" + wd + "の風）" +
+          (state.rain ? "｜☔降水あり（グリーンが重くなる計算に切替）" : "") +
+          "<br>ショット方向に対する向き（向かい/追い/無風扱い）は上のボタンで選んでください。";
+        update();
+      }).catch(function () {
+        out.textContent = "⚠️ 天気を取得できませんでした（電波状況をご確認ください）";
+      });
     }, function (msg) { out.textContent = "⚠️ " + msg; });
   });
 
@@ -2024,12 +2113,12 @@
   function applyStateToUI() {
     ensureClubDist();
     $("courseSelect").value = state.course;
-    $("distNum").textContent = state.distance;
+    $("distNum").textContent = toDisp(state.distance);
     $("distSlider").value = state.distance;
     $("windSpeed").value = state.windSpeed;
     CLUB_DEFAULTS.forEach(function (c) {
       var inp = $("club-" + c[0]);
-      if (inp && typeof state.clubDist[c[0]] === "number") inp.value = state.clubDist[c[0]];
+      if (inp && typeof state.clubDist[c[0]] === "number") inp.value = toDisp(state.clubDist[c[0]]);
     });
     setPenaltyUI();
     if (state.pin) setPinUI(state.pin);
@@ -2044,8 +2133,9 @@
     $("apGreenSpeed").value = state.greenSpeed;
     $("fullGreenSpeed").value = state.greenSpeed;
     $("puttGreenSpeed").value = state.greenSpeed;
-    $("apDistNum").textContent = state.apDist;
+    $("apDistNum").textContent = toDisp(state.apDist);
     $("apDistSlider").value = state.apDist;
+    updateUnitUI();
     setModeUI();
   }
   loadState();
