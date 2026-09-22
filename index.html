@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>狙う1点マップ</title>
+<style>
+  :root {
+    --ground: #f3f6f2;
+    --surface: #ffffff;
+    --surface-2: #f5f8f4;
+    --ink: #22322b;
+    --ink-soft: #5c6b63;
+    --line: #dde5dd;
+    --accent: #1d5fa0;
+    --accent-soft: #e3edf7;
+    --danger: #c03b2e;
+    --danger-soft: #f9e7e4;
+    --turf: #cfe8c4;
+    --turf-deep: #8cc98c;
+    --turf-edge: #5ba35b;
+    --flag: #e04a38;
+    --chip-on-blue: #1d5fa0;
+    --chip-on-red: #c03b2e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #151b17;
+      --surface: #1e2621;
+      --surface-2: #242e28;
+      --ink: #e6ede8;
+      --ink-soft: #9db0a5;
+      --line: #35403a;
+      --accent: #6aa7dd;
+      --accent-soft: #21374d;
+      --danger: #e0685a;
+      --danger-soft: #46251f;
+      --turf: #2c4030;
+      --turf-deep: #3d6242;
+      --turf-edge: #55835a;
+      --flag: #e0685a;
+      --chip-on-blue: #6aa7dd;
+      --chip-on-red: #e0685a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #151b17;
+    --surface: #1e2621;
+    --surface-2: #242e28;
+    --ink: #e6ede8;
+    --ink-soft: #9db0a5;
+    --line: #35403a;
+    --accent: #6aa7dd;
+    --accent-soft: #21374d;
+    --danger: #e0685a;
+    --danger-soft: #46251f;
+    --turf: #2c4030;
+    --turf-deep: #3d6242;
+    --turf-edge: #55835a;
+    --flag: #e0685a;
+    --chip-on-blue: #6aa7dd;
+    --chip-on-red: #e0685a;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    padding-inline: 16px;
+    padding-block: 12px 32px;
+    line-height: 1.5;
+  }
+  .app {
+    max-width: 460px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  header.top {
+    text-align: center;
+    padding-block: 6px 2px;
+  }
+  header.top h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+  header.top p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .card h2 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 15px;
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .choices {
+    display: grid;
+    gap: 8px;
+  }
+  .choices.c4 { grid-template-columns: repeat(4, 1fr); }
+  .choices.c5 { grid-template-columns: repeat(5, 1fr); }
+  .choices.c3 { grid-template-columns: repeat(3, 1fr); }
+  .choices.c2 { grid-template-columns: repeat(2, 1fr); }
+
+  .chip {
+    appearance: none;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 12px;
+    padding: 10px 2px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .chip svg { display: block; }
+  .chip .dot-mark { color: var(--ink-soft); }
+  .chip small { font-size: 9px; font-weight: 500; opacity: 0.75; line-height: 1.2; }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip[aria-pressed="true"].pin-chip {
+    background: var(--chip-on-blue);
+    border-color: var(--chip-on-blue);
+    color: #fff;
+  }
+  .chip[aria-pressed="true"].pin-chip .dot-mark { color: #fff; }
+  .chip[aria-pressed="true"].pen-chip {
+    background: var(--chip-on-red);
+    border-color: var(--chip-on-red);
+    color: #fff;
+  }
+  .chip[aria-pressed="true"].pen-chip .dot-mark { color: #fff; }
+
+  .dist-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .stepper {
+    appearance: none;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    background: var(--surface);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .stepper:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .dist-value {
+    font-size: 38px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+  .dist-value small {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-left: 4px;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    margin: 4px 0 2px;
+  }
+  .scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wind-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .wind-grid .choices.c3 { grid-column: 1 / -1; }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .field label {
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 16px;
+    background: var(--surface);
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .verdict {
+    margin-top: 10px;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .verdict strong {
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .verdict .club {
+    display: inline-block;
+    margin-left: 6px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .club-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .club-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 6px 8px;
+  }
+  .club-cell b {
+    font-size: 12px;
+    min-width: 26px;
+    color: var(--ink-soft);
+  }
+  .club-cell input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 2px 0;
+  }
+  .club-cell input:focus { outline: 2px solid var(--accent); border-radius: 4px; }
+
+  .traj-wrap {
+    margin-top: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .traj-wrap svg { display: block; width: 100%; height: auto; }
+
+  .drop-row { cursor: pointer; }
+  .drop-row:active { opacity: 0.8; }
+
+  .drop-table {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .drop-row {
+    display: grid;
+    grid-template-columns: 58px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .drop-row.best {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .drop-row b {
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .drop-row .place { color: var(--ink); }
+  .drop-row .place strong { font-variant-numeric: tabular-nums; }
+  .drop-row .result {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .drop-row.best .result { color: var(--accent); }
+
+  .map-wrap {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--turf);
+  }
+  .map-wrap svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .map-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  .gps-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .gps-row .stepper { flex: 1; }
+  .gps-out {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    min-height: 1.2em;
+  }
+  .gps-out strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  footer.note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    padding-block: 4px;
+  }
+</style>
+</head>
+<body style="margin:0;">
+
+
+<div class="app">
+  <header class="top">
+    <h1>⛳ 狙う1点マップ</h1>
+    <p>ピンとペナルティを選ぶと、狙う1点と球が散らばる円が出ます</p>
+  </header>
+
+  <section class="card">
+    <div class="choices c3" id="modeChoices" role="group" aria-label="モード切替">
+      <button type="button" class="chip pin-chip" id="mode-full" data-val="full" aria-pressed="true">フルショット</button>
+      <button type="button" class="chip pin-chip" id="mode-approach" data-val="approach" aria-pressed="false">アプローチ</button>
+      <button type="button" class="chip pin-chip" id="mode-putt" data-val="putt" aria-pressed="false">パター</button>
+    </div>
+  </section>
+
+  <section class="card" id="approachCard" hidden>
+    <h2>アプローチ（ピンまでの距離）</h2>
+    <div class="dist-row">
+      <button type="button" class="stepper" id="apMinus">−1</button>
+      <div class="dist-value"><span id="apDistNum">20</span><small>ヤード</small></div>
+      <button type="button" class="stepper" id="apPlus">＋1</button>
+    </div>
+    <input type="range" id="apDistSlider" min="5" max="50" step="1" value="20" aria-label="アプローチの距離">
+    <div class="scale"><span>5</span><span>20</span><span>35</span><span>50</span></div>
+    <div class="choices c3" id="apSlopeChoices" role="group" aria-label="グリーンの傾斜" style="margin-top:12px;">
+      <button type="button" class="chip pin-chip" id="ap-slope-up" data-val="up" aria-pressed="false">上り</button>
+      <button type="button" class="chip pin-chip" id="ap-slope-flat" data-val="flat" aria-pressed="true">平坦</button>
+      <button type="button" class="chip pin-chip" id="ap-slope-down" data-val="down" aria-pressed="false">下り</button>
+    </div>
+    <div class="choices c3" id="apLieChoices" role="group" aria-label="ライ" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="ap-lie-fw" data-val="fw" aria-pressed="true">芝から</button>
+      <button type="button" class="chip pin-chip" id="ap-lie-rough" data-val="rough" aria-pressed="false">ラフから</button>
+      <button type="button" class="chip pin-chip" id="ap-lie-bunker" data-val="bunker" aria-pressed="false">バンカーから</button>
+    </div>
+    <div class="choices c3" id="ballPosChoices" role="group" aria-label="ボール位置" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="bp-right" data-val="right" aria-pressed="false">右足寄り<br><small>低く転がる</small></button>
+      <button type="button" class="chip pin-chip" id="bp-center" data-val="center" aria-pressed="true">中心<br><small>普通</small></button>
+      <button type="button" class="chip pin-chip" id="bp-left" data-val="left" aria-pressed="false">左足寄り<br><small>上げて止める</small></button>
+    </div>
+    <div class="field" style="margin-top:8px;">
+      <label for="apGreenSpeed">グリーンの速さ（フィート・ゴルフ場の掲示値）</label>
+      <input type="number" id="apGreenSpeed" inputmode="decimal" min="6" max="14" step="0.1" value="9.5">
+    </div>
+    <div class="traj-wrap" style="margin-top:12px;">
+      <svg id="apTrajSvg" viewBox="0 0 360 150" role="img" aria-label="アプローチの弾道"></svg>
+    </div>
+    <div class="drop-table" id="apTable"></div>
+    <p class="map-note">打ち方の行をタップすると弾道を再生します。ピンに寄せるための「落とす場所」を逆算しています。</p>
+  </section>
+
+  <section class="card" id="puttCard" hidden>
+    <h2>パター（カップまでの距離）</h2>
+    <div class="dist-row">
+      <button type="button" class="stepper" id="puttMinus">−1</button>
+      <div class="dist-value"><span id="puttDistNum">8</span><small>フィート</small></div>
+      <button type="button" class="stepper" id="puttPlus">＋1</button>
+    </div>
+    <input type="range" id="puttDistSlider" min="1" max="30" step="1" value="8" aria-label="パットの距離">
+    <div class="scale"><span>1</span><span>10</span><span>20</span><span>30</span></div>
+    <p class="map-note" style="margin-top:2px;">1フィート≒30cm（3フィート≒1歩）</p>
+    <div class="choices c3" id="puttVertChoices" role="group" aria-label="縦の傾斜" style="margin-top:10px;">
+      <button type="button" class="chip pin-chip" id="pv-up" data-val="up" aria-pressed="false">上り</button>
+      <button type="button" class="chip pin-chip" id="pv-flat" data-val="flat" aria-pressed="true">平坦</button>
+      <button type="button" class="chip pin-chip" id="pv-down" data-val="down" aria-pressed="false">下り</button>
+    </div>
+    <div class="choices c3" id="puttHorizChoices" role="group" aria-label="横の傾斜（曲がり）" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="ph-hook" data-val="hook" aria-pressed="false">フック<br><small>右→左に切れる</small></button>
+      <button type="button" class="chip pin-chip" id="ph-straight" data-val="straight" aria-pressed="true">まっすぐ</button>
+      <button type="button" class="chip pin-chip" id="ph-slice" data-val="slice" aria-pressed="false">スライス<br><small>左→右に切れる</small></button>
+    </div>
+    <div class="choices c4" id="puttLevelChoices" role="group" aria-label="傾斜レベル" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="pl-0" data-val="0" aria-pressed="false">0<br><small>平ら</small></button>
+      <button type="button" class="chip pin-chip" id="pl-1" data-val="1" aria-pressed="true">1<br><small>かすか</small></button>
+      <button type="button" class="chip pin-chip" id="pl-2" data-val="2" aria-pressed="false">2<br><small>はっきり</small></button>
+      <button type="button" class="chip pin-chip" id="pl-3" data-val="3" aria-pressed="false">3<br><small>体が傾く</small></button>
+    </div>
+    <p class="map-note" style="margin-top:4px;">レベルはAimPoint式：カップとボールの中間に立ち、足裏で感じた傾きで選ぶ</p>
+    <div class="field" style="margin-top:8px;">
+      <label for="puttGreenSpeed">グリーンの速さ（フィート・ゴルフ場の掲示値）</label>
+      <input type="number" id="puttGreenSpeed" inputmode="decimal" min="6" max="14" step="0.1" value="9.5">
+    </div>
+    <div class="gps-row" style="margin-top:8px;">
+      <button type="button" class="stepper" id="slopeMeasure">📐 スマホを置いて傾斜を実測</button>
+    </div>
+    <div class="gps-out" id="slopeOut">ボールとカップの中間の芝にスマホを置き（画面を上・上端をカップに向ける）、ボタンを押すと傾斜を実測して自動入力します。</div>
+    <div class="verdict" id="puttVerdict"></div>
+    <div class="traj-wrap" style="margin-top:10px; touch-action:none;">
+      <svg id="puttSvg" viewBox="0 0 360 320" role="img" aria-label="パットのライン"></svg>
+    </div>
+    <p class="map-note" id="puttDragNote">×印を指で左右にドラッグすると、そのラインで打った場合の結果を試せます。</p>
+
+    <h2 style="margin-top:16px;">📷 写真でライン（デモ）</h2>
+    <div class="gps-row">
+      <label class="stepper" style="flex:1; text-align:center;">グリーンを撮る／選ぶ<input type="file" id="photoInput" accept="image/*" capture="environment" hidden></label>
+      <button type="button" class="stepper" id="photoReset" hidden>やり直し</button>
+    </div>
+    <div class="gps-out" id="photoGuide">実際のグリーンの写真の上に、いま設定中の傾斜でラインを重ねて表示します。</div>
+    <div class="choices c3" id="photoTouchChoices" role="group" aria-label="タッチの強さ" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="pt-soft" data-val="soft" aria-pressed="false">弱め<br><small>手前で切れる</small></button>
+      <button type="button" class="chip pin-chip" id="pt-just" data-val="just" aria-pressed="true">ちょうど<br><small>カップイン</small></button>
+      <button type="button" class="chip pin-chip" id="pt-firm" data-val="firm" aria-pressed="false">強め<br><small>切れずにオーバー</small></button>
+    </div>
+    <div class="traj-wrap" id="photoWrap" hidden style="margin-top:8px;">
+      <canvas id="photoCanvas" style="display:block; width:100%; height:auto;"></canvas>
+    </div>
+  </section>
+
+  <section class="card" id="courseCard">
+    <h2>コース</h2>
+    <select id="courseSelect" aria-label="コース選択">
+      <option value="">コースを選択…</option>
+      <option value="kira">吉良カントリークラブ</option>
+      <option value="castle">キャッスルヒルカントリー</option>
+      <option value="nukata">額田ゴルフクラブ</option>
+      <option value="wood">ウッドフレンズ名古屋港</option>
+    </select>
+  </section>
+
+  <section class="card" id="penaltyCard">
+    <h2>ペナルティの位置（複数選択できます）</h2>
+    <div class="choices c4" id="penaltyChoices" role="group" aria-label="ペナルティの位置">
+      <button type="button" class="chip pen-chip" id="pen-right" data-val="right" aria-pressed="false"><span class="dot-mark">▐</span>右</button>
+      <button type="button" class="chip pen-chip" id="pen-left" data-val="left" aria-pressed="false"><span class="dot-mark">▌</span>左</button>
+      <button type="button" class="chip pen-chip" id="pen-back" data-val="back" aria-pressed="false"><span class="dot-mark">▔</span>奥</button>
+      <button type="button" class="chip pen-chip" id="pen-front" data-val="front" aria-pressed="false"><span class="dot-mark">▁</span>手前</button>
+    </div>
+  </section>
+
+  <section class="card" id="pinCard">
+    <h2>ピンの位置</h2>
+    <div class="choices c5" id="pinChoices" role="group" aria-label="ピンの位置">
+      <button type="button" class="chip pin-chip" id="pin-center" data-val="center" aria-pressed="false"><span class="dot-mark">◉</span>真ん中</button>
+      <button type="button" class="chip pin-chip" id="pin-right" data-val="right" aria-pressed="false"><span class="dot-mark">◕</span>右</button>
+      <button type="button" class="chip pin-chip" id="pin-left" data-val="left" aria-pressed="false"><span class="dot-mark">◔</span>左</button>
+      <button type="button" class="chip pin-chip" id="pin-back" data-val="back" aria-pressed="false"><span class="dot-mark">◓</span>奥</button>
+      <button type="button" class="chip pin-chip" id="pin-front" data-val="front" aria-pressed="false"><span class="dot-mark">◒</span>手前</button>
+    </div>
+  </section>
+
+  <section class="card" id="distCard">
+    <h2>残り距離</h2>
+    <div class="dist-row">
+      <button type="button" class="stepper" id="minus5">−5</button>
+      <div class="dist-value"><span id="distNum">150</span><small>ヤード</small></div>
+      <button type="button" class="stepper" id="plus5">＋5</button>
+    </div>
+    <input type="range" id="distSlider" min="50" max="250" step="5" value="150" aria-label="残り距離">
+    <div class="scale"><span>50</span><span>100</span><span>150</span><span>200</span><span>250</span></div>
+    <div class="choices c3" id="lieChoices" role="group" aria-label="ライ" style="margin-top:12px;">
+      <button type="button" class="chip pin-chip" id="lie-fw" data-val="fw" aria-pressed="true">フェアウェイ</button>
+      <button type="button" class="chip pin-chip" id="lie-rough" data-val="rough" aria-pressed="false">ラフ<br><small>ロス約7%</small></button>
+      <button type="button" class="chip pin-chip" id="lie-bunker" data-val="bunker" aria-pressed="false">バンカー<br><small>ロス約15%</small></button>
+    </div>
+  </section>
+
+  <section class="card" id="windCard">
+    <h2>風（手動入力・番手のめやす）</h2>
+    <div class="wind-grid">
+      <div class="choices c3">
+        <button type="button" class="chip pin-chip" id="wind-none" data-val="none" aria-pressed="true">無風</button>
+        <button type="button" class="chip pin-chip" id="wind-against" data-val="against" aria-pressed="false">向かい風</button>
+        <button type="button" class="chip pin-chip" id="wind-with" data-val="with" aria-pressed="false">追い風</button>
+      </div>
+      <div class="field">
+        <label for="windSpeed">風速（m/s）</label>
+        <input type="number" id="windSpeed" inputmode="decimal" min="0" max="20" step="0.5" value="0">
+      </div>
+    </div>
+    <div class="verdict" id="windVerdict">無風：表示どおり <strong id="effDist">150</strong> ヤードを打つ</div>
+  </section>
+
+  <section class="card" id="clubCard">
+    <h2>マイ番手（自分の飛距離・タップで変更できます）</h2>
+    <div class="club-grid" id="clubGrid"></div>
+  </section>
+
+  <section class="card" id="dropCard">
+    <h2>落としどころ（グリーンの傾斜でランが変わります）</h2>
+    <div class="choices c3" id="slopeChoices" role="group" aria-label="グリーンの傾斜">
+      <button type="button" class="chip pin-chip" id="slope-up" data-val="up" aria-pressed="false">上り</button>
+      <button type="button" class="chip pin-chip" id="slope-flat" data-val="flat" aria-pressed="true">平坦</button>
+      <button type="button" class="chip pin-chip" id="slope-down" data-val="down" aria-pressed="false">下り</button>
+    </div>
+    <div class="choices c3" id="trajChoices" role="group" aria-label="球の高さ" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="traj-low" data-val="low" aria-pressed="false">低い球</button>
+      <button type="button" class="chip pin-chip" id="traj-normal" data-val="normal" aria-pressed="true">普通</button>
+      <button type="button" class="chip pin-chip" id="traj-high" data-val="high" aria-pressed="false">高い球</button>
+    </div>
+    <div class="field" style="margin-top:8px;">
+      <label for="fullGreenSpeed">グリーンの速さ（フィート・ゴルフ場の掲示値）</label>
+      <input type="number" id="fullGreenSpeed" inputmode="decimal" min="6" max="14" step="0.1" value="9.5">
+    </div>
+    <div class="traj-wrap">
+      <svg id="trajSvg" viewBox="0 0 360 150" role="img" aria-label="弾道アニメーション"></svg>
+    </div>
+    <div class="drop-table" id="dropTable"></div>
+    <p class="map-note">番手の行をタップすると、その番手の弾道を再生します。</p>
+  </section>
+
+  <section class="card" id="mapCard">
+    <h2>マップ</h2>
+    <div class="map-wrap">
+      <svg id="mapSvg" viewBox="0 0 360 420" role="img" aria-label="狙う1点マップ"></svg>
+    </div>
+    <p class="map-note" id="mapNote">ペナルティとピンの位置を選んでください。</p>
+  </section>
+
+  <section class="card">
+    <h2>GPSで飛距離を測る</h2>
+    <div class="gps-row">
+      <button type="button" class="stepper" id="gpsMark">📍 ここを打点に記録</button>
+      <button type="button" class="stepper" id="gpsMeasure">📏 ここまでの距離</button>
+    </div>
+    <div class="gps-out" id="gpsOut">打つ前に「記録」、ボール地点で「距離」を押すと飛距離が出ます。</div>
+  </section>
+
+  <footer class="note" id="storageNote">端末内保存で動作中｜散らばり幅は距離×5%で自動計算</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- 状態 ----------
+  var state = {
+    course: "",
+    penalties: [],     // right / left / back / front（複数可）
+    pin: null,         // center / right / left / back / front
+    distance: 150,     // ヤード
+    windDir: "none",   // none / against / with
+    windSpeed: 0,      // m/s
+    slope: "flat",     // up / flat / down（グリーンの傾斜）
+    traj: "normal",    // low / normal / high（球の高さ）
+    mode: "full",      // full / approach / putt
+    puttDist: 8,       // パット距離（フィート）
+    puttVert: "flat",  // up / flat / down
+    puttHoriz: "straight", // hook / straight / slice
+    puttLevel: 1,      // 傾斜レベル 0〜3（AimPoint式）
+    lie: "fw",         // fw / rough / bunker（ライ）
+    apDist: 20,        // アプローチ距離（ヤード）
+    apClub: "SW",      // SW / 52 / PW / 9I / 8I
+    ballPos: "center", // right / center / left（ボール位置）
+    greenSpeed: 9.5,   // グリーンの速さ（フィート・スティンプ値）
+    clubDist: null     // 番手ごとの自分の飛距離（ヤード）
+  };
+  // アプローチのクラブ：base = ラン/キャリー比（平坦・9.5ft・中心時）、h = 弾道の高さ倍率
+  var AP_CLUBS = [
+    { id: "SW", name: "SW",  base: 0.5, h: 1.4 },
+    { id: "52", name: "52°", base: 1.0, h: 1.15 },
+    { id: "PW", name: "PW",  base: 1.5, h: 0.95 },
+    { id: "9I", name: "9I",  base: 2.0, h: 0.7 },
+    { id: "8I", name: "8I",  base: 3.0, h: 0.5 }
+  ];
+  // ボール位置：run = ラン倍率、h = 弾道高さ倍率
+  var BALL_POS = {
+    right:  { run: 1.5, h: 0.55, name: "右足寄り" },
+    center: { run: 1.0, h: 1.0,  name: "中心" },
+    left:   { run: 0.7, h: 1.35, name: "左足寄り" }
+  };
+  function greenK() { // グリーンの速さによるラン倍率（9.5ft基準）
+    var s = state.greenSpeed;
+    return (typeof s === "number" && s >= 6 && s <= 14) ? s / 9.5 : 1;
+  }
+  // ライ：loss = 飛距離倍率、run = ラン倍率（スピンが減るぶん転がる）
+  var LIE = {
+    fw:     { loss: 1.0,  run: 1.0, name: "フェアウェイ" },
+    rough:  { loss: 0.93, run: 1.3, name: "ラフ" },
+    bunker: { loss: 0.85, run: 1.2, name: "バンカー" }
+  };
+  // [番手, トータル飛距離の初期値, 平坦グリーンでのランの目安(yd)]
+  var CLUB_DEFAULTS = [
+    ["SW", 80, 2], ["AW", 90, 3], ["PW", 100, 4], ["9I", 110, 5], ["8I", 120, 6], ["7I", 130, 8],
+    ["6I", 140, 10], ["5I", 150, 12], ["4I", 160, 14], ["UT", 170, 16], ["5W", 180, 20], ["3W", 195, 25], ["1W", 220, 30]
+  ];
+  var CLUB_RUN = {};
+  CLUB_DEFAULTS.forEach(function (c) { CLUB_RUN[c[0]] = c[2]; });
+  var SLOPE_K = { up: 0.5, flat: 1, down: 1.8 }; // 傾斜によるランの倍率
+  var TRAJ_K = { low: 1.6, normal: 1, high: 0.6 }; // 球の高さによるランの倍率
+  var TRAJ_H = { low: 0.55, normal: 1, high: 1.4 }; // アニメの弾道高さ倍率
+
+  function applyLoaded(s) {
+    for (var k in state) if (s[k] !== undefined) state[k] = s[k];
+    if (s.penalty && (!s.penalties || !s.penalties.length)) state.penalties = [s.penalty]; // 旧形式の互換
+    if (!Array.isArray(state.penalties)) state.penalties = [];
+  }
+  function loadState() {
+    try {
+      var raw = localStorage.getItem("nerai1ten");
+      if (raw) applyLoaded(JSON.parse(raw));
+    } catch (e) { /* 保存なしでも動作 */ }
+  }
+
+  // ---------- クラウド保存（使える環境では端末をまたいで保存） ----------
+  var cloudDoc = null, cloudTimer = null, cloudSaving = false, cloudDirty = false;
+  function saveState() {
+    try { localStorage.setItem("nerai1ten", JSON.stringify(state)); } catch (e) {}
+    scheduleCloudSave();
+  }
+  function scheduleCloudSave() {
+    if (!cloudDoc) return;
+    clearTimeout(cloudTimer);
+    cloudTimer = setTimeout(doCloudSave, 1200); // 連続操作は1回にまとめる
+  }
+  function doCloudSave() {
+    if (!cloudDoc) return;
+    if (cloudSaving) { cloudDirty = true; return; }
+    cloudSaving = true;
+    cloudDoc.set(JSON.parse(JSON.stringify(state))).then(function () {
+      cloudSaving = false;
+      if (cloudDirty) { cloudDirty = false; scheduleCloudSave(); }
+    }, function () { cloudSaving = false; });
+  }
+  function setStorageNote(txt) {
+    var f = document.getElementById("storageNote");
+    if (f) f.textContent = txt;
+  }
+  function initCloud() {
+    if (!(window.claude && window.claude.use)) return;
+    Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (res) {
+      var db = res[0], user = res[1];
+      if (!db || !user) return;
+      return user.id().then(function (uid) {
+        if (!uid) return;
+        var d = db.doc("data/users/" + uid + "/settings");
+        return d.get().then(function (snap) {
+          cloudDoc = d;
+          if (snap.exists) {
+            applyLoaded(snap.data());
+            applyStateToUI();
+            update();
+          } else {
+            scheduleCloudSave(); // 初回はいまの設定を保存
+          }
+          setStorageNote("クラウド保存オン：マイデータはどの端末でも共有されます｜散らばり幅は距離×5%で自動計算");
+        });
+      });
+    }).catch(function () { /* 使えない環境では端末内保存のまま */ });
+  }
+
+  // ---------- 参照 ----------
+  var $ = function (id) { return document.getElementById(id); };
+  var svg = $("mapSvg");
+  var NS = "http://www.w3.org/2000/svg";
+
+  // ---------- 選択チップ共通 ----------
+  function bindChips(groupId, onPick) {
+    var group = $(groupId);
+    var chips = group.querySelectorAll(".chip");
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+        chip.setAttribute("aria-pressed", "true");
+        onPick(chip.dataset.val);
+      });
+    });
+    return function setVal(val) {
+      chips.forEach(function (c) {
+        c.setAttribute("aria-pressed", c.dataset.val === val ? "true" : "false");
+      });
+    };
+  }
+
+  // ペナルティはトグル式（複数選択可）
+  (function () {
+    var chips = document.querySelectorAll("#penaltyChoices .chip");
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        var v = chip.dataset.val;
+        var i = state.penalties.indexOf(v);
+        if (i >= 0) state.penalties.splice(i, 1);
+        else state.penalties.push(v);
+        chip.setAttribute("aria-pressed", i >= 0 ? "false" : "true");
+        update();
+      });
+    });
+  })();
+  function setPenaltyUI() {
+    document.querySelectorAll("#penaltyChoices .chip").forEach(function (c) {
+      c.setAttribute("aria-pressed", state.penalties.indexOf(c.dataset.val) >= 0 ? "true" : "false");
+    });
+  }
+  var setPinUI = bindChips("pinChoices", function (v) {
+    state.pin = v; update();
+  });
+
+  // 風向きチップ（同じカード内の3択）
+  (function () {
+    var ids = ["wind-none", "wind-against", "wind-with"];
+    ids.forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ids.forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state.windDir = $(id).dataset.val;
+        update();
+      });
+    });
+  })();
+
+  function setWindUI(val) {
+    ["wind-none", "wind-against", "wind-with"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // 傾斜チップ
+  (function () {
+    var ids = ["slope-up", "slope-flat", "slope-down"];
+    ids.forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ids.forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state.slope = $(id).dataset.val;
+        update();
+      });
+    });
+  })();
+  function setSlopeUI(val) {
+    ["slope-up", "slope-flat", "slope-down"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // 球の高さチップ
+  (function () {
+    var ids = ["traj-low", "traj-normal", "traj-high"];
+    ids.forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ids.forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state.traj = $(id).dataset.val;
+        update();
+      });
+    });
+  })();
+  function setTrajUI(val) {
+    ["traj-low", "traj-normal", "traj-high"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // ---------- 距離 ----------
+  function setDistance(yd) {
+    state.distance = Math.min(250, Math.max(50, yd));
+    $("distNum").textContent = state.distance;
+    $("distSlider").value = state.distance;
+    update();
+  }
+  $("distSlider").addEventListener("input", function () { setDistance(parseInt(this.value, 10)); });
+  $("minus5").addEventListener("click", function () { setDistance(state.distance - 5); });
+  $("plus5").addEventListener("click", function () { setDistance(state.distance + 5); });
+
+  // ---------- 風・番手 ----------
+  $("windSpeed").addEventListener("input", function () {
+    var v = parseFloat(this.value);
+    state.windSpeed = isNaN(v) ? 0 : Math.min(20, Math.max(0, v));
+    update();
+  });
+
+  // ---------- マイ番手 ----------
+  function ensureClubDist() {
+    if (!state.clubDist) {
+      state.clubDist = {};
+      CLUB_DEFAULTS.forEach(function (c) { state.clubDist[c[0]] = c[1]; });
+    }
+  }
+  function buildClubGrid() {
+    ensureClubDist();
+    var grid = $("clubGrid");
+    CLUB_DEFAULTS.forEach(function (c) {
+      var name = c[0];
+      var cell = document.createElement("div");
+      cell.className = "club-cell";
+      var b = document.createElement("b");
+      b.textContent = name;
+      var input = document.createElement("input");
+      input.type = "number";
+      input.inputMode = "numeric";
+      input.id = "club-" + name;
+      input.min = 30; input.max = 320; input.step = 5;
+      input.value = state.clubDist[name];
+      input.setAttribute("aria-label", name + "の飛距離（ヤード）");
+      input.addEventListener("input", function () {
+        var v = parseInt(input.value, 10);
+        if (!isNaN(v)) { state.clubDist[name] = v; renderWind(); renderDrop(); saveState(); }
+      });
+      cell.appendChild(b); cell.appendChild(input);
+      grid.appendChild(cell);
+    });
+  }
+  // 自分の飛距離表から「届く中でいちばん近い番手」を選ぶ
+  function suggestClub(effYd) {
+    ensureClubDist();
+    var best = null;
+    CLUB_DEFAULTS.forEach(function (c) {
+      var name = c[0], d = state.clubDist[name];
+      if (typeof d !== "number") return;
+      if (d >= effYd && (best === null || d < state.clubDist[best])) best = name;
+    });
+    if (best === null) { // どれも届かない → 一番飛ぶ番手
+      CLUB_DEFAULTS.forEach(function (c) {
+        var name = c[0], d = state.clubDist[name];
+        if (typeof d !== "number") return;
+        if (best === null || d > state.clubDist[best]) best = name;
+      });
+    }
+    return best ? best + "（" + state.clubDist[best] + "yd）" : "-";
+  }
+
+  function windAdjust() {
+    // 風速3m/s ≒ 1番手（約10ヤード）: 1m/s ≒ 3.3ヤード
+    var delta = state.windSpeed * 3.3;
+    if (state.windDir === "against") return Math.round(delta);
+    if (state.windDir === "with") return -Math.round(delta * 0.7); // 追い風は効きが弱い
+    return 0;
+  }
+
+  function renderWind() {
+    var lieF = LIE[state.lie] || LIE.fw;
+    var adj = windAdjust();
+    var eff = Math.round((state.distance + adj) / lieF.loss); // 風＋ライのロスを織り込んだ「打つべき距離」
+    var el = $("windVerdict");
+    var club = suggestClub(eff);
+    var conds = [];
+    if (state.windDir === "against" && state.windSpeed > 0) conds.push("向かい風 " + state.windSpeed + "m/s");
+    if (state.windDir === "with" && state.windSpeed > 0) conds.push("追い風 " + state.windSpeed + "m/s");
+    if (state.lie !== "fw") conds.push(lieF.name + "（ロス約" + Math.round((1 - lieF.loss) * 100) + "%）");
+    if (conds.length === 0) {
+      el.innerHTML = '表示どおり <strong>' + state.distance + '</strong> ヤードを打つ<span class="club">' + club + '</span>';
+    } else {
+      el.innerHTML = conds.join("＋") + ' → <strong>' + eff + '</strong> ヤード相当を打つ<span class="club">' + club + '</span>';
+    }
+  }
+
+  // ---------- 落としどころ ----------
+  function renderDrop() {
+    ensureClubDist();
+    var D = state.distance;
+    var k = (SLOPE_K[state.slope] || 1) * (TRAJ_K[state.traj] || 1) * greenK(); // 傾斜×球の高さ×グリーンの速さ
+    var adj = windAdjust(); // 向かい風で+（その分キャリーが縮む）
+    var rows = [];
+    var lieF = LIE[state.lie] || LIE.fw;
+    CLUB_DEFAULTS.forEach(function (c) {
+      var name = c[0];
+      var total = state.clubDist[name];
+      if (typeof total !== "number") return;
+      var run = CLUB_RUN[name] || 0;
+      var carry = Math.max(10, (total - run) * lieF.loss) - adj; // ライ・風補正後のキャリー
+      var runEff = run * k * lieF.run;                            // 傾斜・高さ・グリーン速さ・ライ補正後のラン
+      var stop = carry + runEff;
+      rows.push({ name: name, carry: carry, run: runEff, drop: D - carry, diff: stop - D });
+    });
+    rows.sort(function (a, b) { return Math.abs(a.diff) - Math.abs(b.diff); });
+    var top = rows.slice(0, 3);
+    top.sort(function (a, b) { return a.carry - b.carry; });
+    var bestName = rows[0] ? rows[0].name : null;
+
+    var tbl = $("dropTable");
+    tbl.innerHTML = "";
+    top.forEach(function (r) {
+      var row = document.createElement("div");
+      row.className = "drop-row" + (r.name === bestName ? " best" : "");
+      var dropTxt = r.drop >= 1
+        ? "ピンの <strong>" + Math.round(r.drop) + "yd手前</strong> に落とす"
+        : "ピンの <strong>" + Math.round(-r.drop) + "yd奥</strong> に落ちる";
+      var d = Math.round(r.diff);
+      var resTxt = Math.abs(d) < 2 ? "◎ ピンで止まる" : (d > 0 ? "+" + d + "ydオーバー" : Math.abs(d) + "ydショート");
+      row.innerHTML = "<b>" + r.name + "</b><span class='place'>" + dropTxt + "</span><span class='result'>" + resTxt + "</span>";
+      row.addEventListener("click", function () { playTrajectory(r); });
+      tbl.appendChild(row);
+    });
+    // 最有力番手の弾道を自動再生
+    if (rows[0]) playTrajectory(rows[0]);
+    var hint = document.createElement("div");
+    hint.style.cssText = "font-size:11px;margin-top:2px;";
+    hint.className = "map-note";
+    var slopeTxt = state.slope === "up"
+      ? "上り：ランが約半分。ピン近くまでキャリーで運ぶ。"
+      : state.slope === "down"
+        ? "下り：ランが約1.8倍。手前に落として転がす。"
+        : "平坦：番手なりのラン。";
+    var trajTxt = state.traj === "high"
+      ? " 高い球：落下角が急なのですぐ止まる（ラン0.6倍）。"
+      : state.traj === "low"
+        ? " 低い球：落下角が浅くよく転がる（ラン1.6倍）。"
+        : "";
+    hint.textContent = slopeTxt + trajTxt;
+    tbl.appendChild(hint);
+  }
+
+  // ---------- 弾道アニメーション（横から見た断面図） ----------
+  var trajRaf = null;
+  var reducedMotion = false;
+  try { reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  function playTrajectory(r, svgId) {
+    var tsvg = $(svgId || "trajSvg");
+    while (tsvg.firstChild) tsvg.removeChild(tsvg.firstChild);
+    if (trajRaf) { cancelAnimationFrame(trajRaf); trajRaf = null; }
+    css = getComputedStyle(document.documentElement);
+
+    var D = r.D !== undefined ? r.D : state.distance;
+    var k = (SLOPE_K[state.slope] || 1) * (TRAJ_K[state.traj] || 1) * greenK();
+    var run = r.run !== undefined ? r.run : (CLUB_RUN[r.name] || 0) * k;
+    var carry = r.carry;
+    var stop = carry + run;
+
+    // 座標系：横 = 距離、縦 = 高さ
+    var xMax = Math.max(D, stop) + (D < 60 ? 6 : 18);
+    var xMin = Math.max(0, Math.min(carry, D) - (D < 60 ? D + 3 : 60)); // アプローチは打点から表示
+    var span = xMax - xMin;
+    var pxPerYd = 336 / span;
+    var X = function (yd) { return 12 + (yd - xMin) * pxPerYd; };
+    var y0 = 112; // フェアウェイの地面高さ
+    var gs = D < 60 ? Math.max(xMin + 3, D - 14) : D - 28; // グリーンの始まり
+    var slopeRate = state.slope === "up" ? 0.9 : state.slope === "down" ? -0.9 : 0; // px/yd
+    function groundY(yd) {
+      return yd > gs ? y0 - (yd - gs) * slopeRate : y0;
+    }
+
+    // 地面
+    var groundPath = "M " + X(xMin) + " " + y0 + " L " + X(gs) + " " + y0 +
+      " L " + X(xMax) + " " + groundY(xMax) +
+      " L " + X(xMax) + " 150 L " + X(xMin) + " 150 Z";
+    tsvg.appendChild(el("path", { d: groundPath, fill: tok("--turf") }));
+    // グリーン面（傾斜部分を濃く）
+    var greenBand = "M " + X(gs) + " " + y0 + " L " + X(xMax) + " " + groundY(xMax) +
+      " L " + X(xMax) + " " + (groundY(xMax) + 7) + " L " + X(gs) + " " + (y0 + 7) + " Z";
+    tsvg.appendChild(el("path", { d: greenBand, fill: tok("--turf-deep") }));
+
+    // ピン（旗）
+    var pgy = groundY(D);
+    tsvg.appendChild(el("line", { x1: X(D), y1: pgy, x2: X(D), y2: pgy - 26, stroke: tok("--ink"), "stroke-width": 2, "stroke-linecap": "round" }));
+    tsvg.appendChild(el("path", { d: "M " + X(D) + " " + (pgy - 26) + " l 13 4 l -13 5 z", fill: tok("--flag") }));
+
+    // 落下地点マーカー（▽）
+    var dgy = groundY(carry);
+    tsvg.appendChild(el("path", {
+      d: "M " + X(carry) + " " + (dgy - 4) + " l -5 -9 l 10 0 z",
+      fill: tok("--accent")
+    }));
+    tsvg.appendChild(label(X(carry), dgy - 22, "ここに落とす", { fs: 9 }));
+
+    // 見出し（番手・キャリー・ラン）
+    tsvg.appendChild(label(64, 14, r.name + "  キャリー" + Math.round(carry) + " + ラン" + Math.round(run), { fs: 10, wide: true }));
+
+    // 弾道（放物線）：地面の高低差も考慮
+    var launchY = y0; // 打ち出し（表示範囲の左端手前から）
+    var startYd = xMin + 2;
+    var hMax = Math.min(78, (carry - startYd) * pxPerYd * 0.26 * (r.h || TRAJ_H[state.traj] || 1)); // 弾道の高さ（球の高さ連動）
+    function ballPos(t) { // t: 0..1 飛行区間
+      var yd = startYd + (carry - startYd) * t;
+      var base = launchY + (dgy - launchY) * t; // 打点→落下点の直線ベース
+      var y = base - hMax * 4 * t * (1 - t);
+      return { x: X(yd), y: y };
+    }
+    function rollPos(t) { // t: 0..1 転がり区間（減速）
+      var e = 1 - (1 - t) * (1 - t); // easeOut
+      var yd = carry + (stop - carry) * e;
+      return { x: X(yd), y: groundY(yd) - 4 };
+    }
+
+    // 軌跡トレイル + ボール
+    var trail = el("path", { d: "", fill: "none", stroke: tok("--accent"), "stroke-width": 1.5, "stroke-dasharray": "3 4", opacity: 0.7 });
+    tsvg.appendChild(trail);
+    var ball = el("circle", { cx: X(startYd), cy: launchY - 4, r: 4.5, fill: "#fff", stroke: tok("--ink"), "stroke-width": 1.5 });
+    tsvg.appendChild(ball);
+
+    // 停止位置の結果ラベル
+    function showResult() {
+      var d = Math.round(r.diff);
+      var txt = Math.abs(d) < 2 ? "◎ ピンで止まる" : (d > 0 ? "+" + d + "ydオーバー" : Math.abs(d) + "ydショート");
+      var sgy = groundY(stop);
+      tsvg.appendChild(el("circle", { cx: X(stop), cy: sgy - 4, r: 4.5, fill: "#fff", stroke: tok("--accent"), "stroke-width": 2 }));
+      tsvg.appendChild(label(X(stop), sgy - 20, txt, {
+        fs: 10,
+        color: Math.abs(d) < 2 ? "#fff" : tok("--ink"),
+        bg: Math.abs(d) < 2 ? tok("--accent") : tok("--surface"),
+        bgOpacity: 0.95
+      }));
+    }
+
+    if (reducedMotion) {
+      // アニメなし：軌跡全体と結果を静止表示
+      var dstr = "";
+      for (var i = 0; i <= 24; i++) {
+        var pp = ballPos(i / 24);
+        dstr += (i === 0 ? "M " : "L ") + pp.x.toFixed(1) + " " + pp.y.toFixed(1) + " ";
+      }
+      trail.setAttribute("d", dstr);
+      ball.setAttribute("cx", X(stop)); ball.setAttribute("cy", groundY(stop) - 4);
+      showResult();
+      return;
+    }
+
+    // アニメーション：飛行 1100ms → バウンド → 転がり 900ms
+    var t0 = null, FLY = 1100, ROLL = 900, BOUNCE = 160;
+    var trailD = "";
+    function frame(ts) {
+      if (!t0) t0 = ts;
+      var e = ts - t0;
+      if (e <= FLY) {
+        var p = ballPos(e / FLY);
+        ball.setAttribute("cx", p.x); ball.setAttribute("cy", p.y);
+        trailD += (trailD ? "L " : "M ") + p.x.toFixed(1) + " " + p.y.toFixed(1) + " ";
+        trail.setAttribute("d", trailD);
+      } else if (e <= FLY + BOUNCE) {
+        var bt = (e - FLY) / BOUNCE;
+        var byd = carry + (stop - carry) * 0.18 * bt;
+        ball.setAttribute("cx", X(byd));
+        ball.setAttribute("cy", groundY(byd) - 4 - 9 * 4 * bt * (1 - bt));
+      } else if (e <= FLY + BOUNCE + ROLL) {
+        var rt = (e - FLY - BOUNCE) / ROLL;
+        var rp = rollPos(0.18 + 0.82 * rt);
+        ball.setAttribute("cx", rp.x); ball.setAttribute("cy", rp.y);
+      } else {
+        var fp = rollPos(1);
+        ball.setAttribute("cx", fp.x); ball.setAttribute("cy", fp.y);
+        showResult();
+        trajRaf = null;
+        return;
+      }
+      trajRaf = requestAnimationFrame(frame);
+    }
+    trajRaf = requestAnimationFrame(frame);
+  }
+
+  // ---------- アプローチ ----------
+  function renderApproach() {
+    var D = state.apDist;
+    var k = (SLOPE_K[state.slope] || 1) * greenK(); // 傾斜×グリーンの速さ
+    var bp = BALL_POS[state.ballPos] || BALL_POS.center;
+    var tbl = $("apTable");
+    tbl.innerHTML = "";
+
+    // バンカーから：エクスプロージョン専用の計算
+    if (state.lie === "bunker") {
+      var bRatio = 1.0 * k;                 // 砂からはスピンが少なく、キャリー:ラン ≒ 1:1
+      var bCarry = D / (1 + bRatio);
+      var bRun = D - bCarry;
+      var swing = Math.round(D * 2.5);      // 砂が吸収するぶん、振り幅は約2.5倍
+      var row = document.createElement("div");
+      row.className = "drop-row best";
+      row.innerHTML = "<b>SW<br><small>砂</small></b>" +
+        "<span class='place'>ピンの <strong>" + (Math.round(bCarry >= D ? 0 : (D - bCarry) * 10) / 10) + "yd手前</strong> に落とす</span>" +
+        "<span class='result'>キャリー" + (Math.round(bCarry * 10) / 10) + "＋ラン" + (Math.round(bRun * 10) / 10) + "</span>";
+      tbl.appendChild(row);
+      var vd = document.createElement("div");
+      vd.className = "verdict";
+      vd.innerHTML = "エクスプロージョン：砂が力を吸収するので、<strong>" + swing + "ヤード</strong> を打つつもりの振り幅（約2.5倍）。<br>ボールの2〜3cm手前の砂ごと打ち抜く。スピンが少なくランが出ます。";
+      tbl.appendChild(vd);
+      var bh = document.createElement("div");
+      bh.style.cssText = "font-size:11px;margin-top:2px;";
+      bh.className = "map-note";
+      bh.textContent = (state.slope === "up" ? "上り：転がりにくいのでピン寄りに落とせます。" : state.slope === "down" ? "下り：ランが出るのでさらに手前に。" : "") +
+        " アゴが高い場合はまず「出す」ことを優先。";
+      tbl.appendChild(bh);
+      playTrajectory({ name: "SW（砂）", carry: bCarry, run: bRun, drop: D - bCarry, diff: 0, h: 1.5, D: D }, "apTrajSvg");
+      return;
+    }
+
+    var lieRun = state.lie === "rough" ? 1.3 : 1; // ラフからはスピンが減って転がる
+    var selected = null;
+    AP_CLUBS.forEach(function (cl) {
+      // ピンで止めるための逆算：carry × (1 + runRatio) = D
+      var runRatio = cl.base * bp.run * k * lieRun;
+      var carry = D / (1 + runRatio);
+      var run = D - carry;
+      var r = { name: cl.name, carry: carry, run: run, drop: D - carry, diff: 0, h: cl.h * bp.h, D: D };
+      if (cl.id === state.apClub) selected = r;
+      var row = document.createElement("div");
+      row.className = "drop-row" + (cl.id === state.apClub ? " best" : "");
+      row.innerHTML = "<b>" + cl.name + "</b>" +
+        "<span class='place'>ピンの <strong>" + (Math.round(r.drop * 10) / 10) + "yd手前</strong> に落とす</span>" +
+        "<span class='result'>キャリー" + (Math.round(carry * 10) / 10) + "＋ラン" + (Math.round(run * 10) / 10) + "</span>";
+      row.addEventListener("click", function () {
+        state.apClub = cl.id;
+        renderApproach();
+        saveState();
+      });
+      tbl.appendChild(row);
+    });
+    var hint = document.createElement("div");
+    hint.style.cssText = "font-size:11px;margin-top:2px;";
+    hint.className = "map-note";
+    var slopeTxt = state.slope === "up" ? "上り" : state.slope === "down" ? "下り" : "平坦";
+    var spd = state.greenSpeed;
+    hint.textContent = slopeTxt + "・" + spd + "フィート・" + bp.name + (state.lie === "rough" ? "・ラフ（ラン約1.3倍）" : "") + "で計算。" +
+      (state.ballPos === "right" ? " 右足寄り：ロフトが立って低く出るぶん、ランが約1.5倍。" :
+       state.ballPos === "left" ? " 左足寄り：上がって止まるぶん、ランが約0.7倍。" : "") +
+      (spd > 10.5 ? " 速いグリーンなので、かなり手前から。" : spd < 8.5 ? " 遅いグリーンなので、ピン寄りに落とせます。" : "");
+    tbl.appendChild(hint);
+    if (selected) playTrajectory(selected, "apTrajSvg");
+  }
+
+  // ライチップ（フル側とアプローチ側で共有）
+  (function () {
+    [["lie-fw", "lie-rough", "lie-bunker"], ["ap-lie-fw", "ap-lie-rough", "ap-lie-bunker"]].forEach(function (ids) {
+      ids.forEach(function (id) {
+        $(id).addEventListener("click", function () {
+          state.lie = $(id).dataset.val;
+          setLieUI(state.lie);
+          update();
+        });
+      });
+    });
+  })();
+  function setLieUI(val) {
+    ["lie-fw", "lie-rough", "lie-bunker", "ap-lie-fw", "ap-lie-rough", "ap-lie-bunker"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // ボール位置チップ
+  (function () {
+    var ids = ["bp-right", "bp-center", "bp-left"];
+    ids.forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ids.forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state.ballPos = $(id).dataset.val;
+        update();
+      });
+    });
+  })();
+  function setBallPosUI(val) {
+    ["bp-right", "bp-center", "bp-left"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // グリーンの速さ（3画面の入力欄を同期）
+  var GS_INPUTS = ["apGreenSpeed", "fullGreenSpeed", "puttGreenSpeed"];
+  GS_INPUTS.forEach(function (id) {
+    $(id).addEventListener("input", function () {
+      var v = parseFloat(this.value);
+      if (!isNaN(v)) {
+        state.greenSpeed = Math.min(14, Math.max(6, v));
+        GS_INPUTS.forEach(function (o) { if (o !== id) $(o).value = state.greenSpeed; });
+        manualAimPx = null;
+        update();
+      }
+    });
+  });
+
+  // アプローチ距離
+  function setApDist(yd) {
+    state.apDist = Math.min(50, Math.max(5, yd));
+    $("apDistNum").textContent = state.apDist;
+    $("apDistSlider").value = state.apDist;
+    renderApproach();
+    saveState();
+  }
+  $("apDistSlider").addEventListener("input", function () { setApDist(parseInt(this.value, 10)); });
+  $("apMinus").addEventListener("click", function () { setApDist(state.apDist - 1); });
+  $("apPlus").addEventListener("click", function () { setApDist(state.apDist + 1); });
+
+  // アプローチ側の傾斜チップ（state.slopeを共有）
+  (function () {
+    var ids = ["ap-slope-up", "ap-slope-flat", "ap-slope-down"];
+    ids.forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        state.slope = $(id).dataset.val;
+        setSlopeUI(state.slope);
+        setApSlopeUI(state.slope);
+        update();
+      });
+    });
+  })();
+  function setApSlopeUI(val) {
+    ["ap-slope-up", "ap-slope-flat", "ap-slope-down"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // ---------- パター（ライン読み） ----------
+  function setPuttDist(ft) {
+    manualAimPx = null;
+    state.puttDist = Math.min(30, Math.max(1, ft));
+    $("puttDistNum").textContent = state.puttDist;
+    $("puttDistSlider").value = state.puttDist;
+    measurePhase = 0;
+    $("slopeMeasure").textContent = "📐 スマホを置いて傾斜を実測";
+    $("slopeOut").textContent = slopeGuideText();
+    renderPutt();
+    saveState();
+  }
+  $("puttDistSlider").addEventListener("input", function () { setPuttDist(parseInt(this.value, 10)); });
+  $("puttMinus").addEventListener("click", function () { setPuttDist(state.puttDist - 1); });
+  $("puttPlus").addEventListener("click", function () { setPuttDist(state.puttDist + 1); });
+
+  function bindPuttChips(ids, key, parseNum) {
+    ids.forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ids.forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state[key] = parseNum ? parseInt($(id).dataset.val, 10) : $(id).dataset.val;
+        manualAimPx = null;
+        renderPutt();
+        saveState();
+      });
+    });
+  }
+  bindPuttChips(["pv-up", "pv-flat", "pv-down"], "puttVert");
+  bindPuttChips(["ph-hook", "ph-straight", "ph-slice"], "puttHoriz");
+  bindPuttChips(["pl-0", "pl-1", "pl-2", "pl-3"], "puttLevel", true);
+  function setPuttUI() {
+    ["pv-up", "pv-flat", "pv-down"].forEach(function (id) { $(id).setAttribute("aria-pressed", $(id).dataset.val === state.puttVert ? "true" : "false"); });
+    ["ph-hook", "ph-straight", "ph-slice"].forEach(function (id) { $(id).setAttribute("aria-pressed", $(id).dataset.val === state.puttHoriz ? "true" : "false"); });
+    ["pl-0", "pl-1", "pl-2", "pl-3"].forEach(function (id) { $(id).setAttribute("aria-pressed", parseInt($(id).dataset.val, 10) === state.puttLevel ? "true" : "false"); });
+    $("puttDistNum").textContent = state.puttDist;
+    $("puttDistSlider").value = state.puttDist;
+  }
+
+  var puttRaf = null;
+  function renderPutt() {
+    var D = state.puttDist;                 // フィート
+    var lv = state.puttLevel;
+    var spd = (typeof state.greenSpeed === "number") ? state.greenSpeed : 9.5;
+
+    // タッチ：上りは強く、下りは弱く（レベル2の上りで約1.25倍 = 8ft→10ft）
+    var vertMult = state.puttVert === "up" ? 1 + 0.12 * lv
+                 : state.puttVert === "down" ? Math.max(0.5, 1 - 0.13 * lv)
+                 : 1;
+    var speedMult = 9.5 / spd; // 速いグリーンは弱めのタッチ
+    var touch = Math.round(D * vertMult * speedMult * 2) / 2;
+
+    // 曲がり：カップ何個分外すか（下り系は切れやすい）
+    var breakCups = 0;
+    if (state.puttHoriz !== "straight" && lv > 0) {
+      var slopeF = state.puttVert === "down" ? 1.3 : state.puttVert === "up" ? 0.8 : 1;
+      breakCups = Math.round(D * 0.12 * lv * (spd / 9.5) * slopeF * 10) / 10;
+    }
+    var aimSide = state.puttHoriz === "hook" ? "右" : state.puttHoriz === "slice" ? "左" : "";
+    var breakCm = Math.round(breakCups * 10.8);
+
+    // 結果表示
+    var vd = $("puttVerdict");
+    var touchTxt = "タッチ：<strong>" + touch + "フィート分</strong> 打つ";
+    if (state.puttVert === "up") touchTxt += "（上りレベル" + lv + "で強め）";
+    else if (state.puttVert === "down") touchTxt += "（下りレベル" + lv + "で弱め）";
+    else touchTxt += "（平坦）";
+    var aimTxt = breakCups > 0
+      ? "狙い：カップ <strong>" + breakCups + "個分 " + aimSide + "</strong>（約" + breakCm + "cm）"
+      : "狙い：<strong>カップの真ん中</strong>";
+    vd.innerHTML = aimTxt + "<br>" + touchTxt;
+
+    drawPutt(breakCups, aimSide);
+    if (window.__redrawPhoto) window.__redrawPhoto();
+  }
+
+  var manualAimPx = null;                // 指ドラッグで動かしたエイム（null=おすすめ）
+  var lastPutt = { breakCups: 0, dir: 0 }; // 直近の計算結果（ドラッグ再描画用）
+
+  function drawPutt(breakCups, aimSide, animate) {
+    var psvg = $("puttSvg");
+    while (psvg.firstChild) psvg.removeChild(psvg.firstChild);
+    if (puttRaf) { cancelAnimationFrame(puttRaf); puttRaf = null; }
+    css = getComputedStyle(document.documentElement);
+
+    // 上から見た図：ボール下、カップ上
+    psvg.appendChild(el("rect", { x: 0, y: 0, width: 360, height: 320, fill: tok("--turf-deep") }));
+    var pdots = el("g", { fill: tok("--turf-edge"), opacity: 0.3 });
+    for (var dy = 12; dy < 320; dy += 20) for (var dx = 12; dx < 360; dx += 20) {
+      pdots.appendChild(el("circle", { cx: dx, cy: dy, r: 1.2 }));
+    }
+    psvg.appendChild(pdots);
+
+    var ballP = { x: 180, y: 272 };
+    var cupP = { x: 180, y: 62 };
+    var cupR = 8; // カップ半径px（1カップ=16px）
+    var dir = state.puttHoriz === "hook" ? 1 : state.puttHoriz === "slice" ? -1 : 0;
+    lastPutt = { breakCups: breakCups, dir: dir };
+    var offset = Math.min(120, breakCups * 16) * dir; // 曲がり量(px)
+    var recAimX = cupP.x + offset;                    // おすすめエイム
+    var aimX = manualAimPx !== null ? manualAimPx : recAimX;
+    var endX = aimX - offset;                          // 実際の到達点（曲がりの分戻る）
+    var missPx = endX - cupP.x;
+    var missCm = Math.round(missPx / 16 * 10.8);
+    var holed = Math.abs(missCm) <= 6;                 // 半カップ強でカップイン扱い
+    var aimP = { x: aimX, y: cupP.y };
+    var endP = { x: endX, y: cupP.y };
+
+    // 傾斜の矢印（切れていく方向）
+    if (dir !== 0) {
+      var ag = el("g", { stroke: tok("--ink-soft"), "stroke-width": 2, opacity: 0.5, fill: "none", "stroke-linecap": "round" });
+      for (var ay = 110; ay <= 240; ay += 65) {
+        var x1 = 180 - dir * 110, x2 = 180 - dir * 140;
+        ag.appendChild(el("path", { d: "M " + x1 + " " + ay + " L " + x2 + " " + ay + " M " + (x2 + dir * 8) + " " + (ay - 6) + " L " + x2 + " " + ay + " L " + (x2 + dir * 8) + " " + (ay + 6) }));
+      }
+      psvg.appendChild(ag);
+      psvg.appendChild(label(180 - dir * 125, 92, "切れる方向", { fs: 9 }));
+    }
+
+    // カップ＋旗
+    psvg.appendChild(el("circle", { cx: cupP.x, cy: cupP.y, r: cupR, fill: "#1c2420", stroke: "#fff", "stroke-width": 1.5 }));
+    psvg.appendChild(el("line", { x1: cupP.x, y1: cupP.y, x2: cupP.x, y2: cupP.y - 30, stroke: tok("--ink"), "stroke-width": 2 }));
+    psvg.appendChild(el("path", { d: "M " + cupP.x + " " + (cupP.y - 30) + " l 13 4 l -13 5 z", fill: tok("--flag") }));
+
+    // おすすめエイム（薄い印、手動で動かしたときだけ表示）
+    if (manualAimPx !== null && Math.abs(recAimX - aimX) > 3) {
+      psvg.appendChild(el("circle", { cx: recAimX, cy: cupP.y, r: 4, fill: "none", stroke: tok("--accent"), "stroke-width": 1.5, opacity: 0.5, "stroke-dasharray": "3 3" }));
+    }
+
+    // エイム点（×）— ドラッグ可能
+    var pxg = el("g", { stroke: manualAimPx !== null ? tok("--danger") : tok("--accent"), "stroke-width": 3.5, "stroke-linecap": "round" });
+    pxg.appendChild(el("line", { x1: aimP.x - 7, y1: aimP.y - 7, x2: aimP.x + 7, y2: aimP.y + 7 }));
+    pxg.appendChild(el("line", { x1: aimP.x - 7, y1: aimP.y + 7, x2: aimP.x + 7, y2: aimP.y - 7 }));
+    psvg.appendChild(pxg);
+    // タッチしやすい透明ハンドル
+    psvg.appendChild(el("circle", { cx: aimP.x, cy: aimP.y, r: 26, fill: "transparent", id: "aimHandle" }));
+    psvg.appendChild(label(aimP.x, aimP.y - 20, manualAimPx !== null ? "お試しライン" : "ここを狙う", { fs: 10, color: "#fff", bg: manualAimPx !== null ? tok("--danger") : tok("--accent"), bgOpacity: 0.95 }));
+
+    // 結果（手動時：どこに止まるか）
+    if (manualAimPx !== null) {
+      psvg.appendChild(el("circle", { cx: endP.x, cy: endP.y, r: 5, fill: "#fff", stroke: tok("--danger"), "stroke-width": 2, opacity: 0.9 }));
+      var missTxt = holed ? "◎ カップイン！" : "カップの" + (missCm > 0 ? "右" : "左") + Math.abs(missCm) + "cmに外れる";
+      psvg.appendChild(label(endP.x, endP.y + 24, missTxt, { fs: 10, color: holed ? "#fff" : tok("--ink"), bg: holed ? tok("--accent") : tok("--surface"), bgOpacity: 0.95 }));
+    }
+
+    // ライン（2次ベジェ：エイム方向に出て、到達点へ切れる）
+    function linePoint(t) {
+      var cx = aimP.x + (aimP.x - ballP.x) * 0.18;
+      var cy = (ballP.y + cupP.y) / 2 - 20;
+      var mt = 1 - t;
+      return {
+        x: mt * mt * ballP.x + 2 * mt * t * cx + t * t * endP.x,
+        y: mt * mt * ballP.y + 2 * mt * t * cy + t * t * endP.y
+      };
+    }
+    var ld = "";
+    for (var i = 0; i <= 32; i++) {
+      var lp = linePoint(i / 32);
+      ld += (i === 0 ? "M " : "L ") + lp.x.toFixed(1) + " " + lp.y.toFixed(1) + " ";
+    }
+    psvg.appendChild(el("path", { d: ld, fill: "none", stroke: manualAimPx !== null ? tok("--danger") : tok("--accent"), "stroke-width": 2, "stroke-dasharray": "5 5", opacity: 0.7 }));
+
+    // ボール
+    var pball = el("circle", { cx: ballP.x, cy: ballP.y, r: 5.5, fill: "#fff", stroke: tok("--ink"), "stroke-width": 1.5 });
+    psvg.appendChild(pball);
+    psvg.appendChild(label(ballP.x, ballP.y + 20, state.puttDist + "フィート", { fs: 10 }));
+
+    // アニメ：ラインに沿って転がる
+    if (reducedMotion || animate === false) return;
+    var t0 = null, DUR = 1600;
+    function pframe(ts) {
+      if (!t0) t0 = ts;
+      var t = Math.min(1, (ts - t0) / DUR);
+      var e = 1 - (1 - t) * (1 - t) * (1 - t);
+      var pp = linePoint(e);
+      pball.setAttribute("cx", pp.x); pball.setAttribute("cy", pp.y);
+      if (t < 1) { puttRaf = requestAnimationFrame(pframe); }
+      else { pball.setAttribute("r", 4); puttRaf = null; }
+    }
+    puttRaf = requestAnimationFrame(pframe);
+  }
+
+  // エイムの指ドラッグ
+  (function () {
+    var psvg = $("puttSvg");
+    var dragging = false;
+    function svgX(ev) {
+      var rect = psvg.getBoundingClientRect();
+      return (ev.clientX - rect.left) * 360 / rect.width;
+    }
+    psvg.addEventListener("pointerdown", function (ev) {
+      var x = svgX(ev);
+      var rect = psvg.getBoundingClientRect();
+      var y = (ev.clientY - rect.top) * 320 / rect.height;
+      if (y < 130) { // エイム付近の高さならどこでも掴める
+        dragging = true;
+        psvg.setPointerCapture(ev.pointerId);
+        manualAimPx = Math.min(340, Math.max(20, x));
+        drawPutt(lastPutt.breakCups, "", false);
+        ev.preventDefault();
+      }
+    });
+    psvg.addEventListener("pointermove", function (ev) {
+      if (!dragging) return;
+      manualAimPx = Math.min(340, Math.max(20, svgX(ev)));
+      drawPutt(lastPutt.breakCups, "", false);
+    });
+    psvg.addEventListener("pointerup", function (ev) {
+      if (!dragging) return;
+      dragging = false;
+      drawPutt(lastPutt.breakCups, "", true); // 離したら転がしてみる
+    });
+    // ダブルタップでおすすめに戻す
+    psvg.addEventListener("dblclick", function () {
+      manualAimPx = null;
+      drawPutt(lastPutt.breakCups, "", true);
+    });
+  })();
+
+  // スマホの傾斜センサーで実測（ロングパットは2点測定）
+  var measurePhase = 0, firstMeasure = null;
+  function slopeGuideText() {
+    var D = state.puttDist;
+    if (D >= 20) return "ロングパットは2回測ります：①ライン中間 ②カップ手前2〜3歩（曲がりはボールが減速するカップ手前で大きく効くので、そちらを重視して計算）。画面を上・上端をカップに向けて芝に置いてください。";
+    if (D >= 10) return "スマホを置く場所：ラインの後半（カップから1/3あたり）の芝の上。画面を上・上端をカップに向ける。";
+    return "スマホを置く場所：ボールとカップの中間の芝の上。画面を上・上端をカップに向ける。";
+  }
+  function measureOnce(done) {
+    var out = $("slopeOut");
+    var samples = [];
+    function onOri(e) {
+      if (e.beta === null || e.gamma === null) return;
+      samples.push({ b: e.beta, g: e.gamma });
+    }
+    window.addEventListener("deviceorientation", onOri);
+    out.textContent = "測定中…スマホを動かさず3秒待ってください";
+    setTimeout(function () {
+      window.removeEventListener("deviceorientation", onOri);
+      if (samples.length < 5) { done(null); return; }
+      var b = 0, g = 0;
+      samples.forEach(function (s) { b += s.b; g += s.g; });
+      b /= samples.length; g /= samples.length;
+      done({
+        up: Math.tan(b * Math.PI / 180) * 100,   // ＋=カップ方向が上り
+        side: Math.tan(g * Math.PI / 180) * 100  // ＋=右が低い
+      });
+    }, 3000);
+  }
+  function applyMeasure(pct, note) {
+    var total = Math.sqrt(pct.up * pct.up + pct.side * pct.side);
+    var lv = total < 0.7 ? 0 : total < 1.6 ? 1 : total < 2.6 ? 2 : 3;
+    state.puttLevel = lv;
+    state.puttVert = Math.abs(pct.up) < 0.4 ? "flat" : (pct.up > 0 ? "up" : "down");
+    state.puttHoriz = Math.abs(pct.side) < 0.4 ? "straight" : (pct.side > 0 ? "slice" : "hook");
+    manualAimPx = null;
+    setPuttUI(); renderPutt(); saveState();
+    var vTxt = state.puttVert === "up" ? "上り" : state.puttVert === "down" ? "下り" : "縦は平ら";
+    var hTxt = state.puttHoriz === "hook" ? "フックライン" : state.puttHoriz === "slice" ? "スライスライン" : "まっすぐ";
+    $("slopeOut").innerHTML = "✓ " + (note || "") + "実測 傾斜 <strong>" + (Math.round(total * 10) / 10) + "%</strong>（レベル" + lv + "）｜" + vTxt + "・" + hTxt + " を自動入力しました";
+  }
+  $("slopeMeasure").addEventListener("click", function () {
+    var out = $("slopeOut");
+    var isLong = state.puttDist >= 20;
+    function begin() {
+      measureOnce(function (pct) {
+        if (!pct) { out.textContent = "⚠️ センサーの値を取得できませんでした。スマホでお試しください。"; measurePhase = 0; return; }
+        if (isLong && measurePhase === 0) {
+          firstMeasure = pct;
+          measurePhase = 1;
+          out.innerHTML = "✓ ①中間の測定完了。<strong>カップ手前2〜3歩</strong>にスマホを置き直して、もう一度ボタンを押してください。";
+          $("slopeMeasure").textContent = "📐 ②カップ手前で測定";
+          return;
+        }
+        if (isLong && measurePhase === 1) {
+          // カップ手前を重み2倍で合成（曲がりは減速する終盤に効く）
+          var combined = {
+            up: (firstMeasure.up + pct.up * 2) / 3,
+            side: (firstMeasure.side + pct.side * 2) / 3
+          };
+          measurePhase = 0;
+          $("slopeMeasure").textContent = "📐 スマホを置いて傾斜を実測";
+          applyMeasure(combined, "2点測定（カップ手前を重視）：");
+          return;
+        }
+        applyMeasure(pct, "");
+      });
+    }
+    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+      DeviceOrientationEvent.requestPermission().then(function (s) {
+        if (s === "granted") begin();
+        else out.textContent = "⚠️ 傾斜センサーの許可が必要です";
+      }).catch(function () { out.textContent = "⚠️ 傾斜センサーを利用できませんでした"; });
+    } else if (typeof DeviceOrientationEvent !== "undefined") {
+      begin();
+    } else {
+      out.textContent = "⚠️ この端末では傾斜センサーを利用できません";
+    }
+  });
+
+  // ---------- 写真でライン（デモ） ----------
+  (function () {
+    var photoImg = null, photoPts = [], photoRaf = null, photoTouch = "just";
+    var pc = $("photoCanvas");
+    var pctx = pc.getContext("2d");
+
+    // タッチの強さチップ
+    ["pt-soft", "pt-just", "pt-firm"].forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ["pt-soft", "pt-just", "pt-firm"].forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        photoTouch = $(id).dataset.val;
+        if (photoImg && photoPts.length === 2) drawPhoto(true);
+      });
+    });
+
+    $("photoInput").addEventListener("change", function () {
+      var f = this.files && this.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          photoImg = img;
+          photoPts = [];
+          var w = 720;
+          var h = Math.round(img.height * w / img.width);
+          pc.width = w; pc.height = Math.min(960, h);
+          $("photoWrap").hidden = false;
+          $("photoReset").hidden = false;
+          $("photoGuide").textContent = "① ボールの位置をタップしてください";
+          drawPhoto();
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(f);
+      this.value = "";
+    });
+
+    $("photoReset").addEventListener("click", function () {
+      photoPts = [];
+      $("photoGuide").textContent = "① ボールの位置をタップしてください";
+      if (photoImg) drawPhoto();
+    });
+
+    pc.addEventListener("pointerdown", function (ev) {
+      if (!photoImg || photoPts.length >= 2) return;
+      var rect = pc.getBoundingClientRect();
+      photoPts.push({
+        x: (ev.clientX - rect.left) * pc.width / rect.width,
+        y: (ev.clientY - rect.top) * pc.height / rect.height
+      });
+      if (photoPts.length === 1) {
+        $("photoGuide").textContent = "② カップの位置をタップしてください";
+        drawPhoto();
+      } else {
+        $("photoGuide").textContent = "設定中の傾斜（曲がり・レベル・速さ）でラインを表示しています。傾斜を変えると絵も変わります。";
+        drawPhoto(true);
+      }
+    });
+
+    function photoGeometry() {
+      var ball = photoPts[0], cup = photoPts[1];
+      var dx = cup.x - ball.x, dy = cup.y - ball.y;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var ux = dx / len, uy = dy / len;       // 進行方向
+      var nx = dy / len, ny = -dx / len;      // 右側の法線
+      var dir = state.puttHoriz === "hook" ? 1 : state.puttHoriz === "slice" ? -1 : 0;
+      var spd = (typeof state.greenSpeed === "number") ? state.greenSpeed : 9.5;
+      var b0 = dir === 0 ? 0 : len * 0.055 * state.puttLevel * (spd / 9.5); // 基準の膨らみ
+      // タッチで曲がりと終点が変わる
+      var bulge = b0, end = { x: cup.x, y: cup.y }, result = "◎ カップイン";
+      if (photoTouch === "firm") {
+        bulge = b0 * 0.5; // 速い球は切れない
+        end = { x: cup.x + ux * len * 0.16 + nx * dir * b0 * 0.25, y: cup.y + uy * len * 0.16 + ny * dir * b0 * 0.25 };
+        result = "強め：切れずに奥へオーバー";
+      } else if (photoTouch === "soft") {
+        bulge = b0 * 1.7; // 遅い球は大きく切れる
+        end = { x: cup.x - ux * len * 0.12 - nx * dir * b0 * 0.9, y: cup.y - uy * len * 0.12 - ny * dir * b0 * 0.9 };
+        result = "弱め：手前で大きく切れてショート";
+      } else if (dir === 0) {
+        result = "◎ まっすぐカップイン";
+      }
+      var mid = { x: (ball.x + end.x) / 2, y: (ball.y + end.y) / 2 };
+      var ctrl = { x: mid.x + nx * dir * bulge * 2, y: mid.y + ny * dir * bulge * 2 };
+      var aim = { x: cup.x + nx * dir * b0 * 1.3, y: cup.y + ny * dir * b0 * 1.3 };
+      return { ball: ball, cup: cup, end: end, ctrl: ctrl, aim: aim, dir: dir, result: result };
+    }
+    function bez(p0, p1, p2, t) {
+      var mt = 1 - t;
+      return {
+        x: mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
+        y: mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y
+      };
+    }
+
+    function drawPhoto(animate) {
+      if (photoRaf) { cancelAnimationFrame(photoRaf); photoRaf = null; }
+      pctx.clearRect(0, 0, pc.width, pc.height);
+      // 画像（縦長すぎる場合は上を基準に切る）
+      var h = Math.round(photoImg.height * pc.width / photoImg.width);
+      pctx.drawImage(photoImg, 0, 0, pc.width, h);
+
+      function marker(p, fill, lbl) {
+        pctx.beginPath();
+        pctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+        pctx.fillStyle = fill; pctx.fill();
+        pctx.lineWidth = 3; pctx.strokeStyle = "#fff"; pctx.stroke();
+        if (lbl) {
+          pctx.font = "bold 20px sans-serif";
+          pctx.textAlign = "center";
+          pctx.lineWidth = 5; pctx.strokeStyle = "rgba(0,0,0,0.55)";
+          pctx.strokeText(lbl, p.x, p.y - 20);
+          pctx.fillStyle = "#fff";
+          pctx.fillText(lbl, p.x, p.y - 20);
+        }
+      }
+
+      if (photoPts.length >= 1) marker(photoPts[0], "#ffffff", "ボール");
+      if (photoPts.length < 2) return;
+
+      var g = photoGeometry();
+      marker(g.cup, "#1c2420", "カップ");
+
+      // ライン
+      pctx.beginPath();
+      for (var i = 0; i <= 40; i++) {
+        var p = bez(g.ball, g.ctrl, g.end, i / 40);
+        if (i === 0) pctx.moveTo(p.x, p.y); else pctx.lineTo(p.x, p.y);
+      }
+      pctx.setLineDash([12, 10]);
+      pctx.lineWidth = 5;
+      pctx.strokeStyle = photoTouch === "just" ? "rgba(255,255,255,0.9)" : "rgba(255,120,90,0.95)";
+      pctx.stroke();
+      pctx.setLineDash([]);
+
+      // 結果ラベル（画面端で見切れないようにクランプ）
+      var rlx = Math.min(pc.width - 20, Math.max(20, g.end.x));
+      var rly = Math.min(pc.height - 16, Math.max(30, g.end.y + 38));
+      pctx.font = "bold 22px sans-serif";
+      pctx.textAlign = "center";
+      pctx.lineWidth = 6; pctx.strokeStyle = "rgba(0,0,0,0.6)";
+      pctx.strokeText(g.result, rlx, rly);
+      pctx.fillStyle = photoTouch === "just" ? "#8ff09a" : "#ffb3a0";
+      pctx.fillText(g.result, rlx, rly);
+
+      // エイム×
+      if (g.dir !== 0) {
+        pctx.lineWidth = 6; pctx.strokeStyle = "#2f80ed";
+        pctx.beginPath();
+        pctx.moveTo(g.aim.x - 12, g.aim.y - 12); pctx.lineTo(g.aim.x + 12, g.aim.y + 12);
+        pctx.moveTo(g.aim.x - 12, g.aim.y + 12); pctx.lineTo(g.aim.x + 12, g.aim.y - 12);
+        pctx.stroke();
+        pctx.font = "bold 20px sans-serif";
+        pctx.textAlign = "center";
+        pctx.lineWidth = 5; pctx.strokeStyle = "rgba(0,0,0,0.55)";
+        pctx.strokeText("ここを狙う", g.aim.x, g.aim.y - 22);
+        pctx.fillStyle = "#fff";
+        pctx.fillText("ここを狙う", g.aim.x, g.aim.y - 22);
+      }
+
+      if (!animate || reducedMotion) return;
+      // ボールが転がるアニメ
+      var t0 = null, DUR = 1600;
+      function pf(ts) {
+        if (!t0) t0 = ts;
+        var t = Math.min(1, (ts - t0) / DUR);
+        var e = 1 - (1 - t) * (1 - t) * (1 - t);
+        drawPhoto(false);
+        var gg = photoGeometry();
+        var p = bez(gg.ball, gg.ctrl, gg.end, e);
+        pctx.beginPath();
+        pctx.arc(p.x, p.y, 9, 0, Math.PI * 2);
+        pctx.fillStyle = "#fff"; pctx.fill();
+        pctx.lineWidth = 2.5; pctx.strokeStyle = "#333"; pctx.stroke();
+        if (t < 1) photoRaf = requestAnimationFrame(pf);
+        else photoRaf = null;
+      }
+      photoRaf = requestAnimationFrame(pf);
+    }
+
+    // 傾斜設定が変わったら写真のラインも更新
+    window.__redrawPhoto = function () {
+      if (photoImg && photoPts.length === 2) drawPhoto();
+    };
+  })();
+
+  // ---------- モード切替 ----------
+  var FULL_CARDS = ["penaltyCard", "pinCard", "distCard", "windCard", "clubCard", "dropCard", "mapCard"];
+  (function () {
+    ["mode-full", "mode-approach", "mode-putt"].forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        state.mode = $(id).dataset.val;
+        setModeUI();
+        update();
+      });
+    });
+  })();
+  function setModeUI() {
+    ["mode-full", "mode-approach", "mode-putt"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === state.mode ? "true" : "false");
+    });
+    FULL_CARDS.forEach(function (id) { var e = $(id); if (e) e.hidden = state.mode !== "full"; });
+    $("approachCard").hidden = state.mode !== "approach";
+    $("puttCard").hidden = state.mode !== "putt";
+  }
+
+  // ---------- マップ描画 ----------
+  // 座標系: 1ヤード = 4px。グリーン中心 (180, 205)。上=奥、下=手前。
+  var C = { x: 180, y: 205 };
+  var GREEN = { w: 140, h: 128, r: 38 }; // 約35×32ヤード
+  var css = getComputedStyle(document.documentElement);
+  function tok(name) { return css.getPropertyValue(name).trim(); }
+
+  var PIN_OFFSET = {
+    center: { x: 0, y: 0 },
+    right:  { x: 48, y: 0 },
+    left:   { x: -48, y: 0 },
+    back:   { x: 0, y: -46 },
+    front:  { x: 0, y: 46 }
+  };
+  // ペナルティ帯（グリーンのすぐ外側）
+  function penaltyRect(side) {
+    var gL = C.x - GREEN.w / 2, gR = C.x + GREEN.w / 2;
+    var gT = C.y - GREEN.h / 2, gB = C.y + GREEN.h / 2;
+    var TH = 34, GAP = 8;
+    if (side === "back")  return { x: gL - 20, y: gT - GAP - TH, w: GREEN.w + 40, h: TH, vert: false };
+    if (side === "front") return { x: gL - 20, y: gB + GAP,      w: GREEN.w + 40, h: TH, vert: false };
+    if (side === "left")  return { x: gL - GAP - TH, y: gT - 20, w: TH, h: GREEN.h + 40, vert: true };
+    return                { x: gR + GAP,      y: gT - 20, w: TH, h: GREEN.h + 40, vert: true }; // right
+  }
+  // 複数ペナルティから許容範囲を求める（散らばり円が帯に触れないx/y区間）
+  function aimBounds(rPx) {
+    var M = 12; // 安全マージン（約3ヤード）
+    var b = { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity };
+    state.penalties.forEach(function (side) {
+      var r = penaltyRect(side);
+      if (side === "back")  b.minY = Math.max(b.minY, r.y + r.h + rPx + M);
+      if (side === "front") b.maxY = Math.min(b.maxY, r.y - rPx - M);
+      if (side === "left")  b.minX = Math.max(b.minX, r.x + r.w + rPx + M);
+      if (side === "right") b.maxX = Math.min(b.maxX, r.x - rPx - M);
+    });
+    return b;
+  }
+  function clampAxis(v, lo, hi) {
+    if (lo > hi) return (lo + hi) / 2; // 両側から挟まれたら中央
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  function el(name, attrs, children) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (children) children.forEach(function (c) { e.appendChild(c); });
+    return e;
+  }
+  function label(x, y, text, opts) {
+    opts = opts || {};
+    var padX = 6, fs = opts.fs || 11;
+    var t = el("text", {
+      x: x, y: y, "font-size": fs, "font-weight": "700",
+      "text-anchor": "middle", "dominant-baseline": "middle",
+      fill: opts.color || tok("--ink"),
+      "font-family": "inherit"
+    });
+    t.textContent = text;
+    var w = text.length * fs * (opts.wide ? 1.05 : 0.95) + padX * 2;
+    var bg = el("rect", {
+      x: x - w / 2, y: y - fs * 0.75 - 3, width: w, height: fs * 1.5 + 6,
+      rx: 7, fill: opts.bg || tok("--surface"), opacity: opts.bgOpacity || 0.92
+    });
+    var g = el("g", {});
+    g.appendChild(bg); g.appendChild(t);
+    return g;
+  }
+
+  function drawMap() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    css = getComputedStyle(document.documentElement);
+
+    // フェアウェイ地 + ドット
+    svg.appendChild(el("rect", { x: 0, y: 0, width: 360, height: 420, fill: tok("--turf") }));
+    var dots = el("g", { fill: tok("--turf-edge"), opacity: 0.35 });
+    for (var dy = 10; dy < 420; dy += 18) {
+      for (var dx = 10; dx < 360; dx += 18) {
+        dots.appendChild(el("circle", { cx: dx, cy: dy, r: 1.3 }));
+      }
+    }
+    svg.appendChild(dots);
+
+    // 方位ラベル
+    svg.appendChild(label(180, 18, "奥", { fs: 12 }));
+    svg.appendChild(label(180, 402, "手前", { fs: 12 }));
+    svg.appendChild(label(18, 205, "左", { fs: 12 }));
+    svg.appendChild(label(342, 205, "右", { fs: 12 }));
+
+    // グリーン
+    svg.appendChild(el("rect", {
+      x: C.x - GREEN.w / 2, y: C.y - GREEN.h / 2, width: GREEN.w, height: GREEN.h,
+      rx: GREEN.r, fill: tok("--turf-deep"), stroke: tok("--turf-edge"), "stroke-width": 2.5
+    }));
+
+    var note = $("mapNote");
+    if (!state.pin) {
+      svg.appendChild(label(180, 205, "ピンの位置を選択", { fs: 13 }));
+      note.textContent = "ピンの位置を選んでください（ペナルティは複数選択できます）。";
+      return;
+    }
+
+    // ペナルティ帯（複数）
+    state.penalties.forEach(function (side) {
+      var pr = penaltyRect(side);
+      svg.appendChild(el("rect", {
+        x: pr.x, y: pr.y, width: pr.w, height: pr.h, rx: 12,
+        fill: tok("--danger"), opacity: 0.9
+      }));
+      var pt = el("text", {
+        x: pr.x + pr.w / 2, y: pr.y + pr.h / 2,
+        "font-size": 12, "font-weight": "700", fill: "#fff",
+        "text-anchor": "middle", "dominant-baseline": "middle",
+        "font-family": "inherit"
+      });
+      pt.textContent = "ペナルティ";
+      if (pr.vert) pt.setAttribute("transform", "rotate(-90 " + (pr.x + pr.w / 2) + " " + (pr.y + pr.h / 2) + ")");
+      svg.appendChild(pt);
+    });
+
+    // ピン座標・散らばり半径
+    var off = PIN_OFFSET[state.pin];
+    var pin = { x: C.x + off.x, y: C.y + off.y };
+    var curveYd = Math.round(state.distance * 0.05 * 10) / 10; // 曲がり幅（片側）
+    var rPx = Math.max(14, curveYd * 4);
+
+    // 狙う1点の計算：全ペナルティの許容範囲にクランプ（両側なら中央へ）
+    var b = aimBounds(rPx);
+    var aim = {
+      x: clampAxis(pin.x, b.minX, b.maxX),
+      y: clampAxis(pin.y, b.minY, b.maxY)
+    };
+    var shiftX = aim.x - pin.x, shiftY = aim.y - pin.y;
+    var shift = Math.sqrt(shiftX * shiftX + shiftY * shiftY);
+
+    // ピンを直接狙った場合の円（危険を可視化）— ずらす必要があるときだけ
+    if (shift > 0.5) {
+      svg.appendChild(el("circle", {
+        cx: pin.x, cy: pin.y, r: rPx,
+        fill: tok("--danger"), "fill-opacity": 0.12,
+        stroke: tok("--danger"), "stroke-width": 2, "stroke-dasharray": "6 5"
+      }));
+    }
+
+    // 狙う1点の散らばり円
+    svg.appendChild(el("circle", {
+      cx: aim.x, cy: aim.y, r: rPx,
+      fill: tok("--accent"), "fill-opacity": 0.10,
+      stroke: tok("--accent"), "stroke-width": 2.5, "stroke-dasharray": "7 5"
+    }));
+
+    // ピン（旗）
+    var flagG = el("g", {});
+    flagG.appendChild(el("line", {
+      x1: pin.x, y1: pin.y, x2: pin.x, y2: pin.y - 26,
+      stroke: tok("--ink"), "stroke-width": 2.5, "stroke-linecap": "round"
+    }));
+    flagG.appendChild(el("path", {
+      d: "M " + pin.x + " " + (pin.y - 26) + " l 17 5 l -17 6 z",
+      fill: tok("--flag")
+    }));
+    flagG.appendChild(el("circle", { cx: pin.x, cy: pin.y, r: 3.5, fill: tok("--ink") }));
+    svg.appendChild(flagG);
+
+    // 狙う1点（X）
+    var xg = el("g", {
+      stroke: tok("--accent"), "stroke-width": 4.5, "stroke-linecap": "round"
+    });
+    xg.appendChild(el("line", { x1: aim.x - 8, y1: aim.y - 8, x2: aim.x + 8, y2: aim.y + 8 }));
+    xg.appendChild(el("line", { x1: aim.x - 8, y1: aim.y + 8, x2: aim.x + 8, y2: aim.y - 8 }));
+    svg.appendChild(xg);
+
+    // ラベル（ペナルティ帯やお互いに重ならない位置へ逃がす）
+    if (shift > 0.5) {
+      var hasV = state.penalties.indexOf("back") >= 0 || state.penalties.indexOf("front") >= 0;
+      var wl;
+      if (hasV) {
+        // 上下に帯がある → ラベルは横に逃がす
+        var lx = pin.x - rPx - 52;
+        if (lx < 60) lx = pin.x + rPx + 52;
+        wl = { x: Math.min(300, lx), y: pin.y };
+      } else {
+        // 帯は左右のみ → ラベルは上に逃がす
+        wl = { x: pin.x, y: pin.y - rPx - 14 };
+      }
+      svg.appendChild(label(wl.x, wl.y, "ピンを狙うと危険", { color: "#fff", bg: tok("--danger"), bgOpacity: 0.95, fs: 10 }));
+    }
+    svg.appendChild(label(aim.x, aim.y + 20, "狙う1点", { fs: 12 }));
+    var noteY = aim.y + rPx + 20;
+    if (noteY > 396) noteY = aim.y - rPx - 16;
+    svg.appendChild(label(aim.x, noteY, "散らばりの円（曲がり幅" + curveYd + "）", { fs: 10 }));
+
+    // メモ
+    if (shift > 0.5) {
+      var parts = [];
+      var xYd = Math.round(Math.abs(shiftX) / 4), yYd = Math.round(Math.abs(shiftY) / 4);
+      if (xYd > 0) parts.push("約" + xYd + "ヤード" + (shiftX > 0 ? "右" : "左"));
+      if (yYd > 0) parts.push("約" + yYd + "ヤード" + (shiftY > 0 ? "手前" : "奥"));
+      note.textContent = "ピン直狙いは散らばりがペナルティにかかります。ピンより" + parts.join("・") + "側を狙う。";
+    } else if (state.penalties.length === 0) {
+      note.textContent = "ペナルティなし。ピンをそのまま狙えます（選ぶ場合は複数タップできます）。";
+    } else {
+      note.textContent = "ペナルティまで余裕があるので、ピンをそのまま狙えます。";
+    }
+  }
+
+  // ---------- GPS（2点間の飛距離測定） ----------
+  var gpsMarkPos = null;
+  function getPos(cb, errCb) {
+    if (!navigator.geolocation) { errCb("この環境ではGPSを使えません"); return; }
+    navigator.geolocation.getCurrentPosition(
+      function (p) { cb(p.coords); },
+      function (e) {
+        errCb(e.code === 1 ? "位置情報が許可されていません（この画面の公開先ではGPSが制限される場合があります）" : "GPSを取得できませんでした");
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
+    );
+  }
+  function distYd(a, b) {
+    var R = 6371000, rad = Math.PI / 180;
+    var dLat = (b.latitude - a.latitude) * rad;
+    var dLng = (b.longitude - a.longitude) * rad;
+    var s = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(a.latitude * rad) * Math.cos(b.latitude * rad) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    var m = 2 * R * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+    return Math.round(m * 1.09361);
+  }
+  $("gpsMark").addEventListener("click", function () {
+    var out = $("gpsOut");
+    out.textContent = "打点を記録中…";
+    getPos(function (c) {
+      gpsMarkPos = c;
+      out.innerHTML = "✓ 打点を記録しました（精度 約" + Math.round(c.accuracy) + "m）。ボール地点で「距離」を押してください。";
+    }, function (msg) { out.textContent = "⚠️ " + msg; });
+  });
+  $("gpsMeasure").addEventListener("click", function () {
+    var out = $("gpsOut");
+    if (!gpsMarkPos) { out.textContent = "先に「ここを打点に記録」を押してください。"; return; }
+    out.textContent = "測定中…";
+    getPos(function (c) {
+      out.innerHTML = "飛距離：<strong>" + distYd(gpsMarkPos, c) + " ヤード</strong>（精度 約" + Math.round(c.accuracy) + "m）";
+    }, function (msg) { out.textContent = "⚠️ " + msg; });
+  });
+
+  // ---------- コース ----------
+  $("courseSelect").addEventListener("change", function () {
+    state.course = this.value; saveState();
+  });
+
+  // ---------- 更新 ----------
+  function update() {
+    if (state.mode === "approach") {
+      renderApproach();
+    } else if (state.mode === "putt") {
+      renderPutt();
+    } else {
+      renderWind();
+      renderDrop();
+      drawMap();
+    }
+    saveState();
+  }
+
+  // テーマ切替に追随
+  if (window.matchMedia) {
+    try {
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawMap);
+    } catch (e) {}
+  }
+
+  // ---------- 起動 ----------
+  function applyStateToUI() {
+    ensureClubDist();
+    $("courseSelect").value = state.course;
+    $("distNum").textContent = state.distance;
+    $("distSlider").value = state.distance;
+    $("windSpeed").value = state.windSpeed;
+    CLUB_DEFAULTS.forEach(function (c) {
+      var inp = $("club-" + c[0]);
+      if (inp && typeof state.clubDist[c[0]] === "number") inp.value = state.clubDist[c[0]];
+    });
+    setPenaltyUI();
+    if (state.pin) setPinUI(state.pin);
+    setWindUI(state.windDir);
+    setSlopeUI(state.slope);
+    setApSlopeUI(state.slope);
+    setTrajUI(state.traj);
+    setLieUI(state.lie);
+    setBallPosUI(state.ballPos);
+    setPuttUI();
+    $("slopeOut").textContent = slopeGuideText();
+    $("apGreenSpeed").value = state.greenSpeed;
+    $("fullGreenSpeed").value = state.greenSpeed;
+    $("puttGreenSpeed").value = state.greenSpeed;
+    $("apDistNum").textContent = state.apDist;
+    $("apDistSlider").value = state.apDist;
+    setModeUI();
+  }
+  loadState();
+  buildClubGrid();
+  applyStateToUI();
+  update();
+  initCloud();
+})();
+</script>
+
+</body>
+</html>
