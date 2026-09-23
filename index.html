@@ -282,6 +282,58 @@
   }
   .club-cell input:focus { outline: 2px solid var(--accent); border-radius: 4px; }
 
+  .hole-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    margin-top: 10px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hole-chip {
+    appearance: none;
+    flex: 0 0 auto;
+    min-width: 40px;
+    padding: 8px 0;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    text-align: center;
+  }
+  .hole-chip[aria-pressed="true"] {
+    background: var(--chip-on-blue);
+    border-color: var(--chip-on-blue);
+    color: #fff;
+  }
+  .hole-chip small { display: block; font-size: 9px; font-weight: 500; opacity: 0.75; }
+
+  .detail-box {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: var(--surface-2);
+  }
+  .detail-box summary {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .safety {
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .safety.good { color: var(--accent); }
+  .safety.bad { color: var(--danger); }
+
   .traj-wrap {
     margin-top: 10px;
     border-radius: 12px;
@@ -387,6 +439,11 @@
       <button type="button" class="chip pin-chip" id="unit-yd" data-val="yd" aria-pressed="true">ヤード</button>
       <button type="button" class="chip pin-chip" id="unit-m" data-val="m" aria-pressed="false">メートル</button>
     </div>
+    <div class="choices c3" id="goalChoices" role="group" aria-label="目標スコア" style="margin-top:8px;">
+      <button type="button" class="chip pin-chip" id="goal-b100" data-val="b100" aria-pressed="false">100切り<br><small>大叩き撲滅</small></button>
+      <button type="button" class="chip pin-chip" id="goal-b90" data-val="b90" aria-pressed="true">90切り<br><small>ボギーオン</small></button>
+      <button type="button" class="chip pin-chip" id="goal-b80" data-val="b80" aria-pressed="false">80切り<br><small>攻めの条件付き</small></button>
+    </div>
   </section>
 
   <section class="card" id="approachCard" hidden>
@@ -417,6 +474,19 @@
       <label for="apGreenSpeed">グリーンの速さ（フィート・ゴルフ場の掲示値）</label>
       <input type="number" id="apGreenSpeed" inputmode="decimal" min="6" max="14" step="0.1" value="9.5">
     </div>
+    <details class="detail-box" id="apDetail" style="margin-top:8px;">
+      <summary>詳細（芝目・ラフの深さ）— 特殊な状況のときだけ</summary>
+      <div class="choices c3" id="grainChoices" role="group" aria-label="芝目" style="margin-top:8px;">
+        <button type="button" class="chip pin-chip" id="gr-with" data-val="with" aria-pressed="false">順目<br><small>転がる</small></button>
+        <button type="button" class="chip pin-chip" id="gr-none" data-val="none" aria-pressed="true">標準</button>
+        <button type="button" class="chip pin-chip" id="gr-against" data-val="against" aria-pressed="false">逆目<br><small>ザックリ注意</small></button>
+      </div>
+      <div class="choices c2" id="roughDepthChoices" role="group" aria-label="ラフの深さ" style="margin-top:8px;">
+        <button type="button" class="chip pin-chip" id="rd-shallow" data-val="shallow" aria-pressed="true">ラフ浅い</button>
+        <button type="button" class="chip pin-chip" id="rd-deep" data-val="deep" aria-pressed="false">ラフ深い<br><small>まず出す</small></button>
+      </div>
+      <p class="map-note" style="margin-top:6px;">ラフの深さは、ライで「ラフから」を選んだときに効きます。</p>
+    </details>
     <div class="traj-wrap" style="margin-top:12px;">
       <svg id="apTrajSvg" viewBox="0 0 360 150" role="img" aria-label="アプローチの弾道"></svg>
     </div>
@@ -482,14 +552,17 @@
   </section>
 
   <section class="card" id="courseCard">
-    <h2>コース</h2>
+    <h2>コースとホール</h2>
     <select id="courseSelect" aria-label="コース選択">
       <option value="">コースを選択…</option>
       <option value="kira">吉良カントリークラブ</option>
       <option value="castle">キャッスルヒルカントリー</option>
-      <option value="nukata">額田ゴルフクラブ</option>
+      <option value="nukata_w">額田ゴルフ倶楽部（西）</option>
+      <option value="nukata_e">額田ゴルフ倶楽部（東）</option>
       <option value="wood">ウッドフレンズ名古屋港</option>
     </select>
+    <div class="hole-chips" id="holeChips" hidden></div>
+    <div class="verdict" id="holeInfo" hidden></div>
   </section>
 
   <section class="card" id="penaltyCard">
@@ -550,8 +623,10 @@
   </section>
 
   <section class="card" id="clubCard">
-    <h2>マイ番手（自分の飛距離・タップで変更できます）</h2>
-    <div class="club-grid" id="clubGrid"></div>
+    <details class="detail-box" id="clubDetail">
+      <summary>マイ番手（自分の飛距離）— ラウンド前に1回設定すればOK</summary>
+      <div class="club-grid" id="clubGrid" style="margin-top:8px;"></div>
+    </details>
   </section>
 
   <section class="card" id="dropCard">
@@ -608,6 +683,9 @@
     pin: null,         // center / right / left / back / front
     distance: 150,     // ヤード
     unit: "yd",        // yd / m（表示単位・内部計算は常にヤード）
+    goal: "b90",       // b100 / b90 / b80（目標スコア＝マネジメントモード）
+    hole: 0,           // 選択中のホール番号（0=未選択）
+    holeNotes: {},     // ホールごとのペナルティ記憶（マイコースノート）
     windDir: "none",   // none / against / with
     windSpeed: 0,      // m/s
     temp: null,        // 気温（℃・天気取得時のみ）
@@ -623,6 +701,8 @@
     lie: "fw",         // fw / rough / bunker（ライ）
     apDist: 20,        // アプローチ距離（ヤード）
     apClub: "SW",      // SW / 52 / PW / 9I / 8I
+    grain: "none",     // with(順目) / none / against(逆目)
+    roughDepth: "shallow", // shallow / deep（ライ=ラフのとき有効）
     ballPos: "center", // right / center / left（ボール位置）
     greenSpeed: 9.5,   // グリーンの速さ（フィート・スティンプ値）
     clubDist: null     // 番手ごとの自分の飛距離（ヤード）
@@ -681,6 +761,26 @@
     if (typeof state.temp !== "number" || !weatherFresh()) return 0;
     return Math.round(dist * (20 - state.temp) * 0.0015);
   }
+  // 目標スコア（マネジメントモード）：curve = 散らばり幅の係数（距離×◯%）
+  var GOALS = {
+    b100: { curve: 0.07, name: "100切り" },
+    b90:  { curve: 0.06, name: "90切り" },
+    b80:  { curve: 0.05, name: "80切り" }
+  };
+  function goalCfg() { return GOALS[state.goal] || GOALS.b90; }
+  function goalAdvice(distYdVal) { // 距離に応じた目標別の一言
+    if (state.goal === "b100") {
+      return distYdVal >= 130 ? "100切り：グリーンは狙わず手前の花道でOK。OB・池だけ絶対回避。"
+                              : "100切り：乗せるより「前に進める」。ダボで上等。";
+    }
+    if (state.goal === "b80") {
+      return distYdVal <= 150 ? "80切り：ショートアイアンならピンを狙ってOK。ただしショートサイド厳禁。"
+                              : "80切り：ここはセンターでパーオン優先。無理はバーディーの逆側。";
+    }
+    return distYdVal >= 160 ? "90切り：ボギーオンで十分。刻んで100yd以内の得意距離を残す。"
+                            : "90切り：ピンでなくグリーンセンター狙い。2パットでボギー確保。";
+  }
+
   // ライ：loss = 飛距離倍率、run = ラン倍率（スピンが減るぶん転がる）
   var LIE = {
     fw:     { loss: 1.0,  run: 1.0, name: "フェアウェイ" },
@@ -702,6 +802,8 @@
     for (var k in state) if (s[k] !== undefined) state[k] = s[k];
     if (s.penalty && (!s.penalties || !s.penalties.length)) state.penalties = [s.penalty]; // 旧形式の互換
     if (!Array.isArray(state.penalties)) state.penalties = [];
+    if (state.course === "nukata") state.course = "nukata_w"; // 旧額田の互換
+    if (typeof state.holeNotes !== "object" || !state.holeNotes) state.holeNotes = {};
   }
   function loadState() {
     try {
@@ -790,6 +892,7 @@
         if (i >= 0) state.penalties.splice(i, 1);
         else state.penalties.push(v);
         chip.setAttribute("aria-pressed", i >= 0 ? "false" : "true");
+        saveHoleNote();
         update();
       });
     });
@@ -1182,17 +1285,47 @@
     }
 
     var lieRun = state.lie === "rough" ? 1.3 : 1; // ラフからはスピンが減って転がる
+    var grainRun = state.grain === "with" ? 1.15 : state.grain === "against" ? 0.85 : 1; // 芝目
+    var deepRough = state.lie === "rough" && state.roughDepth === "deep";
+    if (deepRough) lieRun *= 1.2;
+
+    // 安全度（ミスへの強さ）：ランに頼るほど強い。状況で補正
+    function apSafety(id) {
+      var s2 = { SW: 2.6, "52": 3.1, PW: 3.7, "9I": 4.3, "8I": 4.7 }[id] || 3;
+      if (state.grain === "against") { // 逆目はザックリしやすい
+        if (id === "SW") s2 -= 1.3; else if (id === "52") s2 -= 1.0; else s2 -= 0.3;
+      }
+      if (state.lie === "rough") { // ラフからは転がしが効かない
+        var deep = state.roughDepth === "deep";
+        if (id === "8I" || id === "9I") s2 -= deep ? 2.4 : 1.1;
+        else if (id === "PW") s2 -= deep ? 1.6 : 0.5;
+        else if (id === "52") s2 -= deep ? 0.8 : 0.1;
+        else if (id === "SW") s2 -= deep ? 0.2 : 0;
+      }
+      return s2;
+    }
+    function safetyHtml(v, isBest) {
+      var stars = v >= 4 ? "★★★" : v >= 3 ? "★★☆" : "★☆☆";
+      var cls = v >= 4 ? "safety good" : v < 2.5 ? "safety bad" : "safety";
+      return "<span class='" + cls + "'>" + (v < 2.5 ? "⚠️" : "") + stars + (isBest ? " 安全" : "") + "</span>";
+    }
+    var safest = null, safestV = -99;
+    AP_CLUBS.forEach(function (cl) {
+      var v = apSafety(cl.id);
+      if (v > safestV) { safestV = v; safest = cl.id; }
+    });
+
     var selected = null;
     AP_CLUBS.forEach(function (cl) {
       // ピンで止めるための逆算：carry × (1 + runRatio) = D
-      var runRatio = cl.base * bp.run * k * lieRun;
+      var runRatio = cl.base * bp.run * k * lieRun * grainRun;
       var carry = D / (1 + runRatio);
       var run = D - carry;
       var r = { name: cl.name, carry: carry, run: run, drop: D - carry, diff: 0, h: cl.h * bp.h, D: D };
       if (cl.id === state.apClub) selected = r;
       var row = document.createElement("div");
       row.className = "drop-row" + (cl.id === state.apClub ? " best" : "");
-      row.innerHTML = "<b>" + cl.name + "</b>" +
+      row.innerHTML = "<b>" + cl.name + "<br>" + safetyHtml(apSafety(cl.id), cl.id === safest) + "</b>" +
         "<span class='place'>ピンの <strong>" + fmtD1(r.drop) + "手前</strong> に落とす</span>" +
         "<span class='result'>キャリー" + toDisp1(carry) + "＋ラン" + toDisp1(run) + "</span>";
       row.addEventListener("click", function () {
@@ -1207,7 +1340,10 @@
     hint.className = "map-note";
     var slopeTxt = state.slope === "up" ? "上り" : state.slope === "down" ? "下り" : "平坦";
     var spd = state.greenSpeed;
-    hint.textContent = slopeTxt + "・" + spd + "フィート・" + bp.name + (state.lie === "rough" ? "・ラフ（ラン約1.3倍）" : "") + "で計算。" +
+    var grainTxt = state.grain === "with" ? "・順目（ラン1.15倍）" : state.grain === "against" ? "・逆目（ラン減・ザックリ注意）" : "";
+    hint.textContent = slopeTxt + "・" + spd + "フィート・" + bp.name + (state.lie === "rough" ? (deepRough ? "・深いラフ" : "・ラフ（ラン約1.3倍）") : "") + grainTxt + "で計算。" +
+      (deepRough ? " 深いラフ：スピンがかからず距離感が出ません。SWでまず確実に脱出を。" : "") +
+      (state.grain === "against" ? " 逆目はヘッドが刺さりやすいので、上げる打ち方ほどリスクが上がります。" : "") +
       (state.ballPos === "right" ? " 右足寄り：ロフトが立って低く出るぶん、ランが約1.5倍。" :
        state.ballPos === "left" ? " 左足寄り：上がって止まるぶん、ランが約0.7倍。" : "") +
       (spd > 10.5 ? " 速いグリーンなので、かなり手前から。" : spd < 8.5 ? " 遅いグリーンなので、ピン寄りに落とせます。" : "");
@@ -1230,6 +1366,34 @@
   function setLieUI(val) {
     ["lie-fw", "lie-rough", "lie-bunker", "ap-lie-fw", "ap-lie-rough", "ap-lie-bunker"].forEach(function (id) {
       $(id).setAttribute("aria-pressed", $(id).dataset.val === val ? "true" : "false");
+    });
+  }
+
+  // 芝目・ラフの深さチップ
+  (function () {
+    ["gr-with", "gr-none", "gr-against"].forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ["gr-with", "gr-none", "gr-against"].forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state.grain = $(id).dataset.val;
+        update();
+      });
+    });
+    ["rd-shallow", "rd-deep"].forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        ["rd-shallow", "rd-deep"].forEach(function (i) { $(i).setAttribute("aria-pressed", "false"); });
+        $(id).setAttribute("aria-pressed", "true");
+        state.roughDepth = $(id).dataset.val;
+        update();
+      });
+    });
+  })();
+  function setGrainUI() {
+    ["gr-with", "gr-none", "gr-against"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === state.grain ? "true" : "false");
+    });
+    ["rd-shallow", "rd-deep"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === state.roughDepth ? "true" : "false");
     });
   }
 
@@ -1365,7 +1529,11 @@
     var aimTxt = breakCups > 0
       ? "狙い：カップ <strong>" + breakCups + "個分 " + aimSide + "</strong>（約" + breakCm + "cm）"
       : "狙い：<strong>カップの真ん中</strong>";
-    vd.innerHTML = aimTxt + "<br>" + touchTxt;
+    var twoPutt = "";
+    if (D >= 15 && state.goal !== "b80") {
+      twoPutt = "<br><span style='font-size:12px;'>" + goalCfg().name + "：ロングパットは2パット狙い。カップを中心に半径3フィート（約1m）の円に止めればOK。</span>";
+    }
+    vd.innerHTML = aimTxt + "<br>" + touchTxt + twoPutt;
 
     drawPutt(breakCups, aimSide);
     if (window.__redrawPhoto) window.__redrawPhoto();
@@ -1923,7 +2091,7 @@
     // ピン座標・散らばり半径
     var off = PIN_OFFSET[state.pin];
     var pin = { x: C.x + off.x, y: C.y + off.y };
-    var curveYd = Math.round(state.distance * 0.05 * 10) / 10; // 曲がり幅（片側）
+    var curveYd = Math.round(state.distance * goalCfg().curve * 10) / 10; // 曲がり幅（片側・目標レベル連動）
     var rPx = Math.max(14, curveYd * 4);
 
     // 狙う1点の計算：全ペナルティの許容範囲にクランプ（両側なら中央へ）
@@ -1992,17 +2160,22 @@
     if (noteY > 396) noteY = aim.y - rPx - 16;
     svg.appendChild(label(aim.x, noteY, "散らばりの円（曲がり幅" + curveYd + "）", { fs: 10 }));
 
-    // メモ
+    // メモ（期待打数の比較 + 目標別アドバイス）
     if (shift > 0.5) {
       var parts = [];
       var xYd = Math.round(Math.abs(shiftX) / 4), yYd = Math.round(Math.abs(shiftY) / 4);
       if (xYd > 0) parts.push("約" + fmtD(xYd) + (shiftX > 0 ? "右" : "左"));
       if (yYd > 0) parts.push("約" + fmtD(yYd) + (shiftY > 0 ? "手前" : "奥"));
-      note.textContent = "ピン直狙いは散らばりがペナルティにかかります。ピンより" + parts.join("・") + "側を狙う。";
+      // ピン直狙いのペナルティ確率（円の食い込み深さから近似）→ 期待打数の損失
+      var depth = Math.max(0, shift - 12); // 安全マージンを除いた実質の食い込み(px)
+      var frac = Math.min(0.5, depth / (2 * rPx) + 0.08); // ざっくり確率
+      var pct = Math.round(frac * 100);
+      var lossStrokes = Math.round(frac * 1.5 * 10) / 10; // 1ペナ+リカバリー ≈ 1.5打
+      note.textContent = "ピン直狙いは約" + pct + "%でペナルティ（期待+" + lossStrokes + "打の損）。ピンより" + parts.join("・") + "側の「狙う1点」が正解。 " + goalAdvice(state.distance);
     } else if (state.penalties.length === 0) {
-      note.textContent = "ペナルティなし。ピンをそのまま狙えます（選ぶ場合は複数タップできます）。";
+      note.textContent = "ペナルティなし。ピンをそのまま狙えます。 " + goalAdvice(state.distance);
     } else {
-      note.textContent = "ペナルティまで余裕があるので、ピンをそのまま狙えます。";
+      note.textContent = "ペナルティまで余裕があるので、ピンをそのまま狙えます。 " + goalAdvice(state.distance);
     }
   }
 
@@ -2045,6 +2218,20 @@
     }, function (msg) { out.textContent = "⚠️ " + msg; });
   });
 
+  // 目標スコアチップ
+  ["goal-b100", "goal-b90", "goal-b80"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      state.goal = $(id).dataset.val;
+      setGoalUI();
+      update();
+    });
+  });
+  function setGoalUI() {
+    ["goal-b100", "goal-b90", "goal-b80"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === state.goal ? "true" : "false");
+    });
+  }
+
   // 単位チップ
   ["unit-yd", "unit-m"].forEach(function (id) {
     $(id).addEventListener("click", function () {
@@ -2083,9 +2270,107 @@
     }, function (msg) { out.textContent = "⚠️ " + msg; });
   });
 
-  // ---------- コース ----------
+  // ---------- コースとホール（レギュラーティー基準・楽天GORAコースガイドより） ----------
+  // 各要素: [par, レギュラーティーyd, HCP]
+  var COURSE_DATA = {
+    kira: { name: "吉良CC", holes: [
+      [4,270,15],[4,364,9],[4,376,3],[3,155,7],[4,365,1],[3,122,17],[5,481,5],[5,466,11],[4,300,13],
+      [5,427,12],[3,135,18],[4,353,4],[3,137,14],[4,267,8],[5,463,2],[4,283,16],[3,165,10],[5,480,6]
+    ]},
+    castle: { name: "キャッスルヒル", holes: [
+      [4,340,13],[5,510,17],[3,140,1],[4,360,5],[5,458,11],[3,151,7],[4,342,3],[4,378,9],[4,329,15],
+      [4,288,18],[3,152,4],[4,373,8],[5,565,12],[3,148,2],[4,306,10],[4,337,16],[5,450,14],[4,376,6]
+    ]},
+    nukata_w: { name: "額田（西）", holes: [
+      [4,358,13],[4,353,3],[3,169,11],[5,463,5],[3,151,17],[4,370,1],[4,358,7],[5,463,15],[4,353,9],
+      [5,500,4],[3,143,18],[4,365,16],[4,327,2],[4,351,12],[5,469,8],[4,335,14],[3,186,6],[4,346,10]
+    ]},
+    nukata_e: { name: "額田（東）", holes: [
+      [4,315,15],[5,484,5],[3,128,17],[4,390,3],[4,397,1],[4,341,9],[5,480,7],[3,191,11],[4,312,13],
+      [5,472,6],[4,351,10],[3,166,14],[4,333,8],[5,488,2],[4,383,4],[4,330,12],[3,153,18],[4,384,16]
+    ]},
+    wood: { name: "名古屋港", holes: [
+      [4,353,9],[3,152,15],[5,528,3],[4,386,1],[4,334,13],[5,485,7],[3,147,11],[4,302,17],[4,384,5],
+      [4,392,10],[3,203,4],[5,464,16],[4,361,8],[4,312,14],[5,499,2],[4,375,12],[3,148,18],[4,371,6]
+    ]}
+  };
+
+  function holeKey() { return state.course + "-" + state.hole; }
+
+  function holeStrategy(par, yd, hcp) {
+    var hard = hcp <= 6;
+    if (par === 3) {
+      if (state.goal === "b100") return "Par3：グリーン手前でOK。大叩きだけしない。";
+      return hard ? "難しいPar3：ピンは見ずセンター一択。" : "Par3：センター基準で、ピンはおまけ。";
+    }
+    if (par === 4) {
+      if (state.goal === "b100") return "Par4：2打で届かなくてOK。3打目勝負で十分ボギー。";
+      if (state.goal === "b90") return hard ? "難ホール（HCP" + hcp + "）：ボギー上等。無理をしない。" : "Par4：ボギーオンで確実に。";
+      return hard ? "難ホール（HCP" + hcp + "）：パーが取れれば貯金。" : "Par4：パーオン狙い。";
+    }
+    if (state.goal === "b80") return "Par5：バーディーチャンスを作るホール。2打目は欲張らずベストポジションへ。";
+    return "Par5：刻んで3打目に得意距離（100yd前後）を残すのが正解。";
+  }
+
+  function buildHoleChips() {
+    var wrap = $("holeChips");
+    wrap.innerHTML = "";
+    var cd = COURSE_DATA[state.course];
+    if (!cd) { wrap.hidden = true; $("holeInfo").hidden = true; return; }
+    wrap.hidden = false;
+    cd.holes.forEach(function (h, i) {
+      var n = i + 1;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "hole-chip";
+      b.id = "hole-" + n;
+      b.setAttribute("aria-pressed", state.hole === n ? "true" : "false");
+      b.innerHTML = n + "<small>P" + h[0] + "</small>";
+      b.addEventListener("click", function () { selectHole(n); });
+      wrap.appendChild(b);
+    });
+  }
+
+  function selectHole(n) {
+    state.hole = n;
+    var cd = COURSE_DATA[state.course];
+    if (!cd) return;
+    var h = cd.holes[n - 1];
+    var par = h[0], yd = h[1], hcp = h[2];
+    ensureClubDist();
+    var drv = state.clubDist["1W"] || 220;
+    var fw = state.clubDist["5W"] || 180;
+    var rem, remTxt;
+    if (par === 3) { rem = yd; remTxt = "ティーショットの距離"; }
+    else if (par === 4) { rem = Math.max(50, yd - drv); remTxt = "2打目の目安（1W " + drv + "yd想定）"; }
+    else { rem = Math.max(50, yd - drv - fw); remTxt = "3打目の目安（1W＋5W想定）"; }
+    setDistance(Math.min(250, Math.max(50, Math.round(rem / 5) * 5)));
+    // マイコースノート：このホールのペナルティ記憶を復元
+    var note = state.holeNotes[holeKey()];
+    state.penalties = note && Array.isArray(note.penalties) ? note.penalties.slice() : [];
+    setPenaltyUI();
+    document.querySelectorAll(".hole-chip").forEach(function (c) {
+      c.setAttribute("aria-pressed", c.id === "hole-" + n ? "true" : "false");
+    });
+    var info = $("holeInfo");
+    info.hidden = false;
+    info.innerHTML = "<strong>" + cd.name + " " + n + "番</strong>　Par" + par + "・" + fmtD(yd) + "（HCP " + hcp + "）<br>" +
+      "<span style='font-size:12px;'>" + remTxt + "：<strong>" + fmtD(rem) + "</strong>｜" + holeStrategy(par, yd, hcp) + "</span>" +
+      (state.penalties.length ? "<br><span style='font-size:11px;'>📝 このホールのペナルティ位置を復元しました</span>" : "");
+    update();
+  }
+
+  function saveHoleNote() { // ペナルティを変えたら、そのホールに記憶
+    if (!state.hole || !COURSE_DATA[state.course]) return;
+    state.holeNotes[holeKey()] = { penalties: state.penalties.slice() };
+  }
+
   $("courseSelect").addEventListener("change", function () {
-    state.course = this.value; saveState();
+    state.course = this.value;
+    state.hole = 0;
+    $("holeInfo").hidden = true;
+    buildHoleChips();
+    saveState();
   });
 
   // ---------- 更新 ----------
@@ -2128,6 +2413,9 @@
     setTrajUI(state.traj);
     setLieUI(state.lie);
     setBallPosUI(state.ballPos);
+    setGrainUI();
+    setGoalUI();
+    buildHoleChips();
     setPuttUI();
     $("slopeOut").textContent = slopeGuideText();
     $("apGreenSpeed").value = state.greenSpeed;
