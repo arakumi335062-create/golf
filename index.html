@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body style="margin:0">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>狙う1点マップ</title>
 <style>
 [hidden] { display: none !important; }
+#simCardWrap th, #simCardWrap td { padding: 5px 4px; border-bottom: 1px solid rgba(128,128,128,.28); }
   :root {
     --ground: #f3f6f2;
     --surface: #ffffff;
@@ -25,6 +20,10 @@
     --flag: #e04a38;
     --chip-on-blue: #1d5fa0;
     --chip-on-red: #c03b2e;
+    --haz3: #c03b2e;
+    --haz2: #c2651a;
+    --haz1: #97761a;
+    --haz0: #2f7d45;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -44,6 +43,10 @@
       --flag: #e0685a;
       --chip-on-blue: #6aa7dd;
       --chip-on-red: #e0685a;
+      --haz3: #d85b4d;
+      --haz2: #d07a34;
+      --haz1: #a98a34;
+      --haz0: #3f9657;
     }
   }
   :root[data-theme="dark"] {
@@ -63,6 +66,10 @@
     --flag: #e0685a;
     --chip-on-blue: #6aa7dd;
     --chip-on-red: #e0685a;
+    --haz3: #d85b4d;
+    --haz2: #d07a34;
+    --haz1: #a98a34;
+    --haz0: #3f9657;
   }
 
   body {
@@ -444,12 +451,64 @@
     color: var(--ink-soft);
     padding-block: 4px;
   }
+
+  /* ステップ見出し（①〜④） */
+  .step-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .step-head h2 { margin: 0; }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto;
+    background: var(--accent); color: #fff; font-size: 12px; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .step-badge {
+    display: none; font-size: 10px; font-weight: 700; color: #fff;
+    background: var(--accent); border-radius: 6px; padding: 1px 6px;
+  }
+  .step-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .step-card.active .step-badge { display: inline-block; }
+  .step-sum { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .sub-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); margin: 12px 0 6px; }
+
+  /* 十字配置（グリーンを中心に上下左右） */
+  .cross { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto auto; gap: 6px; }
+  .cross .c-top { grid-column: 2; grid-row: 1; }
+  .cross .c-left { grid-column: 1; grid-row: 2; }
+  .cross .c-mid { grid-column: 2; grid-row: 2; }
+  .cross .c-right { grid-column: 3; grid-row: 2; }
+  .cross .c-bot { grid-column: 2; grid-row: 3; }
+  .green-pill {
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 999px; background: var(--turf-deep); border: 2px solid var(--turf-edge);
+    color: var(--ink); font-weight: 800; font-size: 13px; min-height: 44px;
+  }
+
+  /* 障害物の種類（点数） */
+  .haz-chip .pts { font-size: 15px; font-weight: 800; line-height: 1; }
+  .haz-chip[data-pts="3"] .pts { color: var(--haz3); }
+  .haz-chip[data-pts="2"] .pts { color: var(--haz2); }
+  .haz-chip[data-pts="1"] .pts { color: var(--haz1); }
+  .haz-chip[data-pts="0"] .pts { color: var(--haz0); }
+  .chip[aria-pressed="true"][data-pts] { color: #fff; }
+  .chip[aria-pressed="true"][data-pts] .pts, .chip[aria-pressed="true"][data-pts] .dot-mark { color: #fff; }
+  .chip[aria-pressed="true"][data-pts="3"] { background: var(--haz3); border-color: var(--haz3); }
+  .chip[aria-pressed="true"][data-pts="2"] { background: var(--haz2); border-color: var(--haz2); }
+  .chip[aria-pressed="true"][data-pts="1"] { background: var(--haz1); border-color: var(--haz1); }
+  .chip[aria-pressed="true"][data-pts="0"] { background: var(--haz0); border-color: var(--haz0); }
+
+  /* 計算式と結論 */
+  .formula { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .formula strong { color: var(--accent); font-size: 17px; }
+  .formula small { display: block; font-size: 11px; font-weight: 500; color: var(--ink-soft); margin-top: 4px; }
+  .aim-box { background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; }
+  .aim-head { font-size: 21px; font-weight: 800; color: var(--accent); line-height: 1.35; font-variant-numeric: tabular-nums; }
+  .aim-why { font-size: 12px; color: var(--ink-soft); margin-top: 4px; line-height: 1.6; }
+
 </style>
 
 <div class="app">
   <header class="top">
     <h1>⛳ 狙う1点マップ</h1>
-    <p>ピンとペナルティを選ぶと、狙う1点と球が散らばる円が出ます</p>
+    <p>①ピンと距離 → ②曲がり幅 → ③障害物の点数 → ④狙う1点</p>
   </header>
 
   <section class="card">
@@ -651,8 +710,10 @@
         <button type="button" class="stepper" id="simEndBtn">終了して集計</button>
       </div>
       <div class="gps-row" style="margin-top:8px;">
+        <button type="button" class="stepper" id="simCardBtn">📋 スコアカード</button>
         <button type="button" class="stepper" id="simBigBtn" style="flex:1;">🔳 大ボタン画面（打ちながら入力）</button>
       </div>
+      <div id="simCardWrap" hidden style="margin-top:8px;"></div>
       <p class="map-note" id="simNote"></p>
     </div>
     <div id="simBig" hidden style="position:fixed; inset:0; z-index:60; background:var(--surface, #fff); overflow:auto; padding:14px 14px 24px;">
@@ -677,29 +738,16 @@
     </div>
   </section>
 
-  <section class="card" id="penaltyCard">
-    <h2>ペナルティの位置（複数選択できます）</h2>
-    <div class="choices c4" id="penaltyChoices" role="group" aria-label="ペナルティの位置">
-      <button type="button" class="chip pen-chip" id="pen-right" data-val="right" aria-pressed="false"><span class="dot-mark">▐</span>右</button>
-      <button type="button" class="chip pen-chip" id="pen-left" data-val="left" aria-pressed="false"><span class="dot-mark">▌</span>左</button>
-      <button type="button" class="chip pen-chip" id="pen-back" data-val="back" aria-pressed="false"><span class="dot-mark">▔</span>奥</button>
-      <button type="button" class="chip pen-chip" id="pen-front" data-val="front" aria-pressed="false"><span class="dot-mark">▁</span>手前</button>
+  <section class="card step-card" id="pinCard" data-step="1">
+    <div class="step-head"><span class="step-num">1</span><h2>ピンの位置と残り距離</h2><span class="step-badge">選択中</span><span class="step-sum" id="sum1"></span></div>
+    <div class="cross" id="pinChoices" role="group" aria-label="ピンの位置">
+      <button type="button" class="chip pin-chip c-top" id="pin-back" data-val="back" aria-pressed="false"><span class="dot-mark">◓</span>奥</button>
+      <button type="button" class="chip pin-chip c-left" id="pin-left" data-val="left" aria-pressed="false"><span class="dot-mark">◔</span>左</button>
+      <button type="button" class="chip pin-chip c-mid" id="pin-center" data-val="center" aria-pressed="false"><span class="dot-mark">◉</span>真ん中</button>
+      <button type="button" class="chip pin-chip c-right" id="pin-right" data-val="right" aria-pressed="false"><span class="dot-mark">◕</span>右</button>
+      <button type="button" class="chip pin-chip c-bot" id="pin-front" data-val="front" aria-pressed="false"><span class="dot-mark">◒</span>手前</button>
     </div>
-  </section>
-
-  <section class="card" id="pinCard">
-    <h2>ピンの位置</h2>
-    <div class="choices c5" id="pinChoices" role="group" aria-label="ピンの位置">
-      <button type="button" class="chip pin-chip" id="pin-center" data-val="center" aria-pressed="false"><span class="dot-mark">◉</span>真ん中</button>
-      <button type="button" class="chip pin-chip" id="pin-right" data-val="right" aria-pressed="false"><span class="dot-mark">◕</span>右</button>
-      <button type="button" class="chip pin-chip" id="pin-left" data-val="left" aria-pressed="false"><span class="dot-mark">◔</span>左</button>
-      <button type="button" class="chip pin-chip" id="pin-back" data-val="back" aria-pressed="false"><span class="dot-mark">◓</span>奥</button>
-      <button type="button" class="chip pin-chip" id="pin-front" data-val="front" aria-pressed="false"><span class="dot-mark">◒</span>手前</button>
-    </div>
-  </section>
-
-  <section class="card" id="distCard">
-    <h2>残り距離</h2>
+    <div class="sub-label">ピンまでの距離</div>
     <div class="dist-row">
       <button type="button" class="stepper" id="minus5">−5</button>
       <div class="dist-value"><span id="distNum">150</span><small id="unitLabelFull">ヤード</small></div>
@@ -712,6 +760,48 @@
       <button type="button" class="chip pin-chip" id="lie-rough" data-val="rough" aria-pressed="false">ラフ<br><small>ロス約7%</small></button>
       <button type="button" class="chip pin-chip" id="lie-bunker" data-val="bunker" aria-pressed="false">バンカー<br><small>ロス約15%</small></button>
     </div>
+  </section>
+
+  <section class="card step-card" id="curveCard" data-step="2">
+    <div class="step-head"><span class="step-num">2</span><h2>残り距離から曲がり幅を計算</h2><span class="step-badge">選択中</span></div>
+    <div class="formula" id="curveFormula"></div>
+  </section>
+
+  <section class="card step-card" id="penaltyCard" data-step="3">
+    <div class="step-head"><span class="step-num">3</span><h2>コース状況を点数で把握</h2><span class="step-badge">選択中</span><span class="step-sum" id="sum3"></span></div>
+    <div class="sub-label">障害物の種類（点数）→ 次に位置をタップ</div>
+    <div class="choices c4" id="hazTypeChoices" role="group" aria-label="障害物の種類">
+      <button type="button" class="chip haz-chip" data-val="3" data-pts="3" aria-pressed="true"><span class="pts">③</span>ペナルティ<small>OB・池</small></button>
+      <button type="button" class="chip haz-chip" data-val="2" data-pts="2" aria-pressed="false"><span class="pts">②</span>寄せにくい<small>深ラフ・崖</small></button>
+      <button type="button" class="chip haz-chip" data-val="1" data-pts="1" aria-pressed="false"><span class="pts">①</span>バンカー<small>&nbsp;</small></button>
+      <button type="button" class="chip haz-chip" data-val="0" data-pts="0" aria-pressed="false"><span class="pts">⓪</span>寄せやすい<small>花道など</small></button>
+    </div>
+    <p class="map-note" id="hazTypeNote" style="margin-top:6px;"></p>
+    <div class="sub-label">障害物の位置（複数OK・同じ種類でもう一度タップで解除）</div>
+    <div class="cross" id="penaltyChoices" role="group" aria-label="障害物の位置">
+      <button type="button" class="chip pen-chip c-top" id="pen-back" data-val="back" aria-pressed="false"><span class="dot-mark">▔</span>奥</button>
+      <button type="button" class="chip pen-chip c-left" id="pen-left" data-val="left" aria-pressed="false"><span class="dot-mark">▌</span>左</button>
+      <div class="green-pill c-mid" aria-hidden="true">グリーン</div>
+      <button type="button" class="chip pen-chip c-right" id="pen-right" data-val="right" aria-pressed="false"><span class="dot-mark">▐</span>右</button>
+      <button type="button" class="chip pen-chip c-bot" id="pen-front" data-val="front" aria-pressed="false"><span class="dot-mark">▁</span>手前</button>
+    </div>
+  </section>
+
+  <section class="card step-card" id="mapCard" data-step="4">
+    <div class="step-head"><span class="step-num">4</span><h2>曲がり幅と点数から狙いを決める</h2><span class="step-badge">選択中</span></div>
+    <div class="aim-box">
+      <div class="aim-head" id="aimHead">ピンの位置を選んでください</div>
+      <div class="aim-why" id="aimWhy"></div>
+    </div>
+    <div class="map-wrap" style="margin-top:10px;">
+      <svg id="mapSvg" viewBox="0 0 360 420" role="img" aria-label="狙う1点マップ" style="cursor:pointer;"></svg>
+    </div>
+    <p class="map-note" style="text-align:center; margin-top:6px;">図の上でもタップで選べます（グリーンの中＝ピン、外側＝障害物）</p>
+    <p class="map-note" id="mapNote">ペナルティとピンの位置を選んでください。</p>
+    <details class="detail-box" style="margin-top:8px;">
+      <summary>この図と計算のしくみ</summary>
+      <p class="map-note" id="mapModelNote" style="margin-top:6px;"></p>
+    </details>
   </section>
 
   <section class="card" id="windCard">
@@ -765,14 +855,6 @@
     <p class="map-note">番手の行をタップすると、その番手の弾道を再生します。</p>
   </section>
 
-  <section class="card" id="mapCard">
-    <h2>マップ</h2>
-    <div class="map-wrap">
-      <svg id="mapSvg" viewBox="0 0 360 420" role="img" aria-label="狙う1点マップ"></svg>
-    </div>
-    <p class="map-note" id="mapNote">ペナルティとピンの位置を選んでください。</p>
-  </section>
-
   <section class="card">
     <h2>GPSで飛距離を測る</h2>
     <div class="gps-row">
@@ -782,7 +864,7 @@
     <div class="gps-out" id="gpsOut">打つ前に「記録」、ボール地点で「距離」を押すと飛距離が出ます。</div>
   </section>
 
-  <footer class="note" id="storageNote">端末内保存で動作中｜散らばり幅は距離×5%で自動計算</footer>
+  <footer class="note" id="storageNote">端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
 </div>
 
 <script>
@@ -793,6 +875,8 @@
   var state = {
     course: "",
     penalties: [],     // right / left / back / front（複数可）
+    penaltyPts: {},    // 側ごとの障害物点数 3=ペナルティ 2=寄せにくい 1=バンカー 0=寄せやすい
+    hazType: 3,        // 次にタップする障害物の種類（点数）
     pin: null,         // center / right / left / back / front
     distance: 150,     // ヤード
     unit: "yd",        // yd / m（表示単位・内部計算は常にヤード）
@@ -916,6 +1000,8 @@
     for (var k in state) if (s[k] !== undefined) state[k] = s[k];
     if (s.penalty && (!s.penalties || !s.penalties.length)) state.penalties = [s.penalty]; // 旧形式の互換
     if (!Array.isArray(state.penalties)) state.penalties = [];
+    if (typeof state.penaltyPts !== "object" || !state.penaltyPts) state.penaltyPts = {};
+    state.penalties.forEach(function (sd) { if (typeof state.penaltyPts[sd] !== "number") state.penaltyPts[sd] = 3; }); // 旧データは全部ペナルティ扱い
     if (state.course === "nukata") state.course = "nukata_w"; // 旧額田の互換
     if (typeof state.holeNotes !== "object" || !state.holeNotes) state.holeNotes = {};
   }
@@ -967,7 +1053,7 @@
           } else {
             scheduleCloudSave(); // 初回はいまの設定を保存
           }
-          setStorageNote("クラウド保存オン：マイデータはどの端末でも共有されます｜散らばり幅は距離×5%で自動計算");
+          setStorageNote("クラウド保存オン：マイデータはどの端末でも共有されます｜曲がり幅＝距離×目標別%");
         });
       });
     }).catch(function () { /* 使えない環境では端末内保存のまま */ });
@@ -996,26 +1082,46 @@
     };
   }
 
-  // ペナルティはトグル式（複数選択可）
-  (function () {
-    var chips = document.querySelectorAll("#penaltyChoices .chip");
-    chips.forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        var v = chip.dataset.val;
-        var i = state.penalties.indexOf(v);
-        if (i >= 0) state.penalties.splice(i, 1);
-        else state.penalties.push(v);
-        chip.setAttribute("aria-pressed", i >= 0 ? "false" : "true");
-        saveHoleNote();
-        update();
-      });
-    });
-  })();
+  // 障害物：種類（点数）を選んでから位置をタップ。同じ種類でもう一度タップで解除（複数の位置OK）
+  var HAZ = {
+    3: { name: "ペナルティ", mark: "③", note: "3点＝OB・池などのペナルティエリア（1打罰）" },
+    2: { name: "寄せにくい", mark: "②", note: "2点＝深いラフ・崖・砲台の下など、次が難しい場所" },
+    1: { name: "バンカー",   mark: "①", note: "1点＝バンカー（出すだけなら大きな傷にならない）" },
+    0: { name: "寄せやすい", mark: "⓪", note: "0点＝花道など普通に寄せられる場所（それでも球はグリーンに残す）" }
+  };
+  var SIDE_NAME = { left: "左", right: "右", back: "奥", front: "手前" };
+  function hazPts(side) { var v = state.penaltyPts[side]; return typeof v === "number" ? v : 3; }
+  function togglePenalty(side) {
+    var i = state.penalties.indexOf(side);
+    if (i >= 0 && hazPts(side) === state.hazType) {
+      state.penalties.splice(i, 1);           // 同じ種類 → 解除
+      delete state.penaltyPts[side];
+    } else {
+      if (i < 0) state.penalties.push(side);  // 新規 or 種類の付け替え
+      state.penaltyPts[side] = state.hazType;
+    }
+    setPenaltyUI();
+    saveHoleNote();
+    update();
+  }
+  document.querySelectorAll("#penaltyChoices .chip").forEach(function (chip) {
+    chip.addEventListener("click", function () { togglePenalty(chip.dataset.val); });
+  });
   function setPenaltyUI() {
     document.querySelectorAll("#penaltyChoices .chip").forEach(function (c) {
-      c.setAttribute("aria-pressed", state.penalties.indexOf(c.dataset.val) >= 0 ? "true" : "false");
+      var on = state.penalties.indexOf(c.dataset.val) >= 0;
+      c.setAttribute("aria-pressed", on ? "true" : "false");
+      if (on) c.setAttribute("data-pts", String(hazPts(c.dataset.val))); else c.removeAttribute("data-pts");
+      var base = SIDE_NAME[c.dataset.val];
+      var lbl = c.lastChild;
+      if (lbl && lbl.nodeType === 3) lbl.nodeValue = on ? base + " " + HAZ[hazPts(c.dataset.val)].mark : base;
     });
   }
+  var setHazTypeUI = bindChips("hazTypeChoices", function (v) {
+    state.hazType = parseInt(v, 10);
+    $("hazTypeNote").textContent = HAZ[state.hazType].note;
+    saveState();
+  });
   var setPinUI = bindChips("pinChoices", function (v) {
     state.pin = v; update();
   });
@@ -2064,7 +2170,7 @@
   })();
 
   // ---------- モード切替 ----------
-  var FULL_CARDS = ["penaltyCard", "pinCard", "distCard", "windCard", "clubCard", "dropCard", "mapCard"];
+  var FULL_CARDS = ["penaltyCard", "pinCard", "curveCard", "windCard", "clubCard", "dropCard", "mapCard"];
   (function () {
     ["mode-full", "mode-approach", "mode-putt"].forEach(function (id) {
       $(id).addEventListener("click", function () {
@@ -2084,42 +2190,64 @@
   }
 
   // ---------- マップ描画 ----------
-  // 座標系: 1ヤード = 4px。グリーン中心 (180, 205)。上=奥、下=手前。
-  var C = { x: 180, y: 205 };
-  var GREEN = { w: 140, h: 128, r: 38 }; // 約35×32ヤード
+  // 座標系: 1ヤード = 6px。グリーンは楕円（横35×縦32ヤード）、中心 (180, 210)。上=奥、下=手前。
+  var S = 6;
+  var C = { x: 180, y: 210 };
+  var GREEN = { w: 35 * S, h: 32 * S }; // 210×192px
+  var GA = GREEN.w / 2, GB = GREEN.h / 2;
   var css = getComputedStyle(document.documentElement);
   function tok(name) { return css.getPropertyValue(name).trim(); }
 
+  // ピンは端から約5ヤード内側
   var PIN_OFFSET = {
     center: { x: 0, y: 0 },
-    right:  { x: 48, y: 0 },
-    left:   { x: -48, y: 0 },
-    back:   { x: 0, y: -46 },
-    front:  { x: 0, y: 46 }
+    right:  { x: GA - 5 * S, y: 0 },
+    left:   { x: -(GA - 5 * S), y: 0 },
+    back:   { x: 0, y: -(GB - 5 * S) },
+    front:  { x: 0, y: GB - 5 * S }
   };
-  // ペナルティ帯（グリーンのすぐ外側）
+  // 障害物帯（楕円のすぐ外側。帯の長さはグリーンの約75%）
   function penaltyRect(side) {
-    var gL = C.x - GREEN.w / 2, gR = C.x + GREEN.w / 2;
-    var gT = C.y - GREEN.h / 2, gB = C.y + GREEN.h / 2;
-    var TH = 34, GAP = 8;
-    if (side === "back")  return { x: gL - 20, y: gT - GAP - TH, w: GREEN.w + 40, h: TH, vert: false };
-    if (side === "front") return { x: gL - 20, y: gB + GAP,      w: GREEN.w + 40, h: TH, vert: false };
-    if (side === "left")  return { x: gL - GAP - TH, y: gT - 20, w: TH, h: GREEN.h + 40, vert: true };
-    return                { x: gR + GAP,      y: gT - 20, w: TH, h: GREEN.h + 40, vert: true }; // right
+    var TH = 30, GAP = 8;
+    var lw = GREEN.w * 0.72, lh = GREEN.h * 0.72;
+    if (side === "back")  return { x: C.x - lw / 2, y: C.y - GB - GAP - TH, w: lw, h: TH, vert: false };
+    if (side === "front") return { x: C.x - lw / 2, y: C.y + GB + GAP,      w: lw, h: TH, vert: false };
+    if (side === "left")  return { x: C.x - GA - GAP - TH, y: C.y - lh / 2, w: TH, h: lh, vert: true };
+    return                { x: C.x + GA + GAP,      y: C.y - lh / 2, w: TH, h: lh, vert: true }; // right
   }
-  // 複数ペナルティから許容範囲を求める（散らばり円が帯に触れないx/y区間）
-  function aimBounds(rPx) {
-    var M = 12; // 安全マージン（約3ヤード）
+  // 点(x,y)の行・列で見た楕円の端の座標（px）
+  function edgeAt(side, x, y) {
+    if (side === "left" || side === "right") {
+      var ky = (y - C.y) / GB, hx = GA * Math.sqrt(Math.max(0, 1 - ky * ky));
+      return side === "left" ? C.x - hx : C.x + hx;
+    }
+    var kx = (x - C.x) / GA, hy = GB * Math.sqrt(Math.max(0, 1 - kx * kx));
+    return side === "back" ? C.y - hy : C.y + hy;
+  }
+  function insideGreen(x, y) {
+    var kx = (x - C.x) / GA, ky = (y - C.y) / GB;
+    return kx * kx + ky * ky <= 1;
+  }
+  // 障害物がある向きだけを見て、端から「曲がり幅＋点数」ヤード内側までを許容範囲にする
+  function aimBounds(curveYd, ref) {
     var b = { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity };
     state.penalties.forEach(function (side) {
-      var r = penaltyRect(side);
-      if (side === "back")  b.minY = Math.max(b.minY, r.y + r.h + rPx + M);
-      if (side === "front") b.maxY = Math.min(b.maxY, r.y - rPx - M);
-      if (side === "left")  b.minX = Math.max(b.minX, r.x + r.w + rPx + M);
-      if (side === "right") b.maxX = Math.min(b.maxX, r.x - rPx - M);
+      var need = (curveYd + hazPts(side)) * S;
+      var e = edgeAt(side, ref.x, ref.y);
+      if (side === "back")  b.minY = Math.max(b.minY, e + need);
+      if (side === "front") b.maxY = Math.min(b.maxY, e - need);
+      if (side === "left")  b.minX = Math.max(b.minX, e + need);
+      if (side === "right") b.maxX = Math.min(b.maxX, e - need);
     });
     return b;
   }
+  // ピンからその向きのグリーンの端までの距離（ヤード）
+  function edgeYd(pin, side) {
+    var e = edgeAt(side, pin.x, pin.y);
+    var px = side === "left" ? pin.x - e : side === "right" ? e - pin.x : side === "back" ? pin.y - e : e - pin.y;
+    return px / S;
+  }
+  function curveYdVal() { return Math.round(state.distance * goalCfg().curve * 10) / 10; }
   function clampAxis(v, lo, hi) {
     if (lo > hi) return (lo + hi) / 2; // 両側から挟まれたら中央
     return Math.min(hi, Math.max(lo, v));
@@ -2168,28 +2296,35 @@
     // 方位ラベル
     svg.appendChild(label(180, 18, "奥", { fs: 12 }));
     svg.appendChild(label(180, 402, "手前", { fs: 12 }));
-    svg.appendChild(label(18, 205, "左", { fs: 12 }));
-    svg.appendChild(label(342, 205, "右", { fs: 12 }));
+    svg.appendChild(label(18, 210, "左", { fs: 12 }));
+    svg.appendChild(label(342, 210, "右", { fs: 12 }));
 
     // グリーン
-    svg.appendChild(el("rect", {
-      x: C.x - GREEN.w / 2, y: C.y - GREEN.h / 2, width: GREEN.w, height: GREEN.h,
-      rx: GREEN.r, fill: tok("--turf-deep"), stroke: tok("--turf-edge"), "stroke-width": 2.5
+    svg.appendChild(el("ellipse", {
+      cx: C.x, cy: C.y, rx: GA, ry: GB,
+      fill: tok("--turf-deep"), stroke: tok("--turf-edge"), "stroke-width": 2.5
     }));
+    // ピン位置の目印（5か所の小さな点）
+    Object.keys(PIN_OFFSET).forEach(function (k) {
+      svg.appendChild(el("circle", { cx: C.x + PIN_OFFSET[k].x, cy: C.y + PIN_OFFSET[k].y, r: 3, fill: tok("--turf-edge"), opacity: 0.6 }));
+    });
 
     var note = $("mapNote");
     if (!state.pin) {
-      svg.appendChild(label(180, 205, "ピンの位置を選択", { fs: 13 }));
-      note.textContent = "ピンの位置を選んでください（ペナルティは複数選択できます）。";
+      svg.appendChild(label(180, 210, "ピンの位置を選択", { fs: 13 }));
+      note.textContent = "①でピンの位置を選ぶか、図のグリーンをタップしてください。";
+      $("aimHead").textContent = "ピンの位置を選んでください";
+      $("aimWhy").textContent = "";
       return;
     }
 
-    // ペナルティ帯（複数）
+    // 障害物帯（点数ごとに色分け）
     state.penalties.forEach(function (side) {
       var pr = penaltyRect(side);
+      var pts = hazPts(side);
       svg.appendChild(el("rect", {
         x: pr.x, y: pr.y, width: pr.w, height: pr.h, rx: 12,
-        fill: tok("--danger"), opacity: 0.9
+        fill: tok("--haz" + pts), opacity: 0.9
       }));
       var pt = el("text", {
         x: pr.x + pr.w / 2, y: pr.y + pr.h / 2,
@@ -2197,27 +2332,30 @@
         "text-anchor": "middle", "dominant-baseline": "middle",
         "font-family": "inherit"
       });
-      pt.textContent = "ペナルティ";
+      pt.textContent = HAZ[pts].mark + " " + HAZ[pts].name;
       if (pr.vert) pt.setAttribute("transform", "rotate(-90 " + (pr.x + pr.w / 2) + " " + (pr.y + pr.h / 2) + ")");
       svg.appendChild(pt);
     });
 
-    // ピン座標・散らばり半径
+    // ピン座標・曲がり幅
     var off = PIN_OFFSET[state.pin];
     var pin = { x: C.x + off.x, y: C.y + off.y };
-    var curveYd = Math.round(state.distance * goalCfg().curve * 10) / 10; // 曲がり幅（片側・目標レベル連動）
-    var rPx = Math.max(14, curveYd * 4);
+    var curveYd = curveYdVal();
+    var rPx = Math.max(12, curveYd * S);
 
-    // 狙う1点の計算：全ペナルティの許容範囲にクランプ（両側なら中央へ）
-    var b = aimBounds(rPx);
+    // 狙う1点：全障害物の許容範囲にクランプ（両側から挟まれたら中央）
+    var b = aimBounds(curveYd, pin);
     var aim = {
       x: clampAxis(pin.x, b.minX, b.maxX),
       y: clampAxis(pin.y, b.minY, b.maxY)
     };
+    // 楕円なので、ずらした後の位置で端を測り直す（1回補正）
+    b = aimBounds(curveYd, aim);
+    aim = { x: clampAxis(pin.x, b.minX, b.maxX), y: clampAxis(pin.y, b.minY, b.maxY) };
     var shiftX = aim.x - pin.x, shiftY = aim.y - pin.y;
     var shift = Math.sqrt(shiftX * shiftX + shiftY * shiftY);
 
-    // ピンを直接狙った場合の円（危険を可視化）— ずらす必要があるときだけ
+    // ピンを直接狙った場合の円（危険を可視化）
     if (shift > 0.5) {
       svg.appendChild(el("circle", {
         cx: pin.x, cy: pin.y, r: rPx,
@@ -2225,73 +2363,156 @@
         stroke: tok("--danger"), "stroke-width": 2, "stroke-dasharray": "6 5"
       }));
     }
-
     // 狙う1点の散らばり円
     svg.appendChild(el("circle", {
       cx: aim.x, cy: aim.y, r: rPx,
       fill: tok("--accent"), "fill-opacity": 0.10,
       stroke: tok("--accent"), "stroke-width": 2.5, "stroke-dasharray": "7 5"
     }));
+    // ピン→狙う1点のずらし矢印
+    if (shift > 6) {
+      svg.appendChild(el("line", {
+        x1: pin.x, y1: pin.y, x2: aim.x - shiftX / shift * 10, y2: aim.y - shiftY / shift * 10,
+        stroke: tok("--accent"), "stroke-width": 2, opacity: 0.7
+      }));
+    }
 
     // ピン（旗）
     var flagG = el("g", {});
-    flagG.appendChild(el("line", {
-      x1: pin.x, y1: pin.y, x2: pin.x, y2: pin.y - 26,
-      stroke: tok("--ink"), "stroke-width": 2.5, "stroke-linecap": "round"
-    }));
-    flagG.appendChild(el("path", {
-      d: "M " + pin.x + " " + (pin.y - 26) + " l 17 5 l -17 6 z",
-      fill: tok("--flag")
-    }));
+    flagG.appendChild(el("line", { x1: pin.x, y1: pin.y, x2: pin.x, y2: pin.y - 20, stroke: tok("--ink"), "stroke-width": 2.5, "stroke-linecap": "round" }));
+    flagG.appendChild(el("path", { d: "M " + pin.x + " " + (pin.y - 20) + " l 14 4 l -14 5 z", fill: tok("--flag") }));
     flagG.appendChild(el("circle", { cx: pin.x, cy: pin.y, r: 3.5, fill: tok("--ink") }));
     svg.appendChild(flagG);
 
     // 狙う1点（X）
-    var xg = el("g", {
-      stroke: tok("--accent"), "stroke-width": 4.5, "stroke-linecap": "round"
-    });
+    var xg = el("g", { stroke: tok("--accent"), "stroke-width": 4.5, "stroke-linecap": "round" });
     xg.appendChild(el("line", { x1: aim.x - 8, y1: aim.y - 8, x2: aim.x + 8, y2: aim.y + 8 }));
     xg.appendChild(el("line", { x1: aim.x - 8, y1: aim.y + 8, x2: aim.x + 8, y2: aim.y - 8 }));
     svg.appendChild(xg);
 
-    // ラベル（ペナルティ帯やお互いに重ならない位置へ逃がす）
+    // ラベル
     if (shift > 0.5) {
       var hasV = state.penalties.indexOf("back") >= 0 || state.penalties.indexOf("front") >= 0;
       var wl;
       if (hasV) {
-        // 上下に帯がある → ラベルは横に逃がす
-        var lx = pin.x - rPx - 52;
-        if (lx < 60) lx = pin.x + rPx + 52;
-        wl = { x: Math.min(300, lx), y: pin.y };
+        var lx = pin.x - rPx - 46;
+        if (lx < 56) lx = pin.x + rPx + 46;
+        wl = { x: Math.min(304, lx), y: pin.y };
       } else {
-        // 帯は左右のみ → ラベルは上に逃がす
-        wl = { x: pin.x, y: pin.y - rPx - 14 };
+        wl = { x: pin.x, y: Math.max(40, pin.y - rPx - 14) };
       }
-      svg.appendChild(label(wl.x, wl.y, "ピンを狙うと危険", { color: "#fff", bg: tok("--danger"), bgOpacity: 0.95, fs: 10 }));
+      svg.appendChild(label(wl.x, wl.y, "ピンを狙うと", { color: "#fff", bg: tok("--danger"), bgOpacity: 0.95, fs: 10 }));
     }
     svg.appendChild(label(aim.x, aim.y + 20, "狙う1点", { fs: 12 }));
-    var noteY = aim.y + rPx + 20;
-    if (noteY > 396) noteY = aim.y - rPx - 16;
-    svg.appendChild(label(aim.x, noteY, "散らばりの円（曲がり幅" + curveYd + "）", { fs: 10 }));
+    // 散らばりの円ラベル：下→上の順に、障害物帯と重ならない位置へ
+    var noteY = aim.y + rPx + 18;
+    var hasFront = state.penalties.indexOf("front") >= 0, hasBack = state.penalties.indexOf("back") >= 0;
+    var frontTop = C.y + GB + 4;
+    if (noteY > 380 || (hasFront && noteY > frontTop - 12)) {
+      noteY = aim.y - rPx - 14;
+      if (hasBack && noteY < C.y - GB - 4) noteY = hasFront ? C.y + GB - 10 : Math.min(380, aim.y + rPx + 18);
+      if (!hasBack && noteY < 40) noteY = 40;
+    }
+    svg.appendChild(label(aim.x, noteY, "散らばりの円（曲がり幅" + toDisp1(curveYd) + "）", { fs: 10 }));
+    // 打つ方向
+    svg.appendChild(label(72, 402, "⬆ 打つ方向", { fs: 10 }));
+
+    // ---- 結論（見出し＋根拠） ----
+    var cvTxt = toDisp1(curveYd);
+    var head, why = [];
+    var conflictX = b.minX > b.maxX, conflictY = b.minY > b.maxY;
+    if (shift > 0.5) {
+      var hp = [];
+      var xYd = Math.abs(shiftX) / S, yYd = Math.abs(shiftY) / S;
+      if (xYd >= 0.5) hp.push((shiftX > 0 ? "右" : "左") + " 約" + fmtD(xYd));
+      if (yYd >= 0.5) hp.push((shiftY > 0 ? "手前" : "奥") + " 約" + fmtD(yYd));
+      head = "ピンの" + hp.join("・") + "を狙う";
+      state.penalties.forEach(function (side) {
+        var need = curveYd + hazPts(side);
+        var e = edgeYd(pin, side);
+        if (e + 0.01 < need) {
+          why.push(SIDE_NAME[side] + "のグリーンの端から約" + fmtD(need) + "内側（曲がり幅" + cvTxt + "＋点数" + hazPts(side) + "）");
+        }
+      });
+      if (conflictX || conflictY) why.push("両側とも余裕が足りないので、その間の真ん中を狙います");
+    } else if (state.penalties.length === 0) {
+      head = "ピンをそのまま狙えます";
+      why.push("障害物が選ばれていません（③で選ぶと狙いが変わります）");
+    } else {
+      head = "ピンをそのまま狙えます";
+      // いちばん余裕が小さい向きを根拠に示す
+      var tight = null, tightGap = Infinity;
+      state.penalties.forEach(function (side) {
+        var gap = edgeYd(pin, side) - (curveYd + hazPts(side));
+        if (gap < tightGap) { tightGap = gap; tight = side; }
+      });
+      if (tight) {
+        var nd = curveYd + hazPts(tight);
+        why.push(SIDE_NAME[tight] + "のグリーンの端まで" + fmtD(edgeYd(pin, tight)) + "あるので、曲がり幅" + cvTxt + "＋点数" + hazPts(tight) + "＝" + fmtD(nd) + "より離れています");
+      }
+    }
+    if (state.penalties.some(function (sd) { return hazPts(sd) === 0; }) && shift > 0.5) {
+      why.push("点数0でも、曲がり幅のぶんは離します（球をグリーンに残すため）");
+    }
+    $("aimHead").textContent = head;
+    $("aimWhy").innerHTML = why.join("<br>");
 
     // メモ（期待打数の比較 + 目標別アドバイス）
     if (shift > 0.5) {
-      var parts = [];
-      var xYd = Math.round(Math.abs(shiftX) / 4), yYd = Math.round(Math.abs(shiftY) / 4);
-      if (xYd > 0) parts.push("約" + fmtD(xYd) + (shiftX > 0 ? "右" : "左"));
-      if (yYd > 0) parts.push("約" + fmtD(yYd) + (shiftY > 0 ? "手前" : "奥"));
-      // ピン直狙いのペナルティ確率（円の食い込み深さから近似）→ 期待打数の損失
-      var depth = Math.max(0, shift - 12); // 安全マージンを除いた実質の食い込み(px)
-      var frac = Math.min(0.5, depth / (2 * rPx) + 0.08); // ざっくり確率
+      var maxPts = 0;
+      state.penalties.forEach(function (sd) {
+        if (edgeYd(pin, sd) < curveYd + hazPts(sd)) maxPts = Math.max(maxPts, hazPts(sd));
+      });
+      var frac = Math.min(0.5, shift / (2 * rPx) + 0.05);
       var pct = Math.round(frac * 100);
-      var lossStrokes = Math.round(frac * 1.5 * 10) / 10; // 1ペナ+リカバリー ≈ 1.5打
-      note.textContent = "ピン直狙いは約" + pct + "%でペナルティ（期待+" + lossStrokes + "打の損）。ピンより" + parts.join("・") + "側の「狙う1点」が正解。 " + goalAdvice(state.distance);
-    } else if (state.penalties.length === 0) {
-      note.textContent = "ペナルティなし。ピンをそのまま狙えます。 " + goalAdvice(state.distance);
+      var lossPer = { 3: 1.5, 2: 0.8, 1: 0.5, 0: 0.2 }[maxPts];
+      var lossStrokes = Math.round(frac * lossPer * 10) / 10;
+      var where = maxPts === 0 ? "グリーンを外れ" : HAZ[maxPts].name + (maxPts === 1 ? "に入り" : "につかまり");
+      note.textContent = "ピン直狙いは約" + pct + "%で" + where + "ます" + (lossStrokes >= 0.1 ? "（期待+" + lossStrokes + "打の損）" : "") + "。 " + goalAdvice(state.distance);
     } else {
-      note.textContent = "ペナルティまで余裕があるので、ピンをそのまま狙えます。 " + goalAdvice(state.distance);
+      note.textContent = goalAdvice(state.distance);
     }
   }
+
+  // ---- 図をタップして選ぶ（グリーン内＝ピン、外側＝障害物） ----
+  svg.addEventListener("click", function (ev) {
+    var rect = svg.getBoundingClientRect();
+    var x = (ev.clientX - rect.left) * 360 / rect.width;
+    var y = (ev.clientY - rect.top) * 420 / rect.height;
+    var dx = x - C.x, dy = y - C.y;
+    var horiz = Math.abs(dx) / GA > Math.abs(dy) / GB;
+    var side = horiz ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+    if (insideGreen(x, y)) {
+      var p = (Math.abs(dx) < GA * 0.3 && Math.abs(dy) < GB * 0.3) ? "center" : side;
+      state.pin = p;
+      setPinUI(p);
+      markActive("pinCard");
+      update();
+    } else {
+      markActive("penaltyCard");
+      togglePenalty(side);
+    }
+  });
+
+  // ---- ステップの要約と「選択中」 ----
+  function renderSteps() {
+    var pinName = state.pin ? (state.pin === "center" ? "真ん中" : SIDE_NAME[state.pin]) : "未選択";
+    $("sum1").textContent = pinName + "・" + fmtD(state.distance);
+    var cv = curveYdVal();
+    $("curveFormula").innerHTML = toDisp(state.distance) + unitName() + " × " + Math.round(goalCfg().curve * 100) + "% ＝ <strong>曲がり幅 約" + toDisp1(cv) + unitName() + "</strong>" +
+      "<small>" + goalCfg().name + "の散らばり（片側）。目標スコアを変えると%が変わります（100切り7%・90切り6%・80切り5%）</small>";
+    $("sum3").textContent = state.penalties.length
+      ? state.penalties.map(function (sd) { return SIDE_NAME[sd] + HAZ[hazPts(sd)].mark; }).join("・")
+      : "なし";
+    $("mapModelNote").textContent = "図のグリーンは横35・縦32ヤードの楕円で、ピンは端から約5ヤード内側に置いています。狙う1点は、障害物がある向きだけを見て、端までの距離が「曲がり幅＋点数」に足りないぶんだけピンからずらしています。点数はペナルティ3・寄せにくい2・バンカー1・寄せやすい0。曲がり幅は残り距離×目標別の%（" + goalCfg().name + "は" + Math.round(goalCfg().curve * 100) + "%）です。";
+  }
+  function markActive(id) {
+    document.querySelectorAll(".step-card").forEach(function (c) { c.classList.toggle("active", c.id === id); });
+  }
+  document.addEventListener("pointerdown", function (ev) {
+    var c = ev.target && ev.target.closest ? ev.target.closest(".step-card") : null;
+    if (c) markActive(c.id);
+  });
 
   // ---------- GPS（2点間の飛距離測定） ----------
   var gpsMarkPos = null;
@@ -2524,6 +2745,7 @@
     // マイコースノート：このホールのペナルティ記憶を復元
     var note = state.holeNotes[holeKey()];
     state.penalties = note && Array.isArray(note.penalties) ? note.penalties.slice() : [];
+    state.penaltyPts = note && note.penaltyPts ? JSON.parse(JSON.stringify(note.penaltyPts)) : {};
     setPenaltyUI();
     document.querySelectorAll(".hole-chip").forEach(function (c) {
       c.setAttribute("aria-pressed", c.id === "hole-" + n ? "true" : "false");
@@ -2542,6 +2764,7 @@
     if (!state.hole || !COURSE_DATA[state.course]) return;
     var n = state.holeNotes[holeKey()] || {};
     n.penalties = state.penalties.slice();
+    n.penaltyPts = JSON.parse(JSON.stringify(state.penaltyPts));
     state.holeNotes[holeKey()] = n;
   }
 
@@ -3078,7 +3301,8 @@
   }
   function simStart() {
     if (!COURSE_DATA[state.course]) return;
-    state.sim = { hole: state.hole || 1, par: 4, strokes: 0, rem: 0, total: 0, totalPar: 0, played: 0, phase: "shot", nearPin: false };
+    state.sim = { hole: state.hole || 1, par: 4, strokes: 0, rem: 0, total: 0, totalPar: 0, played: 0, phase: "shot", nearPin: false, card: [] };
+    $("simCardWrap").hidden = true;
     simInitHole();
     saveState();
   }
@@ -3135,6 +3359,9 @@
     s.strokes += n;
     var diff = s.strokes - s.par;
     s.total += s.strokes; s.totalPar += s.par; s.played++;
+    s.card = s.card || [];
+    s.card.push([s.hole, s.par, s.strokes]);
+    if (!$("simCardWrap").hidden) $("simCardWrap").innerHTML = simCardHTML();
     s.phase = "done";
     simRender("");
     $("simMsg").innerHTML = "🏁 ホールアウト：<strong>" + s.strokes + "打（" + scoreName(diff) + "）</strong>";
@@ -3259,6 +3486,29 @@
       ev.preventDefault(); $("simNextBtn").click();
     }
   });
+  // ---- スコアカード ----
+  function simCardHTML() {
+    var s = state.sim;
+    if (!s || !s.card || !s.card.length) return "<p class='map-note'>まだホールアウトしていません。ホールを終えるとここに記録されます。</p>";
+    var tp = 0, ts = 0;
+    var rows = s.card.map(function (r) {
+      tp += r[1]; ts += r[2];
+      var d = r[2] - r[1];
+      var col = d <= -1 ? "#2e7dd1" : d === 0 ? "inherit" : d === 1 ? "#b07600" : "#c0392b";
+      var dTxt = d > 0 ? "+" + d : d === 0 ? "±0" : String(d);
+      return "<tr><td>" + r[0] + "番</td><td>" + r[1] + "</td><td><strong>" + r[2] + "</strong></td><td style='color:" + col + "; font-weight:700;'>" + dTxt + "</td></tr>";
+    }).join("");
+    var td = ts - tp;
+    var tdTxt = td > 0 ? "+" + td : td === 0 ? "±0" : String(td);
+    return "<table style='width:100%; border-collapse:collapse; font-size:13px; text-align:center;'>" +
+      "<tr style='opacity:.72;'><th>ホール</th><th>Par</th><th>打数</th><th>±</th></tr>" + rows +
+      "<tr style='border-top:2px solid currentColor;'><td><strong>計 " + s.card.length + "H</strong></td><td>" + tp + "</td><td><strong>" + ts + "</strong></td><td><strong>" + tdTxt + "</strong></td></tr></table>";
+  }
+  $("simCardBtn").addEventListener("click", function () {
+    var w = $("simCardWrap");
+    w.hidden = !w.hidden;
+    if (!w.hidden) w.innerHTML = simCardHTML();
+  });
   $("simStartBtn").addEventListener("click", simStart);
   $("sim-nice").addEventListener("click", function () { simShot("nice"); });
   $("sim-short").addEventListener("click", function () { simShot("short"); });
@@ -3284,6 +3534,8 @@
     var diff = s.total - s.totalPar;
     $("simHead").innerHTML = "<strong>🎮 おつかれさま！</strong> " + s.played + "ホールで <strong>" + s.total + "打</strong>（Par" + s.totalPar + "・" + (diff >= 0 ? "+" + diff : String(diff)) + "）";
     $("simMsg").innerHTML = s.played ? simPaceText() : "まだホールアウトしていません。";
+    $("simCardWrap").innerHTML = simCardHTML();
+    $("simCardWrap").hidden = false;
     $("simShotChoices").hidden = true; $("simPuttChoices").hidden = true; $("simNextBtn").hidden = true;
     $("simNote").textContent = "「🎮 コースシミュ開始」でもう一度遊べます。";
     state.sim = null;
@@ -3312,6 +3564,7 @@
       renderWind();
       renderDrop();
       drawMap();
+      renderSteps();
     }
     saveState();
   }
@@ -3335,6 +3588,8 @@
       if (inp && typeof state.clubDist[c[0]] === "number") inp.value = toDisp(state.clubDist[c[0]]);
     });
     setPenaltyUI();
+    setHazTypeUI(String(state.hazType));
+    $("hazTypeNote").textContent = HAZ[state.hazType].note;
     if (state.pin) setPinUI(state.pin);
     setWindUI(state.windDir);
     setSlopeUI(state.slope);
@@ -3366,5 +3621,4 @@
 })();
 </script>
 
-</body>
-</html>
+</body></html>
