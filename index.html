@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0">
 <title>狙う1点マップ</title>
 <style>
+[hidden] { display: none !important; }
   :root {
     --ground: #f3f6f2;
     --surface: #ffffff;
@@ -442,9 +445,6 @@
     padding-block: 4px;
   }
 </style>
-</head>
-<body style="margin:0;">
-
 
 <div class="app">
   <header class="top">
@@ -586,6 +586,95 @@
     </select>
     <div class="hole-chips" id="holeChips" hidden></div>
     <div class="verdict" id="holeInfo" hidden></div>
+    <div id="teeMapWrap" hidden style="margin-top:10px;">
+      <div class="choices c3" id="doglegChoices" role="group" aria-label="ホール形状" style="margin-bottom:8px;">
+        <button type="button" class="chip pin-chip" id="dl-left" data-val="left" aria-pressed="false">左ドッグ<br><small>↰ 左曲がり</small></button>
+        <button type="button" class="chip pin-chip" id="dl-straight" data-val="straight" aria-pressed="true">ストレート</button>
+        <button type="button" class="chip pin-chip" id="dl-right" data-val="right" aria-pressed="false">右ドッグ<br><small>↱ 右曲がり</small></button>
+      </div>
+      <div class="choices c3" id="elevChoices" role="group" aria-label="ホールの高低" style="margin-bottom:8px;">
+        <button type="button" class="chip pin-chip" id="el-up" data-val="up" aria-pressed="false">打ち上げ<br><small>飛距離 約−6%</small></button>
+        <button type="button" class="chip pin-chip" id="el-flat" data-val="flat" aria-pressed="true">平ら</button>
+        <button type="button" class="chip pin-chip" id="el-down" data-val="down" aria-pressed="false">打ち下ろし<br><small>飛距離 約＋6%</small></button>
+      </div>
+      <div class="choices c2" id="teeDangerChoices" role="group" aria-label="ティーショットの危険">
+        <button type="button" class="chip pen-chip" id="td-left" data-val="left" aria-pressed="false">左あぶない<br><small>OB・池など</small></button>
+        <button type="button" class="chip pen-chip" id="td-right" data-val="right" aria-pressed="false">右あぶない<br><small>OB・池など</small></button>
+      </div>
+      <div class="choices c3" id="crossChoices" role="group" aria-label="前方のハザード" style="margin-top:8px;">
+        <button type="button" class="chip pin-chip" id="cx-none" data-val="none" aria-pressed="true">なし</button>
+        <button type="button" class="chip pen-chip" id="cx-valley" data-val="valley" aria-pressed="false">谷越え</button>
+        <button type="button" class="chip pen-chip" id="cx-pond" data-val="pond" aria-pressed="false">池越え</button>
+      </div>
+      <div class="field" id="crossDistField" hidden style="margin-top:8px;">
+        <label for="crossDist">ハザードまでの距離（ティーから・越えるのに必要なキャリー）</label>
+        <input type="number" id="crossDist" inputmode="numeric" min="50" max="300" step="5" value="180">
+      </div>
+      <div class="gps-row" style="margin-top:8px;">
+        <button type="button" class="stepper" id="backPlanBtn" style="flex:1;">▶ カップから逆算プランを再生</button>
+      </div>
+      <div class="traj-wrap" style="margin-top:8px;">
+        <svg id="teeSvg" viewBox="0 0 360 460" role="img" aria-label="ティーショットマップ"></svg>
+      </div>
+      <div class="drop-table" id="teeTable"></div>
+      <p class="map-note" id="teeNote">クラブの行をタップすると、そのティーショット後の残り距離がセカンドの計算に入ります。</p>
+    </div>
+    <div class="gps-row" style="margin-top:10px;">
+      <button type="button" class="stepper" id="simStartBtn" style="flex:1;" hidden>🎮 コースシミュ開始（打ちっぱなし練習ゲーム）</button>
+    </div>
+    <div id="simWrap" hidden style="margin-top:10px;">
+      <div class="verdict" id="simHead"></div>
+      <div class="gps-out" id="simMsg" style="margin-top:8px;"></div>
+      <div class="gps-row" style="margin-top:8px;">
+        <button type="button" class="stepper" id="simCamBtn" style="flex:1;">📷 カメラON（後ろから撮影して練習）</button>
+        <button type="button" class="stepper" id="simRecBtn" hidden>⏺ 録画</button>
+      </div>
+      <div id="simCamWrap" hidden style="margin-top:8px;">
+        <video id="simCam" autoplay muted playsinline style="width:100%; border-radius:12px; display:block; background:#000;"></video>
+        <p class="map-note" id="simCamNote">ボールの後ろにスマホを立てると、弾道と一緒にスイングが撮れます。⏺録画 → 打つ → 結果をタップで自動保存。</p>
+      </div>
+      <div class="choices c2" id="simShotChoices" role="group" aria-label="ショット結果" style="margin-top:8px;">
+        <button type="button" class="chip pin-chip" id="sim-nice">ナイス！<br><small>想定どおり打てた</small></button>
+        <button type="button" class="chip pen-chip" id="sim-short">ダフリ・トップ<br><small>飛距離6割くらい</small></button>
+        <button type="button" class="chip pen-chip" id="sim-left">左にミス<br><small>飛距離8割</small></button>
+        <button type="button" class="chip pen-chip" id="sim-right">右にミス<br><small>飛距離8割</small></button>
+        <button type="button" class="chip pen-chip" id="sim-choro">チョロ<br><small>ほんの少し前へ</small></button>
+        <button type="button" class="chip pen-chip" id="sim-ob">OB・池ポチャ<br><small>+1罰打・打ち直し</small></button>
+      </div>
+      <div class="choices c3" id="simPuttChoices" role="group" aria-label="パット結果" hidden style="margin-top:8px;">
+        <button type="button" class="chip pin-chip" id="simp-1">1パット<br><small>ナイス！</small></button>
+        <button type="button" class="chip pin-chip" id="simp-2">2パット<br><small>OK</small></button>
+        <button type="button" class="chip pen-chip" id="simp-3">3パット</button>
+      </div>
+      <div class="gps-row" style="margin-top:8px;">
+        <button type="button" class="stepper" id="simNextBtn" style="flex:1;" hidden>次のホールへ ▶</button>
+        <button type="button" class="stepper" id="simEndBtn">終了して集計</button>
+      </div>
+      <div class="gps-row" style="margin-top:8px;">
+        <button type="button" class="stepper" id="simBigBtn" style="flex:1;">🔳 大ボタン画面（打ちながら入力）</button>
+      </div>
+      <p class="map-note" id="simNote"></p>
+    </div>
+    <div id="simBig" hidden style="position:fixed; inset:0; z-index:60; background:var(--surface, #fff); overflow:auto; padding:14px 14px 24px;">
+      <div class="verdict" id="simBigHead" style="font-size:15px;"></div>
+      <div class="gps-out" id="simBigMsg" style="margin-top:8px; font-size:14px;"></div>
+      <div id="simBigShots" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;">
+        <button type="button" class="chip pin-chip" data-bk="nice" style="font-size:21px; padding:26px 8px; grid-column:1/-1;">⭕ ナイス！</button>
+        <button type="button" class="chip pen-chip" data-bk="left" style="font-size:19px; padding:22px 8px;">⬅ 左にミス</button>
+        <button type="button" class="chip pen-chip" data-bk="right" style="font-size:19px; padding:22px 8px;">右にミス ➡</button>
+        <button type="button" class="chip pen-chip" data-bk="short" style="font-size:17px; padding:20px 8px;">ダフリ・トップ</button>
+        <button type="button" class="chip pen-chip" data-bk="choro" style="font-size:17px; padding:20px 8px;">チョロ</button>
+        <button type="button" class="chip pen-chip" data-bk="ob" style="font-size:17px; padding:18px 8px; grid-column:1/-1;">OB・池ポチャ（+1罰打）</button>
+      </div>
+      <div id="simBigPutts" style="display:none; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:14px;">
+        <button type="button" class="chip pin-chip" data-bp="1" style="font-size:20px; padding:26px 4px;">1<br><small>パット</small></button>
+        <button type="button" class="chip pin-chip" data-bp="2" style="font-size:20px; padding:26px 4px;">2<br><small>パット</small></button>
+        <button type="button" class="chip pen-chip" data-bp="3" style="font-size:20px; padding:26px 4px;">3<br><small>パット</small></button>
+      </div>
+      <button type="button" class="stepper" id="simBigNext" style="display:none; width:100%; margin-top:14px; font-size:19px; padding:20px 8px;">次のホールへ ▶</button>
+      <button type="button" class="stepper" id="simBigClose" style="width:100%; margin-top:16px;">✕ 通常画面に戻る</button>
+      <p class="map-note" style="margin-top:10px;">指輪型Bluetoothリモコンにも対応：▲＝ナイス／▼＝ダフリ／◀＝左／▶＝右（パット中は1・2・3キー）</p>
+    </div>
   </section>
 
   <section class="card" id="penaltyCard">
@@ -729,7 +818,8 @@
     roughDepth: "shallow", // shallow / deep（ライ=ラフのとき有効）
     ballPos: "center", // right / center / left（ボール位置）
     greenSpeed: 9.5,   // グリーンの速さ（フィート・スティンプ値）
-    clubDist: null     // 番手ごとの自分の飛距離（ヤード）
+    clubDist: null,    // 番手ごとの自分の飛距離（ヤード）
+    sim: null          // コースシミュ（打ちっぱなし練習ゲーム）の進行状態
   };
   // アプローチのクラブ：base = ラン/キャリー比（平坦・9.5ft・中心時）、h = 弾道の高さ倍率
   var AP_CLUBS = [
@@ -2401,8 +2491,9 @@
     var wrap = $("holeChips");
     wrap.innerHTML = "";
     var cd = COURSE_DATA[state.course];
-    if (!cd) { wrap.hidden = true; $("holeInfo").hidden = true; return; }
+    if (!cd) { wrap.hidden = true; $("holeInfo").hidden = true; $("simStartBtn").hidden = true; return; }
     wrap.hidden = false;
+    $("simStartBtn").hidden = false;
     cd.holes.forEach(function (h, i) {
       var n = i + 1;
       var b = document.createElement("button");
@@ -2442,18 +2533,771 @@
     info.innerHTML = "<strong>" + cd.name + " " + n + "番</strong>　Par" + par + "・" + fmtD(yd) + "（HCP " + hcp + "）<br>" +
       "<span style='font-size:12px;'>" + remTxt + "：<strong>" + fmtD(rem) + "</strong>｜" + holeStrategy(par, yd, hcp) + "</span>" +
       (state.penalties.length ? "<br><span style='font-size:11px;'>📝 このホールのペナルティ位置を復元しました</span>" : "");
+    setTeeDangerUI();
+    drawTeeMap();
     update();
   }
 
   function saveHoleNote() { // ペナルティを変えたら、そのホールに記憶
     if (!state.hole || !COURSE_DATA[state.course]) return;
-    state.holeNotes[holeKey()] = { penalties: state.penalties.slice() };
+    var n = state.holeNotes[holeKey()] || {};
+    n.penalties = state.penalties.slice();
+    state.holeNotes[holeKey()] = n;
   }
+
+  // ---------- ティーショットマップ ----------
+  var teeClub = "1W"; // 表示中のティーショットクラブ
+  var TEE_CLUBS = ["1W", "3W", "5W", "UT", "5I"];
+
+  function teeDanger() {
+    var n = state.holeNotes[holeKey()] || {};
+    return n.tee || { left: false, right: false };
+  }
+  function setTeeDanger(side, val) {
+    if (!state.hole) return;
+    var n = state.holeNotes[holeKey()] || {};
+    n.tee = n.tee || { left: false, right: false };
+    n.tee[side] = val;
+    state.holeNotes[holeKey()] = n;
+  }
+  function holeNote() { return state.holeNotes[holeKey()] || {}; }
+  function setHoleNote(patch) {
+    if (!state.hole) return;
+    var n = holeNote();
+    Object.keys(patch).forEach(function (k) { n[k] = patch[k]; });
+    state.holeNotes[holeKey()] = n;
+  }
+  function setTeeDangerUI() {
+    var d = teeDanger();
+    $("td-left").setAttribute("aria-pressed", d.left ? "true" : "false");
+    $("td-right").setAttribute("aria-pressed", d.right ? "true" : "false");
+    var n = holeNote();
+    var dl = n.dogleg || "straight";
+    ["dl-left", "dl-straight", "dl-right"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === dl ? "true" : "false");
+    });
+    var cx = n.cross || { type: "none", yd: 180 };
+    ["cx-none", "cx-valley", "cx-pond"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === (cx.type || "none") ? "true" : "false");
+    });
+    $("crossDist").value = cx.yd || 180;
+    $("crossDistField").hidden = (cx.type || "none") === "none";
+    var ev = n.elev || "flat";
+    ["el-up", "el-flat", "el-down"].forEach(function (id) {
+      $(id).setAttribute("aria-pressed", $(id).dataset.val === ev ? "true" : "false");
+    });
+  }
+  // 打ち上げ・打ち下ろし選択
+  ["el-up", "el-flat", "el-down"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      setHoleNote({ elev: $(id).dataset.val });
+      setTeeDangerUI();
+      drawTeeMap();
+      saveState();
+    });
+  });
+  // ドッグレッグ選択
+  ["dl-left", "dl-straight", "dl-right"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      setHoleNote({ dogleg: $(id).dataset.val });
+      setTeeDangerUI();
+      drawTeeMap();
+      saveState();
+    });
+  });
+  // 前方ハザード（谷・池）
+  ["cx-none", "cx-valley", "cx-pond"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      var n = holeNote();
+      var cx = n.cross || { type: "none", yd: 180 };
+      cx.type = $(id).dataset.val;
+      setHoleNote({ cross: cx });
+      setTeeDangerUI();
+      drawTeeMap();
+      saveState();
+    });
+  });
+  $("crossDist").addEventListener("input", function () {
+    var v = parseInt(this.value, 10);
+    if (isNaN(v)) return;
+    var n = holeNote();
+    var cx = n.cross || { type: "none", yd: 180 };
+    cx.yd = Math.min(300, Math.max(50, v));
+    setHoleNote({ cross: cx });
+    drawTeeMap();
+    saveState();
+  });
+
+  // ホールの高低による飛距離倍率（打ち上げ=6%減・打ち下ろし=6%増）
+  function elevK() {
+    var e = holeNote().elev || "flat";
+    return e === "up" ? 0.94 : e === "down" ? 1.06 : 1;
+  }
+  // ティーマップの共通ジオメトリ（ドッグレッグ対応）
+  function teeGeom(yd) {
+    var teeP = { x: 180, y: 430 };
+    var topYd = yd + 25;
+    var pxPerYd = 390 / topYd;
+    var Y = function (dy) { return teeP.y - dy * pxPerYd; };
+    var n = holeNote();
+    var dl = n.dogleg || "straight";
+    var corner = Math.round(yd * 0.55);
+    var g, cornerP = null;
+    if (dl === "straight") {
+      g = { x: 180, y: Y(yd) };
+    } else {
+      var dir = dl === "right" ? 1 : -1;
+      cornerP = { x: 180, y: Y(corner) };
+      g = { x: 180 + dir * 92, y: Y(corner) - (yd - corner) * pxPerYd * 0.4 };
+    }
+    return { teeP: teeP, pxPerYd: pxPerYd, Y: Y, dl: dl, corner: corner, cornerP: cornerP, g: g, totalYd: yd, cross: n.cross || { type: "none" } };
+  }
+  // ティーからの距離 → マップ上の座標（ドッグレッグはコース中心線に沿う）
+  function posAt(G, dyd) {
+    if (G.dl === "straight" || dyd <= G.corner) return { x: 180, y: G.Y(dyd) };
+    var frac = Math.min(1, (dyd - G.corner) / Math.max(1, G.totalYd - G.corner));
+    return { x: 180 + (G.g.x - 180) * frac, y: G.cornerP.y + (G.g.y - G.cornerP.y) * frac };
+  }
+  ["td-left", "td-right"].forEach(function (id) {
+    $(id).addEventListener("click", function () {
+      var side = $(id).dataset.val;
+      var d = teeDanger();
+      setTeeDanger(side, !d[side]);
+      setTeeDangerUI();
+      drawTeeMap();
+      saveState();
+    });
+  });
+
+  // 正規分布の累積分布（成功率計算用）
+  function normCdf(z) {
+    var t = 1 / (1 + 0.2316419 * Math.abs(z));
+    var d2 = 0.3989423 * Math.exp(-z * z / 2);
+    var p = d2 * t * (0.3193815 + t * (-0.3565638 + t * (1.7814779 + t * (-1.8212560 + t * 1.3302744))));
+    return z > 0 ? 1 - p : p;
+  }
+  // ティーショットの成功率（フェアウェイ幅±15yd想定・ブレは正規分布近似）
+  function teeSuccess(dist) {
+    var sigma = Math.max(4, dist * goalCfg().curve);
+    var F = 15;
+    var fw = Math.round((2 * normCdf(F / sigma) - 1) * 100);
+    var d = teeDanger();
+    var obSide = 1 - normCdf((F + 8) / sigma);
+    var ob = Math.round(((d.left ? obSide : 0) + (d.right ? obSide : 0)) * 100);
+    return { fw: fw, ob: ob };
+  }
+  // 目標スコア別のおすすめティーショットクラブ
+  function bestTeeClub(yd) {
+    var minFw = state.goal === "b100" ? 999 : state.goal === "b90" ? 75 : 65; // b100は成功率最重視
+    var best = null, bestScore = -1;
+    TEE_CLUBS.forEach(function (c) {
+      var dist = state.clubDist[c];
+      if (typeof dist !== "number") return;
+      dist = Math.round(dist * elevK());
+      if (dist >= yd) return;
+      var s2 = teeSuccess(dist);
+      var nb = holeNote();
+      if (nb.cross && nb.cross.type !== "none") {
+        var cydB = nb.cross.yd || 180;
+        if (dist >= cydB - 30 && dist < cydB + 10) return; // 谷・池につかまる番手は除外
+      }
+      if (nb.dogleg && nb.dogleg !== "straight" && dist > Math.round(yd * 0.55) + 20) return; // 角を大きく突き抜ける番手は除外
+      var score;
+      if (state.goal === "b100") score = s2.fw - s2.ob * 3;                    // 安全一択
+      else score = (s2.fw >= minFw && s2.ob <= 5) ? dist : dist * 0.3 + s2.fw; // 条件を満たす中で最長
+      if (score > bestScore) { bestScore = score; best = c; }
+    });
+    return best;
+  }
+
+  // カップから逆算するプランをアニメーション再生
+  var planRaf = null;
+  $("backPlanBtn").addEventListener("click", function () {
+    var cd = COURSE_DATA[state.course];
+    if (!cd || !state.hole) return;
+    var h = cd.holes[state.hole - 1];
+    var par = h[0], yd = h[1];
+    if (par === 3) return;
+    drawTeeMap(); // 下地を再描画
+    if (planRaf) { cancelAnimationFrame(planRaf); planRaf = null; }
+    ensureClubDist();
+    var tsvg = $("teeSvg");
+    var G = teeGeom(yd);
+    var teeP = G.teeP, Y = G.Y;
+    var drv = Math.round((state.clubDist[teeClub] || 200) * elevK());
+    if (G.dl !== "straight") drv = Math.min(drv, G.corner); // ドッグレッグは角まででOK
+
+    // 経由点（ティーからの距離）：Par4 = ティーショット落下点 → グリーン、Par5 = 落下点 → 3打目100yd地点 → グリーン
+    var pts;
+    if (par === 4) {
+      pts = [
+        { yd: yd, lbl: "🎯 ゴール（カップ）", num: "" },
+        { yd: Math.min(drv, yd - 30), lbl: "① " + teeClub + "でここへ → 残り" + fmtD(Math.max(30, yd - Math.min(drv, yd - 30))) + "で乗せる", num: "①" }
+      ];
+    } else {
+      var layup = Math.max(40, yd - 100); // 3打目に100yd残す地点
+      pts = [
+        { yd: yd, lbl: "🎯 ゴール（カップ）", num: "" },
+        { yd: layup, lbl: "② 2打目でここへ（3打目に" + fmtD(100) + "を残す）", num: "②" },
+        { yd: Math.min(drv, layup - 20), lbl: "① " + teeClub + "でここへ", num: "①" }
+      ];
+    }
+
+    // 逆算マーカーを順に表示（0.9秒間隔）→ その後ティーから順方向にボールが飛ぶ
+    var noteEl = $("teeNote");
+    var step = 0;
+    function showStep() {
+      if (step < pts.length) {
+        var p = pts[step];
+        var pp = posAt(G, p.yd);
+        tsvg.appendChild(el("circle", { cx: pp.x, cy: pp.y, r: 13, fill: "none", stroke: tok("--danger"), "stroke-width": 3, opacity: 0.9 }));
+        if (p.num) {
+          var t = el("text", { x: pp.x, y: pp.y + 4, "font-size": 12, "font-weight": "800", "text-anchor": "middle", fill: tok("--danger"), "font-family": "inherit" });
+          t.textContent = p.num;
+          tsvg.appendChild(t);
+        }
+        noteEl.textContent = "逆算" + (step + 1) + "/" + pts.length + "：" + p.lbl;
+        step++;
+        setTimeout(showStep, 950);
+        return;
+      }
+      // 順方向のボールアニメ：ティー → ①落下点 →（②）→ グリーン
+      var path = pts.slice().reverse().map(function (p) { return posAt(G, p.yd); });
+      path.unshift({ x: teeP.x, y: teeP.y });
+      var ball = el("circle", { cx: teeP.x, cy: teeP.y, r: 5, fill: "#fff", stroke: tok("--ink"), "stroke-width": 1.5 });
+      tsvg.appendChild(ball);
+      var seg = 0, t0 = null, SEG_MS = 700;
+      function fly(ts) {
+        if (!t0) t0 = ts;
+        var t = Math.min(1, (ts - t0) / SEG_MS);
+        var a = path[seg], b2 = path[seg + 1];
+        var x = a.x + (b2.x - a.x) * t;
+        var y = a.y + (b2.y - a.y) * t - 26 * Math.sin(Math.PI * t); // 山なりのホップ
+        ball.setAttribute("cx", x); ball.setAttribute("cy", y);
+        if (t < 1) { planRaf = requestAnimationFrame(fly); return; }
+        seg++; t0 = null;
+        if (seg < path.length - 1) { planRaf = requestAnimationFrame(fly); return; }
+        noteEl.textContent = "✓ プラン完了：カップから逆算した順番どおりに運ぶだけ。 " + goalAdvice(yd);
+        planRaf = null;
+      }
+      planRaf = requestAnimationFrame(fly);
+    }
+    showStep();
+  });
+
+  function drawTeeMap() {
+    var wrap = $("teeMapWrap");
+    var cd = COURSE_DATA[state.course];
+    if (!cd || !state.hole) { wrap.hidden = true; return; }
+    var h = cd.holes[state.hole - 1];
+    var par = h[0], yd = h[1];
+    if (par === 3) { wrap.hidden = true; return; } // Par3は狙う1点マップで十分
+    wrap.hidden = false;
+    ensureClubDist();
+
+    var tsvg = $("teeSvg");
+    while (tsvg.firstChild) tsvg.removeChild(tsvg.firstChild);
+    css = getComputedStyle(document.documentElement);
+
+    var G = teeGeom(yd);
+    var teeP = G.teeP, pxPerYd = G.pxPerYd, Y = G.Y;
+    var K = elevK();
+
+    // 地面
+    tsvg.appendChild(el("rect", { x: 0, y: 0, width: 360, height: 460, fill: tok("--turf") }));
+
+    // フェアウェイ：ストレート＝帯、ドッグレッグ＝角で曲がる太い帯
+    if (G.dl === "straight") {
+      tsvg.appendChild(el("rect", { x: 180 - 55, y: Y(yd - 15), width: 110, height: teeP.y - Y(yd - 15) - 10, rx: 40, fill: tok("--turf-deep"), opacity: 0.55 }));
+    } else {
+      tsvg.appendChild(el("path", {
+        d: "M " + teeP.x + " " + (teeP.y - 8) + " L " + G.cornerP.x + " " + G.cornerP.y + " L " + G.g.x + " " + G.g.y,
+        stroke: tok("--turf-deep"), "stroke-width": 94, "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none", opacity: 0.55
+      }));
+      var dirTxt = G.dl === "right" ? "↱ 右ドッグレッグ" : "↰ 左ドッグレッグ";
+      tsvg.appendChild(label(180, Y(G.corner) - 42, dirTxt + "・角まで約" + fmtD(G.corner), { fs: 10 }));
+    }
+
+    // 危険帯（1打目の落下エリア＝角より手前側に表示）
+    var d = teeDanger();
+    var dgTop = G.dl === "straight" ? yd : G.corner + 10;
+    if (d.left) {
+      tsvg.appendChild(el("rect", { x: 6, y: Y(dgTop), width: 52, height: teeP.y - Y(dgTop) - 30, rx: 10, fill: tok("--danger"), opacity: 0.8 }));
+      tsvg.appendChild(label(32, Y(dgTop * 0.55), "危険", { fs: 10, color: "#fff", bg: tok("--danger"), bgOpacity: 0 }));
+    }
+    if (d.right) {
+      tsvg.appendChild(el("rect", { x: 302, y: Y(dgTop), width: 52, height: teeP.y - Y(dgTop) - 30, rx: 10, fill: tok("--danger"), opacity: 0.8 }));
+      tsvg.appendChild(label(328, Y(dgTop * 0.55), "危険", { fs: 10, color: "#fff", bg: tok("--danger"), bgOpacity: 0 }));
+    }
+
+    // 谷・池（ティーからの距離の位置に横断帯）
+    var cross = G.cross;
+    var hasCross = cross && cross.type && cross.type !== "none";
+    if (hasCross) {
+      var cyd = Math.min(cross.yd || 180, yd - 20);
+      var bandH = Math.max(13, Math.round(15 * pxPerYd));
+      var isPond = cross.type === "pond";
+      tsvg.appendChild(el("rect", { x: 40, y: Y(cyd), width: 280, height: bandH, rx: 8, fill: isPond ? "#3f8fc4" : "#8a7a5c", opacity: 0.9 }));
+      if (isPond) {
+        tsvg.appendChild(el("path", { d: "M 70 " + (Y(cyd) + bandH / 2) + " q 10 -5 20 0 q 10 5 20 0 q 10 -5 20 0", stroke: "#dff1fb", "stroke-width": 2, fill: "none", opacity: 0.85 }));
+        tsvg.appendChild(el("path", { d: "M 230 " + (Y(cyd) + bandH / 2) + " q 10 -5 20 0 q 10 5 20 0", stroke: "#dff1fb", "stroke-width": 2, fill: "none", opacity: 0.85 }));
+      } else {
+        tsvg.appendChild(el("path", { d: "M 56 " + (Y(cyd) + bandH - 3) + " l 12 -" + (bandH - 6) + " l 12 " + (bandH - 6) + " l 12 -" + (bandH - 6) + " l 12 " + (bandH - 6), stroke: "#5d5240", "stroke-width": 2, fill: "none", opacity: 0.7 }));
+        tsvg.appendChild(el("path", { d: "M 252 " + (Y(cyd) + bandH - 3) + " l 12 -" + (bandH - 6) + " l 12 " + (bandH - 6) + " l 12 -" + (bandH - 6) + " l 12 " + (bandH - 6), stroke: "#5d5240", "stroke-width": 2, fill: "none", opacity: 0.7 }));
+      }
+      var clx = G.dl === "right" ? 258 : G.dl === "left" ? 102 : 180;
+      tsvg.appendChild(label(clx, Y(cyd) + bandH / 2, (isPond ? "池：キャリー" : "谷：キャリー") + fmtD(cyd) + "で越え", { fs: 10, color: "#fff", bg: isPond ? "#2d6f9e" : "#6b5f47" }));
+    }
+
+    // グリーン（ドッグレッグなら曲がった先に描く）
+    var gp = G.g;
+    tsvg.appendChild(el("ellipse", { cx: gp.x, cy: gp.y, rx: 38, ry: 25, fill: tok("--turf-deep"), stroke: tok("--turf-edge"), "stroke-width": 2 }));
+    tsvg.appendChild(el("line", { x1: gp.x, y1: gp.y, x2: gp.x, y2: gp.y - 22, stroke: tok("--ink"), "stroke-width": 2 }));
+    tsvg.appendChild(el("path", { d: "M " + gp.x + " " + (gp.y - 22) + " l 12 4 l -12 5 z", fill: tok("--flag") }));
+    tsvg.appendChild(label(Math.max(58, Math.min(302, gp.x)), gp.y - 34, fmtD(yd) + "・Par" + par, { fs: 10 }));
+
+    // 選択クラブの散らばり扇形（目標スコア連動の曲がり幅）
+    var dist = Math.min(yd - 10, Math.round((state.clubDist[teeClub] || 200) * K));
+    var halfW = dist * goalCfg().curve * pxPerYd * 1.15;
+    var endY = Y(dist);
+    tsvg.appendChild(el("path", {
+      d: "M " + teeP.x + " " + teeP.y + " L " + (teeP.x - halfW) + " " + endY + " L " + (teeP.x + halfW) + " " + endY + " Z",
+      fill: tok("--accent"), "fill-opacity": 0.16, stroke: tok("--accent"), "stroke-width": 1.5, "stroke-dasharray": "5 4"
+    }));
+
+    // クラブ別の到達（ストレート＝横ライン、ドッグレッグ＝コース上のマーカー）
+    TEE_CLUBS.forEach(function (c) {
+      var cd2 = state.clubDist[c];
+      if (typeof cd2 !== "number") return;
+      cd2 = Math.round(cd2 * K);
+      if (cd2 >= yd) return;
+      var isSel = c === teeClub;
+      if (G.dl === "straight") {
+        var ly = Y(cd2);
+        tsvg.appendChild(el("line", { x1: 60, y1: ly, x2: 300, y2: ly, stroke: isSel ? tok("--accent") : tok("--ink-soft"), "stroke-width": isSel ? 2 : 1, "stroke-dasharray": "4 5", opacity: isSel ? 0.9 : 0.5 }));
+        tsvg.appendChild(label(isSel ? 314 : 318, ly, c, { fs: 9, color: isSel ? "#fff" : tok("--ink"), bg: isSel ? tok("--accent") : tok("--surface") }));
+      } else {
+        var pp = posAt(G, cd2);
+        tsvg.appendChild(el("circle", { cx: pp.x, cy: pp.y, r: isSel ? 5 : 3.5, fill: isSel ? tok("--accent") : tok("--surface"), stroke: tok("--ink-soft"), "stroke-width": 1 }));
+        tsvg.appendChild(label(Math.max(24, Math.min(336, pp.x + (G.dl === "right" ? -28 : 28))), pp.y, c, { fs: 9, color: isSel ? "#fff" : tok("--ink"), bg: isSel ? tok("--accent") : tok("--surface") }));
+      }
+    });
+
+    // ティー
+    tsvg.appendChild(el("circle", { cx: teeP.x, cy: teeP.y, r: 5, fill: "#fff", stroke: tok("--ink"), "stroke-width": 1.5 }));
+    tsvg.appendChild(label(teeP.x, teeP.y + 14, "ティー", { fs: 10 }));
+    if (K !== 1) tsvg.appendChild(label(64, teeP.y - 4, K < 1 ? "⛰ 打ち上げ：飛距離−6%" : "⛰ 打ち下ろし：飛距離＋6%", { fs: 9 }));
+
+    // シミュ進行中は「いまここ」を表示
+    if (state.sim && !simNoMarker && state.sim.hole === state.hole && state.sim.rem > 0 && state.sim.rem < yd) {
+      var bp = posAt(G, yd - state.sim.rem);
+      tsvg.appendChild(el("circle", { cx: bp.x, cy: bp.y, r: 5.5, fill: "#fff", stroke: tok("--accent"), "stroke-width": 2.5 }));
+      tsvg.appendChild(label(Math.max(52, Math.min(308, bp.x)), bp.y + 16, "🎮いまここ・残り" + fmtD(state.sim.rem), { fs: 9 }));
+    }
+
+    // 総合ノート：谷池 → 角抜け → 左右危険 の順で大事なものから
+    var spreadYd = Math.round(dist * goalCfg().curve);
+    var warns = [];
+    if (hasCross) {
+      var cyd2 = cross.yd || 180;
+      var nm = cross.type === "pond" ? "池" : "谷";
+      if (dist >= cyd2 + 10) warns.push("✅ " + teeClub + "なら" + nm + "は越えられます（余裕" + fmtD(dist - cyd2) + "）。");
+      else if (dist >= cyd2 - 30) warns.push("⚠️ " + teeClub + "だと" + nm + "につかまる危険大。越えるには+" + fmtD(cyd2 + 10 - dist) + "必要。安全策は手前" + fmtD(Math.max(50, cyd2 - 30)) + "地点で刻み。");
+      else warns.push(nm + "の" + fmtD(cyd2 - dist) + "手前に刻めて安全です。");
+    }
+    if (G.dl !== "straight" && dist > G.corner + 15) {
+      warns.push("⚠️ " + teeClub + "は角を" + fmtD(dist - G.corner) + "突き抜けます。角に合わせるなら約" + fmtD(G.corner) + "の番手を。");
+    }
+    if ((d.left || d.right) && spreadYd > 12) {
+      var sideTxt = d.left && d.right ? "左右" : d.left ? "左" : "右";
+      warns.push("⚠️ " + teeClub + "の散らばり（片側約" + fmtD(spreadYd) + "）は" + sideTxt + "の危険にかかる可能性。");
+    }
+    $("teeNote").textContent = warns.join(" ") || "クラブの行をタップすると、そのティーショット後の残り距離がセカンドの計算に入ります。";
+
+    // クラブ別テーブル（成功率＋谷池判定つき）
+    var tbl = $("teeTable");
+    tbl.innerHTML = "";
+    var reco = bestTeeClub(yd);
+    TEE_CLUBS.forEach(function (c) {
+      var cd2 = state.clubDist[c];
+      if (typeof cd2 !== "number") return;
+      cd2 = Math.round(cd2 * K); // 高低補正
+      if (cd2 >= yd) return;
+      var rem = Math.max(30, yd - cd2);
+      var suc = teeSuccess(cd2);
+      var row = document.createElement("div");
+      row.className = "drop-row" + (c === teeClub ? " best" : "");
+      var sucCls = suc.fw >= 80 ? "safety good" : suc.ob >= 8 ? "safety bad" : "safety";
+      var cxTxt = "";
+      if (hasCross) {
+        var cy3 = cross.yd || 180;
+        var nm2 = cross.type === "pond" ? "池" : "谷";
+        if (cd2 >= cy3 + 10) cxTxt = "<br><span class='safety good'>" + nm2 + "越えOK</span>";
+        else if (cd2 >= cy3 - 30) cxTxt = "<br><span class='safety bad'>⚠️" + nm2 + "危険</span>";
+        else cxTxt = "<br><span class='safety'>" + nm2 + "の手前で刻み</span>";
+      }
+      var cornerTxt = (G.dl !== "straight" && cd2 > G.corner + 15) ? "<br><span class='safety bad'>⚠️角を突き抜け</span>" : "";
+      row.innerHTML = "<b>" + c + (c === reco ? "<br><span class='safety good'>🛡おすすめ</span>" : "") + "</b>" +
+        "<span class='place'>残り <strong>" + fmtD(rem) + "</strong>（" + suggestClub(rem) + "）</span>" +
+        "<span class='result'><span class='" + sucCls + "' style='font-size:12px;'>成功" + suc.fw + "%</span>" +
+        (suc.ob > 0 ? "<br><span class='safety bad'>OB危険" + suc.ob + "%</span>" : "") + cxTxt + cornerTxt + "</span>";
+      row.addEventListener("click", function () {
+        teeClub = c;
+        drawTeeMap();
+        setDistance(Math.min(250, Math.max(50, Math.round(rem / 5) * 5)));
+      });
+      tbl.appendChild(row);
+    });
+    if (reco && !$("teeNote").textContent.startsWith("⚠️")) {
+      var recoD = Math.round(state.clubDist[reco] * K);
+      var rs = teeSuccess(recoD);
+      $("teeNote").textContent = goalCfg().name + "のおすすめ：" + reco + "（成功" + rs.fw + "%・残り" + fmtD(Math.max(30, yd - recoD)) + "）。行をタップで選択＆セカンド計算へ。";
+    }
+  }
+
+  // ---------- コースシミュ（打ちっぱなし練習ゲーム） ----------
+  function simPickClub(effYd) { // 番手名と距離を返す（高低補正込み）
+    ensureClubDist();
+    var k = elevK();
+    var best = null;
+    CLUB_DEFAULTS.forEach(function (c) {
+      var nm = c[0], dd = state.clubDist[nm];
+      if (typeof dd !== "number") return;
+      if (dd * k >= effYd && (best === null || dd < state.clubDist[best])) best = nm;
+    });
+    if (best === null) {
+      CLUB_DEFAULTS.forEach(function (c) {
+        var nm = c[0], dd = state.clubDist[nm];
+        if (typeof dd !== "number") return;
+        if (best === null || dd > state.clubDist[best]) best = nm;
+      });
+    }
+    return best ? { name: best, d: Math.round(state.clubDist[best] * k) } : { name: "7I", d: 150 };
+  }
+  // シミュの打球アニメ（ティーマップ上を飛ぶ）
+  var simRaf = null, simNoMarker = false;
+  function simAnimate(fromRem, toRem, kind) {
+    var cd = COURSE_DATA[state.course];
+    if (!cd || !state.sim) return;
+    var h = cd.holes[state.sim.hole - 1];
+    if (h[0] === 3 || $("teeMapWrap").hidden) return;
+    if (simRaf) { cancelAnimationFrame(simRaf); simRaf = null; }
+    simNoMarker = true; drawTeeMap(); simNoMarker = false;
+    var yd = h[1];
+    var G = teeGeom(yd);
+    var p1 = fromRem >= yd ? { x: G.teeP.x, y: G.teeP.y } : posAt(G, yd - Math.max(0, fromRem));
+    var p2 = toRem <= 0 ? { x: G.g.x, y: G.g.y } : posAt(G, yd - toRem);
+    if (kind === "left") p2 = { x: Math.max(20, p2.x - 34), y: p2.y };
+    if (kind === "right") p2 = { x: Math.min(340, p2.x + 34), y: p2.y };
+    if (kind === "ob") { var d0 = teeDanger(); p2 = { x: d0.left && !d0.right ? 30 : 330, y: (p1.y + p2.y) / 2 }; }
+    var tsvg = $("teeSvg");
+    var endLbl = kind === "ob" ? "OB！" : toRem <= 0 ? "⛳オン！" : null;
+    if (reducedMotion) {
+      tsvg.appendChild(el("circle", { cx: p2.x, cy: p2.y, r: 5.5, fill: "#fff", stroke: tok("--accent"), "stroke-width": 2.5 }));
+      if (endLbl) tsvg.appendChild(label(Math.max(40, Math.min(320, p2.x)), p2.y - 14, endLbl, { fs: 10, color: "#fff", bg: kind === "ob" ? tok("--danger") : tok("--accent") }));
+      return;
+    }
+    var ball = el("circle", { cx: p1.x, cy: p1.y, r: 5.5, fill: "#fff", stroke: tok("--accent"), "stroke-width": 2.5 });
+    tsvg.appendChild(ball);
+    var t0 = null, MS = 800;
+    var hop = Math.min(32, Math.max(8, Math.abs(fromRem - toRem) * 0.15));
+    function fly(ts) {
+      if (!t0) t0 = ts;
+      var t = Math.min(1, (ts - t0) / MS);
+      var e2 = t * (2 - t); // ease-out
+      ball.setAttribute("cx", p1.x + (p2.x - p1.x) * e2);
+      ball.setAttribute("cy", p1.y + (p2.y - p1.y) * e2 - hop * Math.sin(Math.PI * t));
+      if (t < 1) { simRaf = requestAnimationFrame(fly); return; }
+      simRaf = null;
+      if (endLbl) tsvg.appendChild(label(Math.max(40, Math.min(320, p2.x)), p2.y - 14, endLbl, { fs: 10, color: "#fff", bg: kind === "ob" ? tok("--danger") : tok("--accent") }));
+    }
+    simRaf = requestAnimationFrame(fly);
+  }
+  function scoreName(diff) {
+    if (diff <= -2) return "イーグル🦅";
+    if (diff === -1) return "バーディ🐤";
+    if (diff === 0) return "パー✨";
+    if (diff === 1) return "ボギー";
+    if (diff === 2) return "ダブルボギー";
+    return "+" + diff;
+  }
+  function simHoleData() {
+    var cd = COURSE_DATA[state.course];
+    return cd && state.sim ? cd.holes[state.sim.hole - 1] : null;
+  }
+  function simClub() { // いま打つ1球の想定クラブ
+    var s = state.sim;
+    if (s.rem <= 45) return { name: s.rem <= 15 ? "SW（上げるだけ）" : "SW / PW アプローチ", d: s.rem, approach: true };
+    if (s.strokes === 0 && s.par >= 4) {
+      var b = bestTeeClub(s.rem);
+      if (b) return { name: b, d: Math.round(state.clubDist[b] * elevK()), approach: false };
+    }
+    var p = simPickClub(s.rem);
+    return { name: p.name, d: Math.min(p.d, s.rem), approach: false };
+  }
+  function simPaceText() {
+    var s = state.sim;
+    if (!s || !s.played) return "";
+    var diff = s.total - s.totalPar;
+    var proj = 72 + Math.round(diff / s.played * 18);
+    var target = state.goal === "b100" ? 99 : state.goal === "b90" ? 89 : 79;
+    var base = "通算" + s.played + "H：" + s.total + "打（" + (diff >= 0 ? "+" + diff : String(diff)) + "）→ この調子だと18Hで約" + proj + "打。";
+    return base + (proj <= target ? "🎉 " + goalCfg().name + "ペース達成中！" : goalCfg().name + "まであと" + (proj - target) + "打。");
+  }
+  function simRender(msg) {
+    var s = state.sim;
+    if (!s) { $("simWrap").hidden = true; return; }
+    var cd = COURSE_DATA[state.course];
+    if (!cd) { $("simWrap").hidden = true; return; }
+    $("simWrap").hidden = false;
+    $("simHead").innerHTML = "<strong>🎮 " + cd.name + " " + s.hole + "番</strong>　Par" + s.par +
+      "・このホール<strong>" + s.strokes + "打</strong>・残り<strong>" + fmtD(Math.max(0, s.rem)) + "</strong>" +
+      (s.played ? "<br><span style='font-size:12px;'>" + simPaceText() + "</span>" : "");
+    if (s.phase === "shot") {
+      var c = simClub();
+      $("simShotChoices").hidden = false; $("simPuttChoices").hidden = true; $("simNextBtn").hidden = true;
+      $("simMsg").innerHTML = "▶ 想定クラブ：<strong>" + c.name + "</strong>" + (c.approach ? "（残り" + fmtD(s.rem) + "）" : "（約" + fmtD(c.d) + "）") +
+        "<br>練習場でこの1球を本気で打って、結果をタップ！";
+    } else if (s.phase === "putt") {
+      $("simShotChoices").hidden = true; $("simPuttChoices").hidden = false; $("simNextBtn").hidden = true;
+      $("simMsg").innerHTML = "⛳ グリーンオン！" + (s.nearPin ? "ピン絡みのナイスアプローチ、1パットチャンス！" : "まず2パットでOK。") +
+        "<br>パターマットで実際に打ってもOK。結果をタップ！";
+    } else {
+      $("simShotChoices").hidden = true; $("simPuttChoices").hidden = true; $("simNextBtn").hidden = false;
+    }
+    if (msg !== undefined) $("simNote").textContent = msg || "";
+    simBigRender();
+  }
+  function simInitHole(msg) {
+    var s = state.sim;
+    if (state.hole !== s.hole) selectHole(s.hole); // マップ・マイノートも連動
+    var h = simHoleData();
+    if (!h) return;
+    s.par = h[0]; s.rem = h[1]; s.strokes = 0; s.phase = "shot"; s.nearPin = false;
+    simRender(msg || "ホールスタート！マップで危険を確認してから打とう。");
+  }
+  function simStart() {
+    if (!COURSE_DATA[state.course]) return;
+    state.sim = { hole: state.hole || 1, par: 4, strokes: 0, rem: 0, total: 0, totalPar: 0, played: 0, phase: "shot", nearPin: false };
+    simInitHole();
+    saveState();
+  }
+  function simShot(kind) {
+    var s = state.sim;
+    if (!s || s.phase !== "shot") return;
+    if (camRecording) stopRec(true, s.hole + "H_" + (s.strokes + 1) + "打目");
+    var c = simClub();
+    var d = c.d;
+    var isTee = s.strokes === 0 && s.par >= 4;
+    s.strokes++;
+    var gain, msg;
+    if (kind === "nice") { gain = d; msg = "ナイスショット！"; }
+    else if (kind === "short") { gain = Math.round(d * 0.6); msg = "ダフリ気味。約" + fmtD(Math.round(d * 0.6)) + "前進。"; }
+    else if (kind === "choro") { gain = Math.round(d * 0.12); msg = "チョロ…少しだけ前へ。"; }
+    else if (kind === "ob") { s.strokes++; gain = 0; msg = "OB・池…1罰打で同じ場所から打ち直し。"; }
+    else {
+      gain = Math.round(d * 0.8);
+      msg = (kind === "left" ? "左" : "右") + "へ曲がった。";
+      if (isTee && teeDanger()[kind]) {
+        s.strokes++;
+        gain = Math.round(d * 0.5);
+        msg = (kind === "left" ? "左" : "右") + "の危険ゾーンへ…1ペナ（+1打）。";
+      }
+    }
+    if (isTee && kind !== "ob") { // 谷・池の判定（メモしてあるホールのみ）
+      var cx = holeNote().cross;
+      if (cx && cx.type !== "none") {
+        var cyd = cx.yd || 180;
+        var carry = kind === "nice" ? d : gain;
+        if (carry < cyd && carry > cyd - 50) {
+          s.strokes++;
+          gain = Math.max(0, cyd - 20);
+          msg = (cx.type === "pond" ? "池" : "谷") + "につかまった…1ペナ（+1打）。手前から再開。";
+        }
+      }
+    }
+    var fromRem = s.rem;
+    s.rem = Math.max(0, s.rem - gain);
+    s.nearPin = c.approach && kind === "nice";
+    simAnimate(fromRem, kind === "ob" ? fromRem : s.rem, kind);
+    if (s.rem <= 0 || s.nearPin) {
+      s.rem = 0;
+      s.phase = "putt";
+      simRender(msg + " グリーンオン！");
+    } else {
+      simRender(msg + " 残り" + fmtD(s.rem) + "。");
+    }
+    saveState();
+  }
+  function simPutt(n) {
+    var s = state.sim;
+    if (!s || s.phase !== "putt") return;
+    s.strokes += n;
+    var diff = s.strokes - s.par;
+    s.total += s.strokes; s.totalPar += s.par; s.played++;
+    s.phase = "done";
+    simRender("");
+    $("simMsg").innerHTML = "🏁 ホールアウト：<strong>" + s.strokes + "打（" + scoreName(diff) + "）</strong>";
+    $("simNote").textContent = simPaceText();
+    simBigRender();
+    saveState();
+  }
+  // ---- 撮影しながら練習（後方カメラ・スイング動画保存） ----
+  var camStream = null, camRec = null, camChunks = [], camRecording = false;
+  function stopCam() {
+    if (camRecording) stopRec(false, "");
+    if (camStream) { try { camStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} camStream = null; }
+    try { $("simCam").srcObject = null; } catch (e) {}
+    $("simCamWrap").hidden = true;
+    $("simRecBtn").hidden = true;
+    $("simCamBtn").textContent = "📷 カメラON（後ろから撮影して練習）";
+  }
+  $("simCamBtn").addEventListener("click", function () {
+    if (camStream) { stopCam(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      $("simNote").textContent = "この画面ではカメラを使えません。GitHub Pages版（golf.io のURL）で開くと使えます。";
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }).then(function (st) {
+      camStream = st;
+      $("simCam").srcObject = st;
+      $("simCamWrap").hidden = false;
+      $("simRecBtn").hidden = false;
+      $("simCamBtn").textContent = "📷 カメラOFF";
+      $("simCamNote").textContent = "ボールの後ろにスマホを立てると、弾道と一緒にスイングが撮れます。⏺録画 → 打つ → 結果をタップで自動保存。";
+    }).catch(function () {
+      $("simNote").textContent = "カメラを起動できませんでした。ブラウザのカメラ許可（設定）を確認してください。";
+    });
+  });
+  function startRec() {
+    if (!camStream || typeof MediaRecorder === "undefined") {
+      $("simCamNote").textContent = "この環境では録画できません（プレビューのみ）。";
+      return;
+    }
+    camChunks = [];
+    var mime = "";
+    ["video/mp4", "video/webm;codecs=vp9", "video/webm"].some(function (m) {
+      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) { mime = m; return true; }
+      return false;
+    });
+    try { camRec = mime ? new MediaRecorder(camStream, { mimeType: mime }) : new MediaRecorder(camStream); } catch (e) { camRec = null; return; }
+    camRec.ondataavailable = function (e) { if (e.data && e.data.size) camChunks.push(e.data); };
+    camRec.start();
+    camRecording = true;
+    $("simRecBtn").textContent = "⏹ 録画中…";
+    $("simCamNote").textContent = "🔴 録画中！打ったら下の結果ボタンをタップ → 動画を自動保存します。";
+  }
+  function stopRec(save, lbl) {
+    if (!camRec) { camRecording = false; return; }
+    var rec = camRec;
+    rec.onstop = function () {
+      if (save && camChunks.length) {
+        try {
+          var blob = new Blob(camChunks, { type: rec.mimeType || "video/webm" });
+          var ext = (rec.mimeType || "").indexOf("mp4") >= 0 ? "mp4" : "webm";
+          var name = "swing_" + (lbl || Date.now()) + "." + ext;
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+          $("simCamNote").textContent = "🎬 スイング動画を保存しました（" + name + "）。iPhoneは「ファイル」アプリのダウンロードに入ります。";
+        } catch (e) {}
+      }
+      camChunks = [];
+    };
+    try { rec.stop(); } catch (e) {}
+    camRecording = false;
+    camRec = null;
+    $("simRecBtn").textContent = "⏺ 録画";
+  }
+  $("simRecBtn").addEventListener("click", function () {
+    if (camRecording) { stopRec(true, "手動"); return; }
+    startRec();
+  });
+  // ---- 大ボタン画面（練習場で打ちながら入力） ----
+  function simBigRender() {
+    var s = state.sim;
+    var big = $("simBig");
+    if (big.hidden) return;
+    if (!s) { big.hidden = true; return; }
+    $("simBigHead").innerHTML = $("simHead").innerHTML;
+    $("simBigMsg").innerHTML = $("simMsg").innerHTML;
+    $("simBigShots").style.display = s.phase === "shot" ? "grid" : "none";
+    $("simBigPutts").style.display = s.phase === "putt" ? "grid" : "none";
+    $("simBigNext").style.display = s.phase === "done" ? "block" : "none";
+  }
+  $("simBigBtn").addEventListener("click", function () {
+    if (!state.sim) return;
+    $("simBig").hidden = false;
+    simBigRender();
+  });
+  $("simBigClose").addEventListener("click", function () { $("simBig").hidden = true; });
+  document.querySelectorAll("#simBigShots [data-bk]").forEach(function (b) {
+    b.addEventListener("click", function () { simShot(b.dataset.bk); });
+  });
+  document.querySelectorAll("#simBigPutts [data-bp]").forEach(function (b) {
+    b.addEventListener("click", function () { simPutt(parseInt(b.dataset.bp, 10)); });
+  });
+  $("simBigNext").addEventListener("click", function () { $("simNextBtn").click(); });
+  // 指輪型Bluetoothリモコン（キー入力）対応
+  document.addEventListener("keydown", function (ev) {
+    var s = state.sim;
+    if (!s) return;
+    var tag = (ev.target && ev.target.tagName) || "";
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    var k = ev.key;
+    if (s.phase === "shot") {
+      var map = { ArrowUp: "nice", PageUp: "nice", Enter: "nice", " ": "nice", ArrowDown: "short", PageDown: "short", ArrowLeft: "left", ArrowRight: "right" };
+      if (map[k]) { ev.preventDefault(); simShot(map[k]); }
+    } else if (s.phase === "putt") {
+      if (k === "1") { ev.preventDefault(); simPutt(1); }
+      else if (k === "2" || k === "Enter" || k === " ") { ev.preventDefault(); simPutt(2); }
+      else if (k === "3") { ev.preventDefault(); simPutt(3); }
+    } else if (s.phase === "done" && (k === "Enter" || k === " ")) {
+      ev.preventDefault(); $("simNextBtn").click();
+    }
+  });
+  $("simStartBtn").addEventListener("click", simStart);
+  $("sim-nice").addEventListener("click", function () { simShot("nice"); });
+  $("sim-short").addEventListener("click", function () { simShot("short"); });
+  $("sim-left").addEventListener("click", function () { simShot("left"); });
+  $("sim-right").addEventListener("click", function () { simShot("right"); });
+  $("sim-choro").addEventListener("click", function () { simShot("choro"); });
+  $("sim-ob").addEventListener("click", function () { simShot("ob"); });
+  $("simp-1").addEventListener("click", function () { simPutt(1); });
+  $("simp-2").addEventListener("click", function () { simPutt(2); });
+  $("simp-3").addEventListener("click", function () { simPutt(3); });
+  $("simNextBtn").addEventListener("click", function () {
+    var s = state.sim;
+    if (!s) return;
+    s.hole = s.hole % 18 + 1;
+    simInitHole();
+    saveState();
+  });
+  $("simEndBtn").addEventListener("click", function () {
+    stopCam();
+    $("simBig").hidden = true;
+    var s = state.sim;
+    if (!s) { $("simWrap").hidden = true; return; }
+    var diff = s.total - s.totalPar;
+    $("simHead").innerHTML = "<strong>🎮 おつかれさま！</strong> " + s.played + "ホールで <strong>" + s.total + "打</strong>（Par" + s.totalPar + "・" + (diff >= 0 ? "+" + diff : String(diff)) + "）";
+    $("simMsg").innerHTML = s.played ? simPaceText() : "まだホールアウトしていません。";
+    $("simShotChoices").hidden = true; $("simPuttChoices").hidden = true; $("simNextBtn").hidden = true;
+    $("simNote").textContent = "「🎮 コースシミュ開始」でもう一度遊べます。";
+    state.sim = null;
+    saveState();
+  });
 
   $("courseSelect").addEventListener("change", function () {
     state.course = this.value;
     state.hole = 0;
+    state.sim = null;
+    stopCam();
     $("holeInfo").hidden = true;
+    $("teeMapWrap").hidden = true;
+    $("simWrap").hidden = true;
     buildHoleChips();
     saveState();
   });
@@ -2510,6 +3354,9 @@
     $("apDistSlider").value = state.apDist;
     updateUnitUI();
     setModeUI();
+    if (state.sim && state.sim.par && COURSE_DATA[state.course]) {
+      simRender("前回の続きから再開できます。");
+    }
   }
   loadState();
   buildClubGrid();
