@@ -291,6 +291,29 @@
     padding: 2px 0;
   }
   .club-cell input:focus { outline: 2px solid var(--accent); border-radius: 4px; }
+  .bag-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+  .bag-count { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .bag-count.over { color: var(--danger); font-weight: 700; }
+  .bag-toggle, .bag-reset {
+    border: 1.5px solid var(--accent); color: var(--accent); background: var(--surface);
+    border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .bag-reset { border-color: var(--line); color: var(--ink-soft); font-weight: 500; margin-top: 10px; }
+  .bag-wrap { margin-top: 10px; padding: 10px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+  .bag-help { margin: 0 0 8px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .bag-group { margin-top: 8px; }
+  .bag-kind { font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-bottom: 4px; }
+  .bag-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip.bag-chip { flex: 0 0 auto; min-width: 52px; padding: 6px 10px; font-size: 14px; }
+  .chip.bag-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip.bag-chip.custom { border-style: dashed; }
+  .bag-add { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .bag-add-row { display: grid; grid-template-columns: 1.3fr 1.2fr 0.9fr auto; gap: 6px; }
+  .bag-add-row input, .bag-add-row select {
+    min-width: 0; width: 100%; font: inherit; font-size: 16px; padding: 6px 8px;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink);
+  }
+  @media (max-width: 420px) { .bag-add-row { grid-template-columns: 1fr 1fr; } }
 
   .hole-chips {
     display: flex;
@@ -828,6 +851,27 @@
   <section class="card" id="clubCard">
     <details class="detail-box" id="clubDetail">
       <summary>マイ番手（自分の飛距離）— ラウンド前に1回設定すればOK</summary>
+      <div class="bag-bar">
+        <span class="bag-count" id="bagCount"></span>
+        <button type="button" class="bag-toggle" id="bagToggle" aria-expanded="false" aria-controls="bagWrap">🏌️ クラブを入れ替える</button>
+      </div>
+      <div id="bagWrap" class="bag-wrap" hidden>
+        <p class="bag-help">バッグに入れているクラブをタップ（青＝入っている）。もう一度タップで外せます。入れたクラブの飛距離は下の表で直してください。</p>
+        <div id="bagEditor"></div>
+        <div class="bag-add">
+          <div class="bag-kind">一覧にないクラブを追加</div>
+          <div class="bag-add-row">
+            <input type="text" id="bagAddName" maxlength="10" placeholder="例：4U 22°" aria-label="クラブの名前">
+            <select id="bagAddKind" aria-label="クラブの種類">
+              <option value="u">ユーティリティ</option><option value="w">ウッド</option><option value="i">アイアン</option><option value="g">ウェッジ</option>
+            </select>
+            <input type="number" id="bagAddDist" inputmode="numeric" min="30" max="320" step="5" placeholder="飛距離" aria-label="飛距離">
+            <button type="button" class="bag-toggle" id="bagAddBtn">追加</button>
+          </div>
+          <p class="bag-help" id="bagAddMsg" style="margin-top:6px"></p>
+        </div>
+        <button type="button" class="bag-reset" id="bagReset">最初のセットに戻す</button>
+      </div>
       <div class="club-grid" id="clubGrid" style="margin-top:8px;"></div>
     </details>
   </section>
@@ -903,6 +947,8 @@
     ballPos: "center", // right / center / left（ボール位置）
     greenSpeed: 9.5,   // グリーンの速さ（フィート・スティンプ値）
     clubDist: null,    // 番手ごとの自分の飛距離（ヤード）
+    bag: null,         // バッグに入れているクラブ（パター以外）
+    customClubs: [],   // 自分で追加したクラブ [名前, 飛距離, ラン, 種類]
     sim: null          // コースシミュ（打ちっぱなし練習ゲーム）の進行状態
   };
   // アプローチのクラブ：base = ラン/キャリー比（平坦・9.5ft・中心時）、h = 弾道の高さ倍率
@@ -985,13 +1031,24 @@
     rough:  { loss: 0.93, run: 1.3, name: "ラフ" },
     bunker: { loss: 0.85, run: 1.2, name: "バンカー" }
   };
-  // [番手, トータル飛距離の初期値, 平坦グリーンでのランの目安(yd)]
-  var CLUB_DEFAULTS = [
-    ["SW", 80, 2], ["AW", 90, 3], ["PW", 100, 4], ["9I", 110, 5], ["8I", 120, 6], ["7I", 130, 8],
-    ["6I", 140, 10], ["5I", 150, 12], ["4I", 160, 14], ["UT", 170, 16], ["5W", 180, 20], ["3W", 195, 25], ["1W", 220, 30]
+  // クラブの一覧（入れ替え用カタログ）：[番手, 飛距離の初期値, 平坦グリーンでのランの目安(yd), 種類]
+  // 種類 w=ウッド u=ユーティリティ i=アイアン g=ウェッジ
+  var CLUB_CATALOG = [
+    ["LW", 60, 1, "g"], ["60°", 65, 1, "g"], ["58°", 70, 2, "g"], ["SW", 80, 2, "g"], ["56°", 80, 2, "g"], ["54°", 85, 2, "g"],
+    ["52°", 90, 3, "g"], ["AW", 90, 3, "g"], ["50°", 95, 3, "g"], ["GW", 95, 3, "g"], ["48°", 100, 4, "g"], ["PW", 100, 4, "g"],
+    ["9I", 110, 5, "i"], ["8I", 120, 6, "i"], ["7I", 130, 8, "i"], ["6I", 140, 10, "i"], ["5I", 150, 12, "i"],
+    ["4I", 160, 14, "i"], ["3I", 170, 15, "i"], ["2I", 180, 16, "i"],
+    ["7U", 150, 12, "u"], ["6U", 155, 13, "u"], ["5U", 160, 14, "u"], ["UT", 170, 16, "u"], ["4U", 170, 16, "u"], ["3U", 180, 18, "u"], ["2U", 190, 20, "u"],
+    ["11W", 160, 15, "w"], ["9W", 165, 16, "w"], ["7W", 175, 18, "w"], ["5W", 180, 20, "w"], ["4W", 190, 22, "w"], ["3W", 195, 25, "w"], ["2W", 207, 27, "w"], ["1W", 220, 30, "w"]
   ];
+  var CLUB_KIND_NAME = { w: "ウッド", u: "ユーティリティ", i: "アイアン", g: "ウェッジ" };
+  var DEFAULT_BAG = ["SW", "AW", "PW", "9I", "8I", "7I", "6I", "5I", "4I", "UT", "5W", "3W", "1W"];
+  var CAT = {};
+  CLUB_CATALOG.forEach(function (c) { CAT[c[0]] = c; });
+  // CLUB_DEFAULTS は「いまバッグに入っているクラブ」[番手, 初期値, ラン]。入れ替えのたびに中身を作り直す
+  var CLUB_DEFAULTS = [];
   var CLUB_RUN = {};
-  CLUB_DEFAULTS.forEach(function (c) { CLUB_RUN[c[0]] = c[2]; });
+  CLUB_CATALOG.forEach(function (c) { CLUB_RUN[c[0]] = c[2]; });
   var SLOPE_K = { up: 0.5, flat: 1, down: 1.8 }; // 傾斜によるランの倍率
   var TRAJ_K = { low: 1.6, normal: 1, high: 0.6 }; // 球の高さによるランの倍率
   var TRAJ_H = { low: 0.55, normal: 1, high: 1.4 }; // アニメの弾道高さ倍率
@@ -1200,15 +1257,46 @@
   });
 
   // ---------- マイ番手 ----------
+  function registerCustomClubs() {
+    if (!Array.isArray(state.customClubs)) state.customClubs = [];
+    state.customClubs.forEach(function (c) {
+      if (!CAT[c[0]]) { CLUB_CATALOG.push(c); CAT[c[0]] = c; CLUB_RUN[c[0]] = c[2]; }
+    });
+  }
   function ensureClubDist() {
-    if (!state.clubDist) {
-      state.clubDist = {};
-      CLUB_DEFAULTS.forEach(function (c) { state.clubDist[c[0]] = c[1]; });
+    registerCustomClubs();
+    if (!state.clubDist) state.clubDist = {};
+    if (!Array.isArray(state.bag) || !state.bag.length) state.bag = DEFAULT_BAG.slice();
+    state.bag = state.bag.filter(function (id) { return CAT[id]; });
+    state.bag.forEach(function (id) {
+      if (typeof state.clubDist[id] !== "number") state.clubDist[id] = CAT[id][1];
+    });
+    syncBag();
+  }
+  // バッグの中身を短い順に並べ、CLUB_DEFAULTS とティーショット候補を作り直す
+  function syncBag() {
+    if (!Array.isArray(state.bag)) return;
+    var list = state.bag.map(function (id) { return [id, state.clubDist[id] || CAT[id][1], CAT[id][2]]; });
+    list.sort(function (a, b) { return (a[1] - b[1]) || (CLUB_CATALOG.indexOf(CAT[a[0]]) - CLUB_CATALOG.indexOf(CAT[b[0]])); });
+    CLUB_DEFAULTS.length = 0;
+    list.forEach(function (c) { CLUB_DEFAULTS.push(c); });
+    // ティーショット候補：ウェッジ以外で飛ぶ順に5本
+    var tee = list.filter(function (c) { return CAT[c[0]][3] !== "g"; }).slice(-5).reverse().map(function (c) { return c[0]; });
+    if (typeof TEE_CLUBS !== "undefined") {
+      TEE_CLUBS.length = 0;
+      tee.forEach(function (id) { TEE_CLUBS.push(id); });
+      if (TEE_CLUBS.indexOf(teeClub) < 0 && TEE_CLUBS.length) teeClub = TEE_CLUBS[0];
     }
+  }
+  function longestClub(kind) { // その種類でいちばん飛ぶクラブ（なければ null）
+    var best = null;
+    CLUB_DEFAULTS.forEach(function (c) { if (!kind || CAT[c[0]][3] === kind) best = c[0]; });
+    return best;
   }
   function buildClubGrid() {
     ensureClubDist();
     var grid = $("clubGrid");
+    grid.innerHTML = "";
     CLUB_DEFAULTS.forEach(function (c) {
       var name = c[0];
       var cell = document.createElement("div");
@@ -1221,15 +1309,100 @@
       input.id = "club-" + name;
       input.min = 30; input.max = 320; input.step = 5;
       input.value = toDisp(state.clubDist[name]);
-      input.setAttribute("aria-label", name + "の飛距離（ヤード）");
+      input.setAttribute("aria-label", name + "の飛距離");
       input.addEventListener("input", function () {
         var v = parseInt(input.value, 10);
-        if (!isNaN(v)) { state.clubDist[name] = Math.round(fromDisp(v)); renderWind(); renderDrop(); saveState(); }
+        if (!isNaN(v)) { state.clubDist[name] = Math.round(fromDisp(v)); syncBag(); renderWind(); renderDrop(); saveState(); }
       });
       cell.appendChild(b); cell.appendChild(input);
       grid.appendChild(cell);
     });
+    var n = state.bag.length;
+    var cnt = $("bagCount");
+    if (cnt) {
+      cnt.textContent = n + "本＋パター＝" + (n + 1) + "本" + (n + 1 > 14 ? "（ルールは14本までです）" : "");
+      cnt.className = "bag-count" + (n + 1 > 14 ? " over" : "");
+    }
+    buildBagEditor();
   }
+  function buildBagEditor() {
+    var box = $("bagEditor");
+    if (!box) return;
+    box.innerHTML = "";
+    ["w", "u", "i", "g"].forEach(function (kind) {
+      var g = document.createElement("div");
+      g.className = "bag-group";
+      var h = document.createElement("div");
+      h.className = "bag-kind";
+      h.textContent = CLUB_KIND_NAME[kind];
+      g.appendChild(h);
+      var row = document.createElement("div");
+      row.className = "bag-chips";
+      CLUB_CATALOG.filter(function (c) { return c[3] === kind; }).forEach(function (c) {
+        var id = c[0];
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip bag-chip";
+        btn.id = "bag-" + id;
+        btn.textContent = id;
+        if (state.customClubs.some(function (cc) { return cc[0] === id; })) btn.classList.add("custom");
+        var on = state.bag.indexOf(id) >= 0;
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.addEventListener("click", function () {
+          var i = state.bag.indexOf(id);
+          if (i >= 0) {
+            if (state.bag.length <= 1) return;
+            state.bag.splice(i, 1);
+          } else {
+            state.bag.push(id);
+          }
+          ensureClubDist();
+          buildClubGrid();
+          renderWind(); renderDrop(); saveState();
+          try { if (state.hole && COURSE_DATA[state.course]) drawTeeMap(); } catch (e) {}
+        });
+        row.appendChild(btn);
+      });
+      g.appendChild(row);
+      box.appendChild(g);
+    });
+  }
+  (function () {
+    var t = $("bagToggle");
+    if (!t) return;
+    t.addEventListener("click", function () {
+      var box = $("bagWrap");
+      box.hidden = !box.hidden;
+      t.setAttribute("aria-expanded", box.hidden ? "false" : "true");
+      t.textContent = box.hidden ? "🏌️ クラブを入れ替える" : "✓ 入れ替えを閉じる";
+    });
+    var addBtn = $("bagAddBtn");
+    if (addBtn) addBtn.addEventListener("click", function () {
+      var name = ($("bagAddName").value || "").trim();
+      var kind = $("bagAddKind").value;
+      var v = parseInt($("bagAddDist").value, 10);
+      var msg = $("bagAddMsg");
+      if (!name) { msg.textContent = "クラブの名前を入れてください。"; return; }
+      if (isNaN(v)) { msg.textContent = "飛距離を数字で入れてください。"; return; }
+      var yd = Math.round(fromDisp(v));
+      if (!CAT[name]) {
+        var run = Math.max(1, Math.round(yd * (kind === "g" ? 0.03 : kind === "i" ? 0.07 : 0.1)));
+        var c = [name, yd, run, kind];
+        state.customClubs.push(c);
+        CLUB_CATALOG.push(c); CAT[name] = c; CLUB_RUN[name] = run;
+      }
+      state.clubDist[name] = yd;
+      if (state.bag.indexOf(name) < 0) state.bag.push(name);
+      $("bagAddName").value = ""; $("bagAddDist").value = "";
+      msg.textContent = "「" + name + "」をバッグに入れました。";
+      ensureClubDist(); buildClubGrid(); renderWind(); renderDrop(); saveState();
+    });
+    var r = $("bagReset");
+    if (r) r.addEventListener("click", function () {
+      state.bag = DEFAULT_BAG.slice();
+      ensureClubDist(); buildClubGrid(); renderWind(); renderDrop(); saveState();
+    });
+  })();
   // 自分の飛距離表から「届く中でいちばん近い番手」を選ぶ
   function suggestClub(effYd) {
     ensureClubDist();
@@ -2735,12 +2908,14 @@
     var h = cd.holes[n - 1];
     var par = h[0], yd = h[1], hcp = h[2];
     ensureClubDist();
-    var drv = state.clubDist["1W"] || 220;
-    var fw = state.clubDist["5W"] || 180;
+    var drvId = longestClub() || "1W";
+    var fwId = TEE_CLUBS[1] || drvId;
+    var drv = state.clubDist[drvId] || 220;
+    var fw = state.clubDist[fwId] || 180;
     var rem, remTxt;
     if (par === 3) { rem = yd; remTxt = "ティーショットの距離"; }
-    else if (par === 4) { rem = Math.max(50, yd - drv); remTxt = "2打目の目安（1W " + drv + "yd想定）"; }
-    else { rem = Math.max(50, yd - drv - fw); remTxt = "3打目の目安（1W＋5W想定）"; }
+    else if (par === 4) { rem = Math.max(50, yd - drv); remTxt = "2打目の目安（" + drvId + " " + drv + "yd想定）"; }
+    else { rem = Math.max(50, yd - drv - fw); remTxt = "3打目の目安（" + drvId + "＋" + fwId + "想定）"; }
     setDistance(Math.min(250, Math.max(50, Math.round(rem / 5) * 5)));
     // マイコースノート：このホールのペナルティ記憶を復元
     var note = state.holeNotes[holeKey()];
@@ -2771,6 +2946,7 @@
   // ---------- ティーショットマップ ----------
   var teeClub = "1W"; // 表示中のティーショットクラブ
   var TEE_CLUBS = ["1W", "3W", "5W", "UT", "5I"];
+  syncBag(); // バッグの中身からティーショット候補を作り直す
 
   function teeDanger() {
     var n = state.holeNotes[holeKey()] || {};
@@ -3579,6 +3755,7 @@
   // ---------- 起動 ----------
   function applyStateToUI() {
     ensureClubDist();
+    buildClubGrid();
     $("courseSelect").value = state.course;
     $("distNum").textContent = toDisp(state.distance);
     $("distSlider").value = state.distance;
