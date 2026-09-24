@@ -438,6 +438,48 @@
   .plan-note { font-size: 12px; color: var(--danger); margin-top: 2px; }
   .pm-item { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 1.6; }
   .pm-item ol { margin: 4px 0 0; padding-left: 1.2em; }
+  .help-bubble { position: fixed; z-index: 2000; max-width: min(320px, calc(100vw - 20px)); background: var(--ink); color: var(--surface); border-radius: 14px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); font-size: 14px; line-height: 1.6; }
+  .help-bubble b { font-size: 15px; }
+  .help-bubble p { margin: 4px 0 8px; }
+  .hb-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .hb-row a { color: var(--surface); font-weight: 700; }
+  .hb-row button { border: 1px solid rgba(255,255,255,.4); background: none; color: var(--surface); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  button, .chip, .tabbar button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  .tour-spot { position: fixed; z-index: 1500; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(10,20,15,.62); outline: 3px solid #ffd54a; outline-offset: 0; pointer-events: none; transition: all .25s ease; }
+  .tour-spot.none { left: 50% !important; top: 40% !important; width: 0 !important; height: 0 !important; outline: none; }
+  .tour-card { position: fixed; z-index: 1600; left: 10px; right: 10px; margin: 0 auto; max-width: 440px; background: var(--surface); color: var(--ink); border-radius: 16px; padding: 14px 16px 12px; box-shadow: 0 12px 36px rgba(0,0,0,.35); font-size: 15px; line-height: 1.65; }
+  .tour-top { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+  .tour-top .tour-name { flex: 1; }
+  .tour-x { border: none; background: none; color: var(--ink-soft); font: inherit; font-size: 13px; cursor: pointer; padding: 4px 6px; }
+  .tour-bar { height: 4px; border-radius: 4px; background: var(--line); margin: 6px 0 8px; overflow: hidden; }
+  .tour-bar i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
+  .tour-card h3 { margin: 0 0 4px; font-size: 17px; }
+  .tour-card p { margin: 0; }
+  .tour-do { margin-top: 8px; background: var(--accent-soft); border-radius: 10px; padding: 6px 10px; font-size: 14px; }
+  .tour-miss { margin-top: 6px; font-size: 13px; color: var(--ink-soft); }
+  .tour-nav { display: flex; gap: 8px; margin-top: 10px; }
+  .tour-nav button { flex: 1; min-height: 44px; border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  .tour-nav .tour-next { background: var(--accent); border-color: var(--accent); color: #fff; flex: 1.6; }
+  .tour-nav button:disabled { opacity: .35; }
+  .tour-menu-bg { position: fixed; inset: 0; z-index: 1700; background: rgba(10,20,15,.5); display: flex; align-items: flex-end; justify-content: center; }
+  .tour-menu { width: 100%; max-width: 480px; background: var(--surface); color: var(--ink); border-radius: 18px 18px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); max-height: 85vh; overflow: auto; }
+  .tour-menu h3 { margin: 0 0 4px; font-size: 18px; }
+  .tour-menu .tm-sub { font-size: 13px; color: var(--ink-soft); margin: 0 0 10px; }
+  .tm-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 14px; padding: 12px; margin-bottom: 8px; font: inherit; cursor: pointer; }
+  .tm-num { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; display: grid; place-items: center; flex: none; }
+  .tm-item.done .tm-num { background: var(--accent); color: #fff; }
+  .tm-txt { flex: 1; }
+  .tm-txt b { display: block; font-size: 15px; }
+  .tm-txt small { color: var(--ink-soft); font-size: 12px; line-height: 1.5; display: block; }
+  .tm-row { display: flex; gap: 8px; margin-top: 6px; }
+  .tm-row a, .tm-row button { flex: 1; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; display: grid; place-items: center; text-decoration: none; cursor: pointer; }
+  .tour-invite { position: fixed; z-index: 1400; left: 10px; right: 10px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; max-width: 440px; background: var(--ink); color: var(--surface); border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.6; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  .tour-invite div { display: flex; gap: 8px; margin-top: 8px; }
+  .tour-invite button { flex: 1; min-height: 40px; border-radius: 10px; font: inherit; font-weight: 700; border: 1px solid rgba(255,255,255,.4); background: none; color: var(--surface); cursor: pointer; }
+  .tour-invite button.go { background: #ffd54a; border-color: #ffd54a; color: #22322b; }
+  .guide-btn { display: block; width: 100%; min-height: 48px; margin-top: 8px; border-radius: 12px; border: none; background: var(--accent); color: #fff; font: inherit; font-weight: 800; font-size: 15px; cursor: pointer; }
+  .help-link { position: absolute; right: 0; top: 4px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 800; font-size: 16px; display: grid; place-items: center; text-decoration: none; }
+  header.top { position: sticky; }
   .ph-wrap { margin-top: 12px; }
   .ph-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
   .ph-dist { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
@@ -760,6 +802,7 @@
 <div class="app">
   <header class="top">
     <h1>⛳ 狙う1点マップ</h1>
+    <button type="button" class="help-link" id="helpBtn" aria-label="使い方ガイドと取扱説明書">？</button>
     <p id="ctxLine">①ピンと距離 → ②曲がり幅 → ③障害物の点数 → ④狙う1点</p>
   </header>
 
@@ -771,6 +814,9 @@
       <li>コース：ティー・ツーグリーンの設定、新しいコースの登録</li>
       <li>「ホール」タブで航空写真の位置を登録（1コース1回）</li>
     </ol>
+    <button type="button" class="guide-btn" id="guideStartBtn">▶ 手順ガイドで順番に教えてもらう</button>
+    <p class="map-note" style="margin:8px 0 8px;">画面の光る所を1つずつ案内します。わからない項目は<b>長押し</b>でも説明が出ます。</p>
+    <a class="bag-toggle" href="manual.html#qa" style="display:inline-block;text-decoration:none;">📖 取扱説明書（Q&amp;A）を開く</a>
   </section>
 
   <section class="card" data-tabs="prep">
@@ -3408,6 +3454,198 @@
       (r.note ? "<p class='rule-note'>" + r.note + "</p>" : "");
     $("ruleBack").addEventListener("click", function () { ruleOpen = ""; renderRules(); });
   }
+
+  var HELP = [{"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか。今日のピン位置を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③障害物の点数", "x": "ペナルティ3・寄せにくい2・バンカー1・寄せやすい0。種類を選んでから位置を押します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "障害物側の端から「曲がり幅＋点数」内側を狙う。図のタップでも選べます。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
+  // 長押しで説明（どの画面でも）
+  (function () {
+    var timer = null, start = null, fired = false, bubble = null;
+    function findHelp(el) {
+      while (el && el !== document.body) {
+        for (var i = 0; i < HELP.length; i++) { try { if (el.matches && el.matches(HELP[i].s)) return { h: HELP[i], el: el }; } catch (e) {} }
+        el = el.parentElement;
+      }
+      return null;
+    }
+    function hide() { if (bubble) { bubble.remove(); bubble = null; } }
+    function show(hit, x, y) {
+      hide();
+      bubble = document.createElement("div");
+      bubble.className = "help-bubble"; bubble.setAttribute("role", "dialog");
+      bubble.innerHTML = "<b>" + hit.h.t + "</b><p>" + hit.h.x + "</p><div class='hb-row'><a href='manual.html#" + hit.h.a + "'>取説で詳しく →</a><button type='button'>閉じる</button></div>";
+      document.body.appendChild(bubble);
+      var w = bubble.offsetWidth, h = bubble.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+      var left = Math.max(10, Math.min(vw - w - 10, x - w / 2));
+      var top = y - h - 18; if (top < 10) top = Math.min(vh - h - 10, y + 24);
+      bubble.style.left = left + "px"; bubble.style.top = top + "px";
+      bubble.querySelector("button").addEventListener("click", hide);
+      if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+    }
+    document.addEventListener("pointerdown", function (e) {
+      if (bubble && !bubble.contains(e.target)) hide();
+      if (e.target.closest && (e.target.closest("#phEditor") || e.target.closest(".help-bubble") || e.target.closest(".tour-card") || e.target.closest(".tour-menu-bg") || e.target.closest(".tour-invite"))) return;
+      if (e.target.closest && e.target.closest("#phCanvas") && e.pointerType !== "mouse") { /* 写真はタップ操作と区別 */ }
+      fired = false; start = { x: e.clientX, y: e.clientY, t: e.target };
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var hit = findHelp(start.t);
+        if (hit) { fired = true; show(hit, start.x, start.y); }
+      }, 550);
+    }, true);
+    document.addEventListener("pointermove", function (e) {
+      if (start && Math.abs(e.clientX - start.x) + Math.abs(e.clientY - start.y) > 10) clearTimeout(timer);
+    }, true);
+    ["pointerup", "pointercancel", "scroll"].forEach(function (ev) { document.addEventListener(ev, function () { clearTimeout(timer); }, true); });
+    // 長押しの後の「クリック」は無効にする（ボタンが反応しないように）
+    document.addEventListener("click", function (e) {
+      if (fired) { e.preventDefault(); e.stopPropagation(); fired = false; }
+    }, true);
+    document.addEventListener("contextmenu", function (e) { if (findHelp(e.target)) e.preventDefault(); });
+  })();
+
+  // ---------- 手順ガイド（光る所を順番に案内） ----------
+  var TOURS = [
+    { id: "prep", name: "はじめての準備", time: "約3分", sub: "目標スコア・マイ番手・コースの設定", steps: [
+      { tab: "prep", s: "#goalChoices", t: "① 目標スコアを選ぶ", x: "今の実力に近いものを選びます。平均100前後なら「100切り」。散らばりの見積もり・作戦・ホールの評価の基準が全部これで決まります。", d: "3つのどれかを押す" },
+      { tab: "prep", s: "#unitChoices", t: "② 距離の単位", x: "ヤードかメートル。コースの表示に合わせます。", d: "ふだん使う方を押す" },
+      { tab: "prep", s: "#clubCard", t: "③ マイ番手の飛距離", x: "番手ごとに『いつもの平均の飛距離』を入れます。一番いい当たりではなく平均がコツ。全部の計算の土台です。2WやUTは「クラブを入れ替える」で。", d: "▶の見出しを押して開き、よく使う番手から入れる（あとで直せます）" },
+      { tab: "prep", open: "#clubCard details", s: ".skill-btn", t: "④ 得意・苦手なクラブ", x: "番手の横の丸を押すたびに ◎得意 → △苦手 → 普通。得意は狙いを攻め、苦手は安全側にずらします。", d: "自信のある番手を◎、怖い番手を△に" },
+      { tab: "prep", s: "#distSkillCard", t: "⑤ 得意・苦手な距離", x: "20yd刻みで◎△。刻むときに『得意な距離を残す』作戦に使います。", d: "例：100yd前後が得意なら◎" },
+      { tab: "prep", s: "#courseSelect", t: "⑥ コースを選ぶ", x: "行くコースを選びます。一覧になければ、下の「＋ コースを登録」でスコアカードから入れられます。", d: "コースを選ぶ" },
+      { tab: "prep", s: "#teeChoiceWrap", t: "⑦ 使うティー", x: "バック・レギュラー・レディースなど。距離と航空写真のティー位置が切り替わります。ツーグリーンのコースは左右もここで。", d: "当日使うティーを押す", need: "コースを選ぶと出ます" },
+      { tab: "hole", s: "#holeChips", t: "⑧ ホールタブでホールを押す", x: "下の「ホール」タブが、ラウンド中の基本画面です。ホール番号を押すと情報・航空写真・前回のミスが出ます。", d: "1番を押してみる", need: "コースを選ぶと出ます" },
+      { tab: "hole", s: "#phWrap", t: "⑨ 航空写真の位置登録（1コース1回）", x: "初めてのホールは「航空写真で位置を登録」でティー・曲がり角・グリーンを置きます。1度やれば次から距離が正確に出ます。", d: "時間のある日に18ホール分", need: "ホールを選ぶと出ます" },
+      { tab: "prep", s: "#planCard", t: "⑩ 前日は作戦シート", x: "18ホールの作戦（ティーの番手・成功率・前回のミス）を一覧で確認できます。", d: "前の晩に一度ながめる" },
+      { tab: "prep", s: "#backupCard", t: "⑪ バックアップ", x: "データはスマホの中。Safariのデータを消すと消えるので、ときどきファイルに書き出しておきます。", d: "ラウンド後に1回" }
+    ] },
+    { id: "round", name: "ラウンド中：1ホールの流れ", time: "約3分", sub: "ティー → 2打目 → 寄せ → パット → スコア", steps: [
+      { tab: "hole", s: "#tab-hole", t: "① 基本は「ホール」タブ", x: "ホールに着いたらここ。ティーでは作戦と前回のミスを確認します。", d: "ホールタブを押す" },
+      { tab: "hole", s: "#holeChips", t: "② ホール番号を押す", x: "Par・距離・作戦と、前回このホールでしたミスが出ます。", d: "今のホール番号を押す", need: "コースを選ぶと出ます" },
+      { tab: "hole", s: "#pinIn", t: "③ 今日のピン位置", x: "カートナビやピンシートの数字（手前エッジから○yd・左右）を入れます。旗の位置と距離に反映され、その日だけ有効です。", d: "ナビの数字を入れる", need: "ホールを選ぶと出ます" },
+      { tab: "hole", s: "#phGpsBtn", t: "④ 現在地を表示", x: "オンにするとティーを離れたとき自動でボールとグリーンのアップに。ピンまで・エッジまでの距離が出ます。", d: "2打目地点で押す", need: "航空写真を登録すると出ます" },
+      { tab: "hole", s: "#phApplyBtn", t: "⑤ この残り距離で狙いを見る", x: "残り距離をショット画面へ送ります（45yd以内ならアプローチへ）。", d: "残り距離が出たら押す", need: "現在地かボール位置を入れると出ます" },
+      { tab: "shot", s: "#pinChoices", t: "⑥ ショット ①ピンと距離", x: "ピンの位置・残り距離・ライ（芝・ラフ・バンカー）を合わせます。", d: "ピンの位置を押す" },
+      { tab: "shot", s: "#curveCard", t: "⑦ ②曲がり幅", x: "距離と目標スコアから、球が散らばる片側の幅が自動で出ます。得意・苦手な番手で増減します。", d: "見るだけでOK" },
+      { tab: "shot", s: "#penaltyCard", t: "⑧ ③障害物の点数", x: "OB・池（3）、寄せにくい（2）、バンカー（1）、寄せやすい（0）。種類を選んでから、ある方向を押します。", d: "池やOBのある側を押す" },
+      { tab: "shot", s: "#mapCard", t: "⑨ ④狙う1点", x: "障害物から『曲がり幅＋点数』だけ内側が狙う1点。ピンではなく、この点に打ちます。", d: "表示された1点を確認" },
+      { tab: "shot", s: "#slopeCard", t: "⑩ 足元の傾斜", x: "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向きの補正が出ます。", d: "平らでなければ押す" },
+      { tab: "shot", s: "#windCard", t: "⑪ 風と番手", x: "天気を取るか、向かい風・追い風を入れると持つべき番手が出ます。3m/sで約1番手。", d: "旗のなびき方で風を入れる" },
+      { tab: "approach", s: "#approachCard", t: "⑫ 50yd以内はアプローチ", x: "距離・傾斜・ライから、クラブごとの『落とす場所』。★が多いほどミスに強い打ち方です。バンカーの打ち方もここ。", d: "★の多い打ち方を選ぶ" },
+      { tab: "putt", s: "#puttCard", t: "⑬ グリーン上はパター", x: "距離（フィート）・上り下り・曲がり・傾きの強さで、狙う場所とタッチ。", d: "足裏で傾きを感じてレベルを選ぶ" },
+      { tab: "hole", s: "#scoreCard", t: "⑭ ホールが終わったらスコア", x: "打数・パット・罰打・ティーショットを入れると、プロ目線の評価（S〜D）と次のホールへのひと言が出ます。", d: "カートに戻ったら入れる" },
+      { tab: "hole", s: "#missCard", t: "⑮ ミスは一言でも記録", x: "番手・どうなった・原因を残すと、次に同じホールや番手を選んだとき表示されます。", d: "大きなミスだけでOK" }
+    ] },
+    { id: "rules", name: "困ったとき：打数とルール", time: "約1分", sub: "OB・池・ドロップのとき", steps: [
+      { tab: "rules", s: "#tab-rules", t: "① 困ったら「ルール」タブ", x: "OB・池・アンプレヤブルなど、迷ったときに開きます。", d: "ルールタブを押す" },
+      { tab: "rules", s: ".sc-start", t: "② どこから始めたか", x: "ふつうは「ティーから」。前進4打の特設ティーから打つときは右のボタン。", d: "始め方を押す" },
+      { tab: "rules", s: "#scGrid", t: "③ 打った結果を押す", x: "フェアウェイ・OB・池…と結果を押すたびに『次は何打目か』が出ます。カップインでスコアに自動で入ります。", d: "1打ごとに押す" },
+      { tab: "rules", s: "#rulesList", t: "④ 場面を押すと図解", x: "ドロップの場所・罰打・手順が図で出ます（2023年規則。ローカルルールが優先）。", d: "困った場面を押す" }
+    ] },
+    { id: "after", name: "ラウンド後の振り返り", time: "約2分", sub: "評価・ミス・実測で次につなげる", steps: [
+      { tab: "hole", s: "#scoreCard", t: "① ホールごとの評価を見る", x: "目標スコアと比べて良かった点・失った所が出ます。D評価のホールが次の伸びしろです。", d: "評価の悪いホールを見返す" },
+      { tab: "hole", s: "#missCard", t: "② ミスの振り返りと練習メニュー", x: "記録したミスを番手・原因別に集計して、練習場でやることを出します。", d: "多いミスの練習を1つ選ぶ" },
+      { tab: "prep", s: "#shotSuggCard", t: "③ 実測の飛距離で番手を直す", x: "GPSで測った飛距離の中央値。設定とずれていたら「直す」で合わせると、次の計算が正確になります。", d: "ずれの大きい番手を直す" },
+      { tab: "prep", s: "#distSkillCard", t: "④ 得意な距離を見直す", x: "寄った距離・ミスした距離を◎△に反映させると、刻み方の作戦が変わります。", d: "今日の感触で更新" },
+      { tab: "prep", s: "#backupCard", t: "⑤ バックアップ", x: "最後にファイルへ書き出して終わり。", d: "書き出すを押す" }
+    ] }
+  ];
+  var tour = (function () {
+    var KEY = "nerai1ten_tour", cur = null, idx = 0, spot = null, card = null, menuBg = null, rt = null;
+    function rec() { try { return JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { return {}; } }
+    function saveRec(r) { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {} }
+    function visible(el) { if (!el) return false; var r = el.getBoundingClientRect(); return r.width > 2 && r.height > 2 && !el.closest("[hidden]") && !el.closest(".tab-off"); }
+    function find(sel) { var list = document.querySelectorAll(sel); for (var i = 0; i < list.length; i++) if (visible(list[i])) return list[i]; return null; }
+    function esc(t) { return String(t).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+    function place() {
+      if (!cur || !card) return;
+      var st = cur.steps[idx], el = find(st.s), vh = window.innerHeight;
+      var tb = document.getElementById("tabbar"), tbH = tb ? tb.getBoundingClientRect().height : 80;
+      if (!el) { spot.className = "tour-spot none"; card.style.top = ""; card.style.bottom = (tbH + 12) + "px"; return; }
+      var r = el.getBoundingClientRect(), pad = 6;
+      var top = Math.max(4, r.top - pad), bot = Math.min(vh - 4, r.bottom + pad);
+      spot.className = "tour-spot";
+      spot.style.left = Math.max(4, r.left - pad) + "px"; spot.style.top = top + "px";
+      spot.style.width = (Math.min(window.innerWidth - 4, r.right + pad) - Math.max(4, r.left - pad)) + "px";
+      spot.style.height = Math.max(0, bot - top) + "px";
+      var ch = card.offsetHeight, cardTop = vh - tbH - 12 - ch, hh = headH();
+      if (bot > cardTop + 8 && !(tb && tb.contains(el))) {
+        var overBottom = bot - cardTop, overTop = (hh + 8 + ch) - top;
+        if (overTop < overBottom) { card.style.bottom = ""; card.style.top = (hh + 8) + "px"; return; }
+      }
+      card.style.top = ""; card.style.bottom = (tbH + 12) + "px";
+    }
+    function headH() { var h = document.querySelector("header.top"); return h ? Math.max(0, h.getBoundingClientRect().bottom) : 0; }
+    function render() {
+      var st = cur.steps[idx], n = cur.steps.length;
+      if (st.tab && state.tab !== st.tab) showTab(st.tab, true);
+      if (st.open) { var od = document.querySelector(st.open); if (od && !od.open) od.open = true; }
+      var el = find(st.s);
+      card.innerHTML = "<div class='tour-top'><span class='tour-name'>" + esc(cur.name) + "　" + (idx + 1) + " / " + n + "</span><button type='button' class='tour-x'>✕ 終わる</button></div>"
+        + "<div class='tour-bar'><i style='width:" + Math.round((idx + 1) / n * 100) + "%'></i></div>"
+        + "<h3>" + esc(st.t) + "</h3><p>" + esc(st.x) + "</p>"
+        + (st.d ? "<div class='tour-do'>👉 やってみる：" + esc(st.d) + "</div>" : "")
+        + (!el ? "<div class='tour-miss'>※ いまは画面に出ていません（" + esc(st.need || "条件がそろうと出ます") + "）。</div>" : "")
+        + "<div class='tour-nav'><button type='button' class='tour-prev'" + (idx ? "" : " disabled") + ">◀ 戻る</button><button type='button' class='tour-next'>" + (idx === n - 1 ? "完了 ✓" : "次へ ▶") + "</button></div>";
+      card.querySelector(".tour-x").onclick = function () { stop(false); };
+      card.querySelector(".tour-prev").onclick = function () { if (idx > 0) { idx--; render(); } };
+      card.querySelector(".tour-next").onclick = function () { if (idx < n - 1) { idx++; render(); } else stop(true); };
+      if (el) {
+        var tb = document.getElementById("tabbar");
+        if (!(tb && tb.contains(el))) {
+          var r = el.getBoundingClientRect(), vh = window.innerHeight;
+          var room = vh - (tb ? tb.getBoundingClientRect().height : 80) - card.offsetHeight - 24 - headH();
+          var off = r.height < room ? headH() + 12 + Math.max(0, (room - r.height) / 2) : headH() + 12;
+          window.scrollTo({ top: Math.max(0, window.scrollY + r.top - off), behavior: "smooth" });
+        }
+      }
+      place(); clearTimeout(rt); rt = setTimeout(place, 420);
+    }
+    function start(id, at) {
+      closeMenu();
+      cur = null; TOURS.forEach(function (t) { if (t.id === id) cur = t; }); if (!cur) return;
+      idx = at || 0;
+      if (!spot) { spot = document.createElement("div"); document.body.appendChild(spot); }
+      if (!card) { card = document.createElement("div"); card.className = "tour-card"; card.setAttribute("role", "dialog"); card.setAttribute("aria-live", "polite"); document.body.appendChild(card); }
+      render();
+    }
+    function stop(done) {
+      if (cur && done) { var r = rec(); r[cur.id] = 1; saveRec(r); }
+      var fin = done ? cur : null;
+      cur = null; if (spot) { spot.remove(); spot = null; } if (card) { card.remove(); card = null; }
+      if (fin) { openMenu("「" + fin.name + "」完了！ 次のガイドもどうぞ。"); }
+    }
+    function closeMenu() { if (menuBg) { menuBg.remove(); menuBg = null; } }
+    function openMenu(msg) {
+      closeMenu(); var r = rec();
+      menuBg = document.createElement("div"); menuBg.className = "tour-menu-bg";
+      var h = "<div class='tour-menu' role='dialog' aria-label='使い方ガイド'><h3>使い方ガイド</h3><p class='tm-sub'>" + esc(msg || "画面の光る所を1つずつ案内します。上から順番がおすすめ。") + "</p>";
+      TOURS.forEach(function (t, i) {
+        h += "<button type='button' class='tm-item" + (r[t.id] ? " done" : "") + "' data-tour='" + t.id + "'><span class='tm-num'>" + (r[t.id] ? "✓" : (i + 1)) + "</span><span class='tm-txt'><b>" + esc(t.name) + "</b><small>" + esc(t.sub) + "・" + t.steps.length + "ステップ・" + t.time + "</small></span><span>▶</span></button>";
+      });
+      h += "<div class='tm-row'><a href='manual.html#qa'>📖 取説（Q&amp;A）</a><button type='button' class='tm-close'>閉じる</button></div></div>";
+      menuBg.innerHTML = h; document.body.appendChild(menuBg);
+      menuBg.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-tour]"); if (b) { start(b.getAttribute("data-tour")); return; }
+        if (e.target === menuBg || e.target.closest(".tm-close")) closeMenu();
+      });
+    }
+    window.addEventListener("resize", function () { place(); });
+    window.addEventListener("scroll", function () { if (cur) { clearTimeout(rt); rt = setTimeout(place, 60); place(); } }, { passive: true });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if (cur) stop(false); else closeMenu(); } });
+    function invite() {
+      var r = rec(); if (r._invited) return; r._invited = 1; saveRec(r);
+      var d = document.createElement("div"); d.className = "tour-invite"; d.setAttribute("role", "status");
+      d.innerHTML = "<b>手順ガイドができました</b><br>画面の光る所を順番に案内します。右上の「？」からいつでも見られます。<div><button type='button' class='later'>あとで</button><button type='button' class='go'>見てみる ▶</button></div>";
+      document.body.appendChild(d);
+      d.querySelector(".later").onclick = function () { d.remove(); };
+      d.querySelector(".go").onclick = function () { d.remove(); openMenu(); };
+      setTimeout(function () { if (d.parentNode) d.remove(); }, 15000);
+    }
+    return { start: start, stop: stop, openMenu: openMenu, invite: invite, active: function () { return !!cur; } };
+  })();
+  (function () {
+    var hb = document.getElementById("helpBtn"); if (hb) hb.addEventListener("click", function () { tour.openMenu(); });
+    var gb = document.getElementById("guideStartBtn"); if (gb) gb.addEventListener("click", function () { tour.openMenu(); });
+  })();
 
   // ---------- 下のタブで画面を切り替える ----------
   var TAB_MODE = { shot: "full", approach: "approach", putt: "putt" };
@@ -6631,6 +6869,7 @@
   try { photoHole.renderGreenSide(); } catch (e) {}
   showTab(state.tab || (state.mode === "approach" ? "approach" : state.mode === "putt" ? "putt" : "hole"), true);
   initCloud();
+  setTimeout(function () { try { tour.invite(); } catch (e) {} }, 1200);
 })();
 </script>
 
