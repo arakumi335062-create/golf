@@ -663,6 +663,27 @@
   .s3-legend i { display: inline-block; width: 16px; height: 6px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
   .s3-sync { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
   .s3-sync input { flex: 1; }
+  .cmp-src { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cmp-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 10px; }
+  .cmp-cell { position: relative; background: #111; border-radius: 10px; overflow: hidden; min-height: 160px; display: grid; place-items: center; }
+  .cmp-cell video { display: block; width: 100%; max-height: 56vh; object-fit: contain; background: #111; }
+  .cmp-cell canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .cmp-tag { position: absolute; left: 6px; top: 6px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 7px; pointer-events: none; }
+  .cmp-tag.r { background: rgba(107,63,160,.85); }
+  .cmp-empty { color: #cfd8d2; font-size: 12px; padding: 20px 8px; text-align: center; }
+  .cmp-phase { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; color: #fff; font-size: 15px; font-weight: 900; text-shadow: 0 2px 6px rgba(0,0,0,.8); pointer-events: none; }
+  .coach { margin-top: 10px; border-radius: 14px; border: 2px solid #6b3fa0; padding: 12px; background: var(--surface); }
+  .coach h3 { margin: 0 0 6px; font-size: 16px; }
+  .coach .lead { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
+  .coach ol { margin: 0; padding-left: 1.3em; }
+  .coach li { margin: 0 0 10px; font-size: 14px; line-height: 1.7; }
+  .coach li b.h { font-size: 15px; }
+  .coach .dr { display: block; margin-top: 3px; padding: 6px 10px; border-radius: 10px; background: #f3ecfb; color: #3d2463; font-size: 13px; }
+  .coach .go { margin-left: 4px; border: 1px solid #6b3fa0; background: none; color: #6b3fa0; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 800; padding: 1px 8px; cursor: pointer; }
+  .coach table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .coach th, .coach td { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
+  .coach th:first-child, .coach td:first-child { text-align: left; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .coach .dr { background: #2c2140; color: #e6d6ff; } }
   .help-link { position: absolute; right: 0; top: 4px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 800; font-size: 16px; display: grid; place-items: center; text-decoration: none; }
   header.top { position: sticky; }
   .ph-wrap { margin-top: 12px; }
@@ -1027,7 +1048,7 @@
 
 <div class="app">
   <header class="top">
-    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.6.2</button></h1>
+    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.7</button></h1>
     <button type="button" class="help-link" id="helpBtn" aria-label="使い方ガイドと取扱説明書">？</button>
     <p id="ctxLine">①ピンと距離 → ②曲がり幅 → ③障害物の点数 → ④狙う1点</p>
     <button type="button" class="club-now" id="clubNow" hidden><span class="cn-club" id="cnClub"></span><span class="cn-txt"><b id="cnHead"></b><small id="cnSub"></small></span><span class="cn-go">▶</span></button>
@@ -1846,7 +1867,47 @@
     </div>
   </section>
 
-  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.6.2（2026/9/28）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
+  <section class="card" id="swCmpCard" data-tabs="swing">
+    <h2>2本を並べて比べる（先生モード）</h2>
+    <p class="map-note" style="margin-top:0;">前の自分と今日の自分、自分とお手本などを並べて、同時に動かします。同じ向き（正面どうし・後方どうし）から撮った動画で比べてください。</p>
+    <div class="cmp-src">
+      <div class="s3-slot" id="cmpSlotL"><b>左：比べる元</b><small id="cmpInfoL">前の自分・お手本</small><div class="row"><label>撮る<input type="file" id="cmpCamL" accept="video/*" capture="environment" hidden></label><label>選ぶ<input type="file" id="cmpPickL" accept="video/*" hidden></label></div></div>
+      <div class="s3-slot" id="cmpSlotR"><b>右：比べたい動画</b><small id="cmpInfoR">今日の自分</small><div class="row"><label>撮る<input type="file" id="cmpCamR" accept="video/*" capture="environment" hidden></label><label>選ぶ<input type="file" id="cmpPickR" accept="video/*" hidden></label></div></div>
+    </div>
+    <div class="cmp-stage">
+      <div class="cmp-cell"><div class="cmp-empty" id="cmpEmptyL">左の動画</div><video id="cmpVL" playsinline muted preload="auto" hidden></video><canvas id="cmpCL"></canvas><span class="cmp-tag">左：比べる元</span><div class="cmp-phase" id="cmpPhL"></div></div>
+      <div class="cmp-cell"><div class="cmp-empty" id="cmpEmptyR">右の動画</div><video id="cmpVR" playsinline muted preload="auto" hidden></video><canvas id="cmpCR"></canvas><span class="cmp-tag r">右：比べたい</span><div class="cmp-phase" id="cmpPhR"></div></div>
+    </div>
+    <input type="range" class="sw-scrub" id="cmpScrub" min="0" max="1000" value="0" aria-label="2本の再生位置" disabled>
+    <div class="sw-row">
+      <button type="button" id="cmpBack">◀ 1コマ</button>
+      <button type="button" class="big" id="cmpPlay">▶ 同時に再生</button>
+      <button type="button" id="cmpFwd">1コマ ▶</button>
+    </div>
+    <div class="sw-row" role="group" aria-label="2本の速さ">
+      <button type="button" class="grow" data-cmpsp="0.1">0.1×</button><button type="button" class="grow" data-cmpsp="0.25" aria-pressed="true">0.25×</button><button type="button" class="grow" data-cmpsp="0.5">0.5×</button><button type="button" class="grow" data-cmpsp="1">等速</button>
+    </div>
+    <div class="sw-row">
+      <span style="font-size:13px;font-weight:700;color:var(--ink-soft);white-space:nowrap;">右だけずらす</span>
+      <button type="button" class="grow" id="cmpOffM">◀ 1コマ</button>
+      <button type="button" class="grow" id="cmpOffP">1コマ ▶</button>
+      <span id="cmpOffV" style="font-size:13px;font-weight:800;min-width:64px;text-align:right;">±0.00秒</span>
+    </div>
+    <div class="s3-row" role="group" aria-label="場面へ">
+      <button type="button" data-cmpk="addr" disabled>アドレス</button><button type="button" data-cmpk="top" disabled>トップ</button><button type="button" data-cmpk="imp" disabled>インパクト</button>
+    </div>
+    <div class="s3-row">
+      <button type="button" id="cmpBone" aria-pressed="true">骨格を重ねる</button>
+      <button type="button" id="cmpGrid">グリッド</button>
+    </div>
+    <button type="button" class="s3-run" id="cmpRun" disabled>👨‍🏫 先生に見てもらう（AIで解析・自動で合わせる）</button>
+    <button type="button" class="pin-clear" id="cmpStop" hidden style="margin-top:6px;">中止する</button>
+    <div class="s3-prog" id="cmpProg">まずは「同時に再生」でそのまま比べられます。インパクトがずれていたら「右だけずらす」で合わせてください。先生に見てもらうと、AIがアドレス・トップ・インパクトを自動でそろえて、違いを教えます（2本で1〜2分）。</div>
+    <div class="s3-bar"><i id="cmpBar"></i></div>
+    <div class="coach" id="cmpCoach" hidden></div>
+  </section>
+
+  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.7.0（2026/9/28）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
 </div>
 
 <div class="rm" id="rm" hidden role="dialog" aria-label="ラウンド画面（プレーファースト）">
@@ -3872,7 +3933,7 @@
     $("ruleBack").addEventListener("click", function () { ruleOpen = ""; renderRules(); });
   }
 
-  var HELP = [{"s": "#sw3dCard", "t": "3Dスイング（実験版）", "x": "正面（A）と後方（B）の動画をAIで立体のアバターに。指で回して好きな角度から、手の軌道・肩と腰の回転・頭の動きを見られます。ネット接続が必要。", "a": "swing"}, {"s": "#tab-swing", "t": "スイングタブ", "x": "スイング動画をスロー・コマ送りで見て、線・円・角度を描けます。アドレス・トップ・インパクトを記録するとテンポ（約3：1が目安）。", "a": "more"}, {"s": "#swingCard", "t": "スイングチェック", "x": "撮る／動画を選ぶ → 速さを選んで再生。✋送るで画面を左右になぞるとコマ送り。道具を選ぶと線を描けます。", "a": "more"}, {"s": "#verBadge", "t": "バージョン", "x": "いまのアプリの版です。押すと更新内容の一覧。GitHubにアップロードした後、番号が変わっていれば反映されています。", "a": "more"}, {"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか（左奥〜右手前の9か所）。今日のピン位置（カートナビの数字）を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③まわりの点数", "x": "奥・手前・左・右を押して、点数（3ペナルティ〜−2片手でも寄る）を選びます。最初は全部0。0でも曲がり幅のぶんは端から離します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "4方向とも端から「曲がり幅＋点数」を取れる所のうち、ピンにいちばん近い点。下の内訳で、どの方向のためにずらしたかが分かります。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
+  var HELP = [{"s": "#swCmpCard", "t": "2本を並べて比べる", "x": "前の自分と今日の自分などを並べて同時に再生。「先生に見てもらう」でAIがアドレス・トップ・インパクトを自動でそろえ、違いと練習方法を教えます。", "a": "swing"}, {"s": "#sw3dCard", "t": "3Dスイング（実験版）", "x": "正面（A）と後方（B）の動画をAIで立体のアバターに。指で回して好きな角度から、手の軌道・肩と腰の回転・頭の動きを見られます。ネット接続が必要。", "a": "swing"}, {"s": "#tab-swing", "t": "スイングタブ", "x": "スイング動画をスロー・コマ送りで見て、線・円・角度を描けます。アドレス・トップ・インパクトを記録するとテンポ（約3：1が目安）。", "a": "more"}, {"s": "#swingCard", "t": "スイングチェック", "x": "撮る／動画を選ぶ → 速さを選んで再生。✋送るで画面を左右になぞるとコマ送り。道具を選ぶと線を描けます。", "a": "more"}, {"s": "#verBadge", "t": "バージョン", "x": "いまのアプリの版です。押すと更新内容の一覧。GitHubにアップロードした後、番号が変わっていれば反映されています。", "a": "more"}, {"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか（左奥〜右手前の9か所）。今日のピン位置（カートナビの数字）を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③まわりの点数", "x": "奥・手前・左・右を押して、点数（3ペナルティ〜−2片手でも寄る）を選びます。最初は全部0。0でも曲がり幅のぶんは端から離します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "4方向とも端から「曲がり幅＋点数」を取れる所のうち、ピンにいちばん近い点。下の内訳で、どの方向のためにずらしたかが分かります。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
   // 長押しで説明（どの画面でも）
   (function () {
     var timer = null, start = null, fired = false, bubble = null;
@@ -4240,6 +4301,7 @@
     var t = 0, playing = false, speed = 0.25, raf = 0, lastTs = 0;
     var yaw = 0, pitch = 0.12, zoom = 1, trail = true, hand = 1, mode = "fuse", syncOff = 0, curView = "diag"; // hand: 1=右打ち -1=左打ち
     var ghost = true, pipOn = true, pipUrl = null, pipSeekAt = 0;
+    var hand3 = 1; // metricsOf 用（右打ち1・左打ち-1）
     var cv = $("s3Cv"), cx = cv.getContext("2d");
     function setFile(k, f) {
       if (!f) return; files[k] = f;
@@ -4251,7 +4313,7 @@
       $("s3Cam" + k).addEventListener("change", function () { setFile(k, this.files && this.files[0]); this.value = ""; });
       $("s3Pick" + k).addEventListener("change", function () { setFile(k, this.files && this.files[0]); this.value = ""; });
     });
-    function prog(txt, pct) { $("s3Prog").textContent = txt; if (typeof pct === "number") $("s3Bar").style.width = Math.round(pct) + "%"; }
+    var prog = function (txt, pct) { $("s3Prog").textContent = txt; if (typeof pct === "number") $("s3Bar").style.width = Math.round(pct) + "%"; };
     var abortFlag = false, stageT0 = 0;
     function withTimeout(pr, ms, msg) { return Promise.race([pr, new Promise(function (_, rj) { setTimeout(function () { rj(new Error(msg)); }, ms); })]); }
     function checkAbort() { if (abortFlag) throw new Error("中止しました。"); }
@@ -4311,6 +4373,8 @@
         var vw = v.videoWidth || 360, vh = v.videoHeight || 640, k = Math.min(1, 480 / Math.max(vw, vh));
         cvs.width = Math.max(2, Math.round(vw * k)); cvs.height = Math.max(2, Math.round(vh * k));
         var W = [], P = [], errs = 0, lastErr = "";
+        // 前の動画の「追いかけ」を消す：真っ黒なコマを2回見せてから始める（同じ動画なら毎回同じ結果に）
+        try { c2.fillStyle = "#000"; c2.fillRect(0, 0, cvs.width, cvs.height); for (var z = 0; z < 2; z++) { tsNext += 1000; landmarker.detectForVideo(cvs, tsNext); } } catch (e) {}
         return new Promise(function (resolve, reject) {
           var i = 0;
           (function step() {
@@ -4392,8 +4456,11 @@
     }
     function ang(v) { return Math.atan2(v[2], v[0]) * 180 / Math.PI; }
     function dAng(a, b) { var d = a - b; while (d > 180) d -= 360; while (d < -180) d += 360; return d; }
-    function metrics() {
-      var F = D.F, n = D.n, hand = F.map(function (f) { return (f[15][1] + f[16][1]) / 2; });
+    function metrics() { return metricsOf(D.F, D.P); }
+    function a3(p, o, q) { var u = [p[0] - o[0], p[1] - o[1], p[2] - o[2]], v = [q[0] - o[0], q[1] - o[1], q[2] - o[2]]; var c = (u[0] * v[0] + u[1] * v[1] + u[2] * v[2]) / ((Math.hypot(u[0], u[1], u[2]) * Math.hypot(v[0], v[1], v[2])) || 1); return Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI; }
+    function mid(f, a, b) { return [(f[a][0] + f[b][0]) / 2, (f[a][1] + f[b][1]) / 2, (f[a][2] + f[b][2]) / 2]; }
+    function metricsOf(F, P) {
+      var n = F.length, hand = F.map(function (f) { return (f[15][1] + f[16][1]) / 2; });
       // アドレス：手が動き始める直前のコマ（最初の位置から1.5cm以上動いたら始動）
       var imp0 = fastIdx(F), addr = 0, i;
       var hx = function (k) { var f = F[k]; return [(f[15][0] + f[16][0]) / 2, (f[15][1] + f[16][1]) / 2, (f[15][2] + f[16][2]) / 2]; };
@@ -4407,11 +4474,19 @@
       var sh = turn(addr, top, 11, 12), hp = turn(addr, top, 23, 24);
       var out = { addr: addr, top: top, imp: imp, sh: sh, hp: hp, xf: sh - hp };
       if (top > addr && imp > top) out.tempo = (top - addr) / (imp - top);
+      // 前傾（腰の中心→肩の中心が、真上から何度傾いているか）、トップの左腕（右打ち）の伸び、ひざの曲がり、手の高さ
+      var spine = function (k) { var hm = mid(F[k], 23, 24), sm = mid(F[k], 11, 12); return a3([hm[0], hm[1] + 1, hm[2]], hm, sm); };
+      out.spAddr = spine(addr); out.spImp = spine(imp);
+      var L = hand3 > 0 ? [11, 13, 15] : [12, 14, 16];
+      out.armTop = a3(F[top][L[0]], F[top][L[1]], F[top][L[2]]);
+      var knee = function (k) { return (a3(F[k][23], F[k][25], F[k][27]) + a3(F[k][24], F[k][26], F[k][28])) / 2; };
+      out.kneeAddr = knee(addr); out.kneeImp = knee(imp);
+      out.handTop = ((F[top][15][1] + F[top][16][1]) / 2 - (F[top][11][1] + F[top][12][1]) / 2) * 100; // 肩より何cm上か
+      out.fin = n - 1;
       // 頭の動き（Aの画面上。身長170cm換算）
-      var P = D.P;
       if (P && P[addr] && P[imp]) {
         var h = Math.abs(((P[addr][27][1] + P[addr][28][1]) / 2) - P[addr][0][1]) || 0.5, k = 155 / h; // 鼻〜足首 ≒ 155cm
-        out.headX = (P[imp][0][0] - P[addr][0][0]) * k * (cv.width / cv.width); out.headY = (P[addr][0][1] - P[imp][0][1]) * k;
+        out.headX = (P[imp][0][0] - P[addr][0][0]) * k; out.headY = (P[addr][0][1] - P[imp][0][1]) * k;
         var mx = 0; for (i = addr; i <= imp; i++) mx = Math.max(mx, Math.abs(P[i][0][0] - P[addr][0][0]) * k); out.headMax = mx;
       }
       return out;
@@ -4538,7 +4613,7 @@
       pipUrl = URL.createObjectURL(file); pv.src = pipUrl; pv.hidden = !pipOn;
       try { pv.load(); var pp = pv.play(); if (pp && pp.then) pp.then(function () { pv.pause(); draw(); }).catch(function () {}); } catch (e) {}
     }
-    $("s3Side").addEventListener("click", function () { hand = -hand; this.textContent = hand > 0 ? "右打ち" : "左打ち"; if (raw.A) { build(); setView(curView); } });
+    $("s3Side").addEventListener("click", function () { hand = -hand; hand3 = hand; this.textContent = hand > 0 ? "右打ち" : "左打ち"; if (raw.A) { build(); setView(curView); } });
     $("s3Mode").addEventListener("click", function () { mode = mode === "fuse" ? "A" : mode === "A" ? "B" : "fuse"; this.textContent = mode === "fuse" ? "A＋B合成" : mode === "A" ? "Aだけ" : "Bだけ"; if (raw.A) build(); });
     $("s3Sync").addEventListener("input", function () { syncOff = +this.value; $("s3SyncV").textContent = (syncOff > 0 ? "+" : syncOff < 0 ? "" : "±") + syncOff + "コマ"; if (raw.A) build(); });
     // 回す・拡大
@@ -4588,9 +4663,178 @@
         prog(msg, 0);
       });
     });
-    return { setRaw: function (a, b) { raw.A = prep(a); raw.B = b ? prep(b) : null; $("s3Out").hidden = false; t = 0; build(); setView("diag"); }, state: function () { return { t: t, n: D && D.n, met: D && D.met, yaw: yaw, pitch: pitch, zoom: zoom }; }, setT: function (x) { t = x; draw(); }, cfg: { js: MP_JS, wasm: MP_WASM, model: MP_MODEL } };
+    function sceneOf(r) { return r.W.map(function (f) { return f.map(function (q) { return [q[0], -q[1], -q[2]]; }); }); }
+    var api = {
+      ready: function () { abortFlag = false; stageT0 = Date.now(); return loadModel(); },
+      analyze: function (file, label, p0, p1, progFn) { var old = prog; if (progFn) prog = progFn; return analyze(file, label, p0, p1).then(function (r) { prog = old; return r; }, function (e) { prog = old; throw e; }); },
+      prep: function (r) { return prep(r); },
+      metrics: function (r) { return metricsOf(sceneOf(r), r.P); },
+      abort: function () { abortFlag = true; }
+    };
+    return { api: api, setRaw: function (a, b) { raw.A = prep(a); raw.B = b ? prep(b) : null; $("s3Out").hidden = false; t = 0; build(); setView("diag"); }, state: function () { return { t: t, n: D && D.n, met: D && D.met, yaw: yaw, pitch: pitch, zoom: zoom }; }, setT: function (x) { t = x; draw(); }, cfg: { js: MP_JS, wasm: MP_WASM, model: MP_MODEL } };
   })();
   window.__sw3d = sw3d;
+
+  // ---------- 2本を並べて比べる（先生モード） ----------
+  (function () {
+    var V = { L: $("cmpVL"), R: $("cmpVR") }, CV = { L: $("cmpCL"), R: $("cmpCR") }, files = { L: null, R: null }, urls = { L: null, R: null };
+    var t = 0, speed = 0.25, playing = false, raf = 0, lastTs = 0, off = 0, bone = true, grid = false;
+    var AI = null; // { L:{raw,met}, R:{raw,met} } 解析後
+    var FR = 1 / 30;
+    function dur(k) { var v = V[k]; return v && v.duration > 0 && isFinite(v.duration) ? v.duration : 0; }
+    function ready() { return dur("L") > 0 && dur("R") > 0; }
+    function setFile(k, f) {
+      if (!f) return; files[k] = f;
+      if (urls[k]) URL.revokeObjectURL(urls[k]);
+      urls[k] = URL.createObjectURL(f);
+      var v = V[k]; v.src = urls[k]; v.hidden = false; $("cmpEmpty" + k).hidden = true;
+      $("cmpInfo" + k).textContent = f.name.length > 14 ? f.name.slice(0, 12) + "…" : f.name;
+      $("cmpSlot" + k).classList.add("ok");
+      try { v.load(); var pp = v.play(); if (pp && pp.then) pp.then(function () { v.pause(); }).catch(function () {}); } catch (e) {}
+      v.addEventListener("loadedmetadata", function once() { v.removeEventListener("loadedmetadata", once); AI = null; $("cmpCoach").hidden = true; setKeys(); t = 0; off = 0; showOff(); sync(); $("cmpScrub").disabled = !ready(); $("cmpRun").disabled = !ready(); });
+    }
+    ["L", "R"].forEach(function (k) {
+      $("cmpCam" + k).addEventListener("change", function () { setFile(k, this.files && this.files[0]); this.value = ""; });
+      $("cmpPick" + k).addEventListener("change", function () { setFile(k, this.files && this.files[0]); this.value = ""; });
+    });
+    // 左の時刻 → 右の時刻（AI解析後は、アドレス・トップ・インパクトがそろうように区切って伸び縮み）
+    function keysSec(k) { var m = AI[k].met, f = AI[k].raw.fps; return [m.addr / f, m.top / f, m.imp / f, m.fin / f]; }
+    function mapR(tl) {
+      if (!AI) return tl + off;
+      var a = keysSec("L"), b = keysSec("R");
+      if (tl <= a[0]) return b[0] + (tl - a[0]) + off;
+      for (var i = 0; i < 3; i++) if (tl <= a[i + 1]) { var k = (tl - a[i]) / Math.max(0.001, a[i + 1] - a[i]); return b[i] + (b[i + 1] - b[i]) * k + off; }
+      return b[3] + (tl - a[3]) + off;
+    }
+    var seeking = { L: false, R: false }, seekAt = { L: 0, R: 0 }, want = { L: null, R: null };
+    function seekV(k, tt) {
+      var v = V[k]; if (!(dur(k) > 0)) return;
+      tt = Math.max(0, Math.min(dur(k) - 0.01, tt)); want[k] = tt;
+      if (seeking[k] && Date.now() - seekAt[k] < 400) return; // 前のシークが終わったら、最後に頼んだ位置へ行き直す
+      if (Math.abs(v.currentTime - tt) < 0.005) { want[k] = null; return; }
+      seeking[k] = true; seekAt[k] = Date.now(); want[k] = null; try { v.currentTime = tt; } catch (e) {}
+    }
+    ["L", "R"].forEach(function (k) { V[k].addEventListener("seeked", function () { seeking[k] = false; paint(k); phase(); if (want[k] !== null) { var w = want[k]; want[k] = null; seekV(k, w); } }); });
+    function sync() {
+      if (!ready()) return;
+      seekV("L", t); seekV("R", mapR(t));
+      $("cmpScrub").value = String(Math.round(t / dur("L") * 1000));
+      $("cmpPlay").textContent = playing ? "⏸ 止める" : "▶ 同時に再生";
+      phase(); paint("L"); paint("R");
+    }
+    function phaseName(k, tt) {
+      if (!AI) return "";
+      var m = AI[k].met, f = Math.round(tt * AI[k].raw.fps);
+      return f === m.addr ? "アドレス" : f === m.top ? "トップ" : f === m.imp ? "インパクト" : f < m.addr ? "" : f < m.top ? "バックスイング" : f < m.imp ? "ダウンスイング" : "フォロー";
+    }
+    function phase() { $("cmpPhL").textContent = phaseName("L", t); $("cmpPhR").textContent = phaseName("R", mapR(t)); }
+    // 骨格・アドレスの頭・グリッドを重ねる
+    function paint(k) {
+      var c = CV[k], v = V[k], ctx = c.getContext("2d"), r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+      if (c.width !== Math.round(r.width * dpr)) { c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, r.width, r.height);
+      if (!(dur(k) > 0)) return;
+      var vr = v.getBoundingClientRect(), vw = v.videoWidth || vr.width, vh = v.videoHeight || vr.height, sc = Math.min(vr.width / vw, vr.height / vh);
+      var bx = vr.left - r.left + (vr.width - vw * sc) / 2, by = vr.top - r.top + (vr.height - vh * sc) / 2, bw = vw * sc, bh = vh * sc;
+      if (grid) { ctx.strokeStyle = "rgba(255,255,255,.3)"; ctx.lineWidth = 1; for (var g = 1; g < 6; g++) { ctx.beginPath(); ctx.moveTo(bx + bw * g / 6, by); ctx.lineTo(bx + bw * g / 6, by + bh); ctx.stroke(); ctx.beginPath(); ctx.moveTo(bx, by + bh * g / 6); ctx.lineTo(bx + bw, by + bh * g / 6); ctx.stroke(); } }
+      if (!AI || !bone || !AI[k].raw.P) return;
+      var P = AI[k].raw.P, m = AI[k].met, fi = Math.max(0, Math.min(P.length - 1, Math.round(v.currentTime * AI[k].raw.fps))), q = P[fi];
+      var pt = function (a) { return [bx + a[0] * bw, by + a[1] * bh]; };
+      var a0 = P[m.addr] && P[m.addr][0]; // アドレスの頭
+      if (a0) { var hp = pt(a0), rad = Math.max(10, Math.abs(P[m.addr][11][0] - P[m.addr][12][0]) * bw * 0.45); ctx.strokeStyle = "rgba(255,214,90,.95)"; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.arc(hp[0], hp[1], rad, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+      if (!q) return;
+      var BN = [[11, 12], [11, 23], [12, 24], [23, 24], [11, 13], [13, 15], [12, 14], [14, 16], [23, 25], [25, 27], [24, 26], [26, 28]];
+      ctx.lineCap = "round"; ctx.lineWidth = 3;
+      BN.forEach(function (b) { var p1 = pt(q[b[0]]), p2 = pt(q[b[1]]); ctx.strokeStyle = (b[0] % 2 ? "rgba(255,179,71,.95)" : "rgba(155,226,143,.95)"); if (b[0] === 11 && b[1] === 12 || b[0] === 23 && b[1] === 24 || b[1] === 23 || b[1] === 24 && b[0] === 12) ctx.strokeStyle = "rgba(124,196,255,.95)"; ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke(); });
+      // 背骨（腰の中心→肩の中心）とアドレスの背骨
+      var sp = function (f) { return [pt([(f[23][0] + f[24][0]) / 2, (f[23][1] + f[24][1]) / 2]), pt([(f[11][0] + f[12][0]) / 2, (f[11][1] + f[12][1]) / 2])]; };
+      if (P[m.addr]) { var s0 = sp(P[m.addr]); ctx.strokeStyle = "rgba(255,255,255,.45)"; ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(s0[0][0], s0[0][1]); ctx.lineTo(s0[1][0] + (s0[1][0] - s0[0][0]) * 0.3, s0[1][1] + (s0[1][1] - s0[0][1]) * 0.3); ctx.stroke(); ctx.setLineDash([]); }
+      var s1 = sp(q); ctx.strokeStyle = "rgba(255,80,80,.95)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(s1[0][0], s1[0][1]); ctx.lineTo(s1[1][0], s1[1][1]); ctx.stroke();
+    }
+    window.addEventListener("resize", function () { paint("L"); paint("R"); });
+    function loop(ts) {
+      if (!playing) return;
+      var dt = lastTs ? (ts - lastTs) / 1000 : 0; lastTs = ts;
+      t += dt * speed; if (t >= dur("L") - 0.02) t = AI ? Math.max(0, keysSec("L")[0] - 0.3) : 0;
+      sync(); raf = requestAnimationFrame(loop);
+    }
+    function play() { if (!ready()) return; playing = true; lastTs = 0; V.L.pause(); V.R.pause(); raf = requestAnimationFrame(loop); sync(); }
+    function stop() { playing = false; cancelAnimationFrame(raf); sync(); }
+    $("cmpPlay").addEventListener("click", function () { if (playing) stop(); else play(); });
+    $("cmpBack").addEventListener("click", function () { stop(); t = Math.max(0, t - FR); sync(); });
+    $("cmpFwd").addEventListener("click", function () { stop(); t = Math.min(dur("L"), t + FR); sync(); });
+    $("cmpScrub").addEventListener("input", function () { var val = +this.value; stop(); t = val / 1000 * dur("L"); sync(); });
+    document.querySelectorAll("[data-cmpsp]").forEach(function (b) { b.addEventListener("click", function () { speed = +b.dataset.cmpsp; document.querySelectorAll("[data-cmpsp]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); }); });
+    function showOff() { $("cmpOffV").textContent = (off > 0 ? "+" : off < 0 ? "−" : "±") + Math.abs(off).toFixed(2) + "秒"; }
+    $("cmpOffM").addEventListener("click", function () { stop(); off -= FR; showOff(); sync(); });
+    $("cmpOffP").addEventListener("click", function () { stop(); off += FR; showOff(); sync(); });
+    $("cmpBone").addEventListener("click", function () { bone = !bone; this.setAttribute("aria-pressed", bone ? "true" : "false"); paint("L"); paint("R"); });
+    $("cmpGrid").addEventListener("click", function () { grid = !grid; this.setAttribute("aria-pressed", grid ? "true" : "false"); paint("L"); paint("R"); });
+    function setKeys() { document.querySelectorAll("[data-cmpk]").forEach(function (b) { b.disabled = !AI; }); }
+    function goKey(k) { if (!AI) return; var a = keysSec("L"); t = a[k === "addr" ? 0 : k === "top" ? 1 : 2]; sync(); }
+    document.querySelectorAll("[data-cmpk]").forEach(function (b) { b.addEventListener("click", function () { stop(); goKey(b.dataset.cmpk); }); });
+    // ---- 先生のコメント ----
+    function coach() {
+      var a = AI.L.met, b = AI.R.met, pts = [];
+      var add = function (score, head, body, drill, key) { pts.push({ s: score, h: head, b: body, d: drill, k: key }); };
+      var d;
+      d = b.sh - a.sh;
+      if (Math.abs(d) >= 8) add(Math.abs(d), (d > 0 ? "◎ 肩が深く回るようになりました" : "△ 肩の回転が浅くなっています") + "（" + Math.round(a.sh) + "° → " + Math.round(b.sh) + "°）", d > 0 ? "トップで背中が目標を向くくらい回れています。この深さが飛距離の元です。" : "肩が回りきる前に手で上げている可能性があります。肩の回転が浅いと、手打ちになって方向も距離もばらつきます。", d > 0 ? "" : "練習：クラブを胸の前で抱えて、左肩をあごの下まで回す素振りを10回。背中を目標に向けてから打つ。", "top");
+      d = b.hp - a.hp;
+      if (Math.abs(d) >= 8) add(Math.abs(d) * 0.8, (b.hp > 55 ? "△ 腰が回りすぎています" : d > 0 ? "○ 腰の回転が増えました" : "○ 腰の回転が減りました") + "（" + Math.round(a.hp) + "° → " + Math.round(b.hp) + "°）", b.hp > 55 ? "腰まで大きく回ると、上半身とのねじれ（捻転差）が逃げて、力がたまりません。" : "腰は40〜50°くらいが目安。肩との差（捻転差）で力をためます。", b.hp > 55 ? "練習：右ひざの向きを変えずに（右足の内側に体重を感じて）バックスイング。" : "", "top");
+      d = b.xf - a.xf;
+      if (Math.abs(d) >= 8) add(Math.abs(d), (d > 0 ? "◎ 捻転差が大きくなりました" : "△ 捻転差が小さくなっています") + "（" + Math.round(a.xf) + "° → " + Math.round(b.xf) + "°）", d > 0 ? "肩と腰のねじれの差で、ためた力をボールに伝えられています。" : "肩と腰が一緒に回ってしまい、ねじれが作れていません。", d > 0 ? "" : "練習：腰は我慢して、肩だけを深く回すイメージ。ハーフスイングで腰の回りを抑える。", "top");
+      d = (a.spAddr - a.spImp) - (b.spAddr - b.spImp); // 起き上がり（アドレスよりインパクトで前傾が浅くなる量）の差
+      var upB = b.spAddr - b.spImp;
+      if (Math.abs(d) >= 4 || upB >= 8) add(Math.max(Math.abs(d), upB) * 1.5, upB >= 8 ? "△ インパクトで上体が起き上がっています（前傾 " + Math.round(b.spAddr) + "° → " + Math.round(b.spImp) + "°）" + (a.spAddr - a.spImp >= 8 && Math.abs(d) < 4 ? "（左右どちらも）" : "") : (d > 0 ? "◎ 前傾がキープできるようになりました" : "△ 前傾が崩れやすくなっています"), upB >= 8 ? "前傾が起き上がると、クラブの通り道が変わってトップ・シャンク・右へのプッシュが出ます。アマチュアに一番多いミスの原因です。" : "アドレスの前傾の角度を、インパクトまで保てているかがミート率を決めます。", upB >= 8 ? "練習：お尻を壁につけて構え、インパクトまでお尻が壁から離れないように素振り（壁ドリル）。" : "", "imp");
+      d = b.armTop - a.armTop;
+      if (Math.abs(d) >= 10 || b.armTop < 150) add(Math.max(Math.abs(d), 170 - b.armTop) * 0.7, b.armTop < 150 ? "△ トップで左腕が曲がっています（" + Math.round(b.armTop) + "°）" + (a.armTop < 150 && Math.abs(d) < 10 ? "（左右どちらも）" : "") : (d > 0 ? "○ トップの左腕が伸びるようになりました" : "○ トップの左腕の曲がりが増えました") + "（" + Math.round(a.armTop) + "° → " + Math.round(b.armTop) + "°）", "左腕（右打ち）がトップで曲がると、スイングの半径が小さくなって飛距離が落ち、打点もばらつきます。160°以上が目安。", b.armTop < 150 ? "練習：トップを無理に大きくせず、左腕が伸びたままの所までで止める（コンパクトなトップ）。" : "", "top");
+      if (a.tempo && b.tempo) { d = b.tempo - a.tempo; if (Math.abs(d) >= 0.4) add(Math.abs(d) * 12, "テンポが変わりました（" + a.tempo.toFixed(1) + " : 1 → " + b.tempo.toFixed(1) + " : 1）", b.tempo < 2.6 ? "上げるのが速くなっています。切り返しで力みやすく、タイミングがずれます。" : b.tempo > 3.4 ? "トップで間が空きすぎか、ダウンが速すぎます。" : "プロに近い約3：1のリズムです。", b.tempo < 2.6 ? "練習：「イチ・ニ・サン」でトップ、「シ」でインパクトのリズムで素振り。" : "", "addr"); }
+      if (typeof b.headMax === "number" && typeof a.headMax === "number") { d = b.headMax - a.headMax; if (Math.abs(d) >= 4 || b.headMax > 10) add(Math.max(Math.abs(d), b.headMax - 5) * 1.5, (b.headMax > 10 ? (a.headMax > 10 && Math.abs(d) < 4 ? "△ 頭が左右に動いています（左右どちらも）" : "△ 頭が左右に動いています") : d < 0 ? "◎ 頭の動きが小さくなりました" : "○ 頭の動きが増えました") + "（" + Math.round(a.headMax) + "cm → " + Math.round(b.headMax) + "cm）", "頭が大きく動くと、スイングの中心がずれて打点が安定しません。黄色い点線の丸（アドレスの頭）から出ていないかを見てください。", b.headMax > 10 ? "練習：ボールの右側を最後まで見る。頭の位置に目印（影など）を決めて素振り。" : "", "imp"); }
+      d = b.kneeImp - b.kneeAddr;
+      if (d >= 12) add(d, "△ インパクトでひざが伸びています（" + Math.round(b.kneeAddr) + "° → " + Math.round(b.kneeImp) + "°）" + (a.kneeImp - a.kneeAddr >= 12 ? "（左右どちらも）" : ""), "ひざが伸びると体が伸び上がり、トップやスライスが出やすくなります。", "練習：アドレスのひざの角度のまま、ハーフスイングで打つ。", "imp");
+      pts.forEach(function (p) { if (/どちらも/.test(p.h)) p.s *= 0.6; }); // 2本の「差」を先に見せる
+      pts.sort(function (x, y) { return y.s - x.s; });
+      var top3 = pts.slice(0, 3);
+      var good = top3.filter(function (p) { return /^◎/.test(p.h); }).length, bad = top3.filter(function (p) { return /^△/.test(p.h); }).length;
+      var diff = top3.filter(function (p) { return !/どちらも/.test(p.h); }).length;
+      var lead = top3.length && !diff ? "2本の動きはよく似ていて、形は安定しています。そのうえで、どちらにも共通するクセがあります。" : !top3.length ? "2本の動きはほとんど同じです。形は安定しています。あとは狙いと番手選びでスコアを作りましょう。" : bad === 0 ? "良くなっている所が目立ちます。この感覚を忘れないうちに、同じリズムで練習を続けましょう。" : good ? "良くなった所と、気をつけたい所があります。まず一番上の1つだけ意識してください。" : "左の動画と比べて、気になる所があります。いっぺんに直そうとせず、一番上の1つから直しましょう。";
+      var rows = [["肩の回転（トップ）", a.sh, b.sh, "°"], ["腰の回転（トップ）", a.hp, b.hp, "°"], ["捻転差", a.xf, b.xf, "°"], ["前傾（アドレス→インパクト）", null, null, ""], ["左腕の伸び（トップ）", a.armTop, b.armTop, "°"], ["テンポ", a.tempo, b.tempo, ":1"], ["頭の左右の動き", a.headMax, b.headMax, "cm"]];
+      var tb = "<table><tr><th></th><th>左</th><th>右</th></tr>" + rows.map(function (r) {
+        if (r[0].indexOf("前傾") === 0) return "<tr><td>" + r[0] + "</td><td>" + Math.round(a.spAddr) + "→" + Math.round(a.spImp) + "°</td><td>" + Math.round(b.spAddr) + "→" + Math.round(b.spImp) + "°</td></tr>";
+        var f = function (v) { return typeof v === "number" ? (r[3] === ":1" ? v.toFixed(1) : Math.round(v)) + r[3] : "-"; };
+        return "<tr><td>" + r[0] + "</td><td>" + f(r[1]) + "</td><td>" + f(r[2]) + "</td></tr>";
+      }).join("") + "</table>";
+      var box = $("cmpCoach"); box.hidden = false;
+      box.innerHTML = "<h3>👨‍🏫 先生のひと言</h3><p class='lead'>" + lead + "</p>" + (top3.length ? "<ol>" + top3.map(function (p, i) { return "<li><b class='h'>" + p.h + "</b><button type='button' class='go' data-cmpgo='" + p.k + "'>その場面を見る</button><br>" + p.b + (p.d ? "<span class='dr'>" + p.d + "</span>" : "") + "</li>"; }).join("") + "</ol>" : "") +
+        "<p class='map-note' style='margin:6px 0 0;'>動画の上：<span style='color:#e0472f;font-weight:800'>赤い線</span>＝いまの背骨、白い点線＝アドレスの背骨、黄色い点線の丸＝アドレスの頭の位置。数値はAIの推定による目安です。</p>" + tb;
+      box.querySelectorAll("[data-cmpgo]").forEach(function (b) { b.addEventListener("click", function () { stop(); goKey(b.dataset.cmpgo); try { $("cmpVL").scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {} }); });
+    }
+    $("cmpStop").addEventListener("click", function () { try { sw3d.api.abort(); } catch (e) {} });
+    $("cmpRun").addEventListener("click", function () {
+      if (!ready()) return;
+      var btn = this; btn.disabled = true; $("cmpStop").hidden = false; stop();
+      var pr = function (txt, pct) { $("cmpProg").textContent = txt; if (typeof pct === "number") $("cmpBar").style.width = Math.round(pct) + "%"; };
+      var res = {};
+      var old = $("s3Prog").textContent;
+      sw3d.api.ready().then(function () {
+        return sw3d.api.analyze(files.L, "左の動画", 20, 58, pr);
+      }).then(function (rl) {
+        res.L = sw3d.api.prep(rl); if (!res.L) throw new Error("左の動画で人が見つかりませんでした。全身が入るように撮った動画を選んでください。");
+        return sw3d.api.analyze(files.R, "右の動画", 58, 98, pr);
+      }).then(function (rr) {
+        res.R = sw3d.api.prep(rr); if (!res.R) throw new Error("右の動画で人が見つかりませんでした。全身が入るように撮った動画を選んでください。");
+        AI = { L: { raw: res.L, met: sw3d.api.metrics(res.L) }, R: { raw: res.R, met: sw3d.api.metrics(res.R) } };
+        off = 0; showOff(); setKeys(); coach(); goKey("top");
+        pr("できました。アドレス・トップ・インパクトがそろうように合わせました。「同時に再生」で見比べてください。", 100);
+      }).catch(function (err) {
+        var msg = err && err.message ? err.message : String(err);
+        if (/Failed to fetch|NetworkError|import|dynamically imported/i.test(msg)) msg = "AIの部品を読み込めませんでした。インターネットにつながっているときに、もう一度押してください。";
+        pr(msg, 0);
+      }).then(function () { btn.disabled = false; $("cmpStop").hidden = true; $("s3Prog").textContent = old; });
+    });
+    window.__cmp = { state: function () { return { t: t, off: off, ai: !!AI, rt: V.R.currentTime, lt: V.L.currentTime, map: AI ? mapR(t) : null, met: AI && { L: AI.L.met, R: AI.R.met } }; }, setAI: function (l, r) { off = 0; showOff(); AI = { L: { raw: l, met: sw3d.api.metrics(l) }, R: { raw: r, met: sw3d.api.metrics(r) } }; setKeys(); coach(); }, go: goKey, coachText: function () { return $("cmpCoach").innerText; } };
+  })();
 
   // ---------- おすすめ番手（コースでまず見る1行） ----------
   var clubNowAct = null;
@@ -5013,8 +5257,9 @@
   })();
 
   // ---------- バージョンと更新内容 ----------
-  var APP_VER = "1.6.2", APP_DATE = "2026-09-28";
+  var APP_VER = "1.7.0", APP_DATE = "2026-09-28";
   var CHANGELOG = [
+    { v: "1.7", d: "9/28", t: "新機能「2本を並べて比べる（先生モード）」：2本の動画を同時に再生・スロー・コマ送り、右だけずらして合わせる。AIでアドレス・トップ・インパクトを自動でそろえ、骨格・背骨・アドレスの頭を重ねて表示し、先生のように違いと練習方法を説明" },
     { v: "1.6.2", d: "9/28", t: "3Dスイングを分かりやすく：元の動画を小窓で同時表示、場面ボタン（アドレス・トップ・インパクト・フィニッシュ）、アドレスの形を白く残す、見どころカード（◎○△と一言。押すとその場面を見やすい向きで）、色の説明" },
     { v: "1.6.1", d: "9/28", t: "3Dスイング：iPhoneで解析が止まる問題を修正（動画の読み方・AIの読み込み表示・GPUが固まったらCPUに切替・処理を約2倍速く）。中止ボタンと進み具合の表示" },
     { v: "1.6", d: "9/28", t: "新機能（実験版）「3Dスイング」：正面と後方の動画から、AIで立体のアバターを作って好きな角度から再生。手の軌道、肩・腰の回転、捻転差、頭の動き、テンポの目安" },
@@ -5035,7 +5280,7 @@
   }
   document.getElementById("verBadge").addEventListener("click", function () { showVersions(); });
   function checkNewVersion() { // アップロード後に初めて開いたとき、一度だけ知らせる
-    var last = null; try { last = localStorage.getItem("nerai1ten_ver"); if (!last && localStorage.getItem("nerai1ten")) last = "1.5"; } catch (e) {} // 番号を持つ前の版から来た人にも知らせる
+    var last = null; try { last = localStorage.getItem("nerai1ten_ver"); if (!last && localStorage.getItem("nerai1ten")) last = "1.6"; } catch (e) {} // 番号を持つ前の版から来た人にも知らせる
     try { localStorage.setItem("nerai1ten_ver", APP_VER); } catch (e) {}
     if (!last || last === APP_VER) return;
     var d = document.createElement("div"); d.className = "tour-invite"; d.setAttribute("role", "status");
