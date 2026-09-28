@@ -672,6 +672,30 @@
   .cmp-tag.r { background: rgba(107,63,160,.85); }
   .cmp-empty { color: #cfd8d2; font-size: 12px; padding: 20px 8px; text-align: center; }
   .cmp-phase { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; color: #fff; font-size: 15px; font-weight: 900; text-shadow: 0 2px 6px rgba(0,0,0,.8); pointer-events: none; }
+  .tr-set { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .tr-set label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; font-weight: 800; color: var(--ink-soft); }
+  .tr-set select { min-height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; padding: 0 8px; }
+  .tr-stage { position: relative; background: #111; border-radius: 12px; overflow: hidden; min-height: 180px; display: grid; place-items: center; margin-top: 10px; touch-action: manipulation; }
+  .tr-stage video { display: block; width: 100%; max-height: 72vh; object-fit: contain; background: #111; }
+  .tr-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .tr-hint { position: absolute; left: 8px; right: 8px; top: 8px; background: rgba(0,0,0,.72); color: #fff; font-size: 14px; font-weight: 800; padding: 8px 10px; border-radius: 10px; text-align: center; pointer-events: none; }
+  .tr-run { background: #d9412b; }
+  .tr-man { display: flex; gap: 8px; margin-top: 8px; }
+  .tr-man button { flex: 1; min-height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font: inherit; font-weight: 800; }
+  .tr-man #trManDone { background: #d9412b; color: #fff; border: none; }
+  .tr-man #trManDone:disabled { opacity: .45; }
+  .tr-res { margin-top: 10px; border: 2px solid #d9412b; border-radius: 14px; padding: 12px; background: var(--surface); }
+  .tr-big { font-size: 18px; font-weight: 800; }
+  .tr-big b { font-size: 40px; font-weight: 900; color: #d9412b; margin: 0 2px; }
+  .tr-big small { display: block; font-size: 13px; color: var(--ink-soft); font-weight: 700; }
+  .tr-conf { font-size: 13px; font-weight: 700; margin-top: 4px; }
+  .tr-cmp { margin: 6px 0 0; font-size: 15px; font-weight: 800; }
+  .tr-res table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+  .tr-res td { padding: 5px 4px; border-bottom: 1px solid var(--line); }
+  .tr-res td + td { text-align: right; font-weight: 800; }
+  .tr-tips { margin-top: 10px; font-size: 13px; }
+  .tr-tips summary { font-weight: 800; cursor: pointer; }
+  .tr-tips li { margin: 4px 0; line-height: 1.6; }
   .coach { margin-top: 10px; border-radius: 14px; border: 2px solid #6b3fa0; padding: 12px; background: var(--surface); }
   .coach h3 { margin: 0 0 6px; font-size: 16px; }
   .coach .lead { font-size: 14px; line-height: 1.7; margin: 0 0 8px; }
@@ -1907,7 +1931,44 @@
     <div class="coach" id="cmpCoach" hidden></div>
   </section>
 
-  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.7.0（2026/9/28）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
+  <section class="card" id="trCard" data-tabs="swing">
+    <h2>弾道トレーサー（実験版）</h2>
+    <p class="map-note" style="margin-top:0;">打った動画から、ボールの通り道に赤い線を引き、おおよそのキャリー（ヤード）を出します。スマホを<b>ボールの後ろ（飛ぶ方向の反対）</b>に置いて、<b>普通のビデオ（1×）</b>で撮った動画が向いています。</p>
+    <div class="s3-slot" id="trSlot"><b>打った動画</b><small id="trInfo">後ろから撮った1球の動画</small><div class="row"><label>撮る<input type="file" id="trCam" accept="video/*" capture="environment" hidden></label><label>選ぶ<input type="file" id="trPick" accept="video/*" hidden></label></div></div>
+    <div class="tr-set">
+      <label>番手<select id="trClub"></select></label>
+      <label>レンズ<select id="trLens"><option value="1">1×（ふつう）</option><option value="0.5">0.5×（広角）</option><option value="2">2×</option><option value="auto">ズームした・わからない</option></select></label>
+    </div>
+    <div class="tr-stage" id="trTap">
+      <div class="cmp-empty" id="trEmpty">ここに動画が出ます</div>
+      <video id="trV" playsinline muted preload="auto" hidden></video>
+      <canvas id="trC"></canvas>
+      <div class="tr-hint" id="trHint" hidden></div>
+    </div>
+    <input type="range" class="sw-scrub" id="trScrub" min="0" max="1000" value="0" aria-label="再生位置" disabled>
+    <div class="sw-row">
+      <button type="button" id="trBack">◀ 1コマ</button>
+      <button type="button" class="big" id="trPlay">▶ 再生</button>
+      <button type="button" id="trFwd">1コマ ▶</button>
+    </div>
+    <div class="tr-man" id="trManBar" hidden><button type="button" id="trManCancel">やめる</button><button type="button" id="trManDone" disabled>これで計算</button></div>
+    <button type="button" class="s3-run tr-run" id="trRun" disabled>🎯 弾道を描く（ボールを自動で追う）</button>
+    <button type="button" class="pin-clear" id="trStop" hidden style="margin-top:6px;">中止する</button>
+    <button type="button" class="pin-clear" id="trManual" hidden style="margin-top:6px;">✋ 手動でボールを指定する</button>
+    <div class="s3-prog" id="trProg">動画を選んだら、アドレスの場面でボールをタップしてください。</div>
+    <div class="s3-bar"><i id="trBar" style="background:#d9412b"></i></div>
+    <div class="tr-res" id="trRes" hidden></div>
+    <button type="button" class="s3-run tr-run" id="trSave" hidden>💾 線入りの動画を保存</button>
+    <details class="tr-tips"><summary>うまく撮るコツ</summary><ul>
+      <li>スマホは<b>ボールの2〜4m後ろ</b>、胸〜腰の高さ。三脚やバッグに立てかけて<b>動かさない</b>。</li>
+      <li><b>縦向き</b>で、画面の上半分に<b>空（ネット）を広く</b>入れる。ボールが早く画面から出ると、ヤードの確かさが下がります。</li>
+      <li>カメラは<b>「ビデオ」の1×</b>。スローモーションやズームは使わない（使ったときは「レンズ」を合わせる）。</li>
+      <li>夕方・夜の練習場（空が暗く、ボールが明るい）がいちばん見つけやすいです。昼の白い空では見失うことがあります。</li>
+      <li>1本の動画に何球入っていても大丈夫。調べたい球のアドレスで止めて、ボールをタップします。</li>
+    </ul></details>
+  </section>
+
+  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.8.0（2026/9/29）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
 </div>
 
 <div class="rm" id="rm" hidden role="dialog" aria-label="ラウンド画面（プレーファースト）">
@@ -3933,7 +3994,7 @@
     $("ruleBack").addEventListener("click", function () { ruleOpen = ""; renderRules(); });
   }
 
-  var HELP = [{"s": "#swCmpCard", "t": "2本を並べて比べる", "x": "前の自分と今日の自分などを並べて同時に再生。「先生に見てもらう」でAIがアドレス・トップ・インパクトを自動でそろえ、違いと練習方法を教えます。", "a": "swing"}, {"s": "#sw3dCard", "t": "3Dスイング（実験版）", "x": "正面（A）と後方（B）の動画をAIで立体のアバターに。指で回して好きな角度から、手の軌道・肩と腰の回転・頭の動きを見られます。ネット接続が必要。", "a": "swing"}, {"s": "#tab-swing", "t": "スイングタブ", "x": "スイング動画をスロー・コマ送りで見て、線・円・角度を描けます。アドレス・トップ・インパクトを記録するとテンポ（約3：1が目安）。", "a": "more"}, {"s": "#swingCard", "t": "スイングチェック", "x": "撮る／動画を選ぶ → 速さを選んで再生。✋送るで画面を左右になぞるとコマ送り。道具を選ぶと線を描けます。", "a": "more"}, {"s": "#verBadge", "t": "バージョン", "x": "いまのアプリの版です。押すと更新内容の一覧。GitHubにアップロードした後、番号が変わっていれば反映されています。", "a": "more"}, {"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか（左奥〜右手前の9か所）。今日のピン位置（カートナビの数字）を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③まわりの点数", "x": "奥・手前・左・右を押して、点数（3ペナルティ〜−2片手でも寄る）を選びます。最初は全部0。0でも曲がり幅のぶんは端から離します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "4方向とも端から「曲がり幅＋点数」を取れる所のうち、ピンにいちばん近い点。下の内訳で、どの方向のためにずらしたかが分かります。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
+  var HELP = [{"s": "#trCard", "t": "弾道トレーサー（実験版）", "x": "後ろから撮った1球の動画で、アドレスのボールをタップ→「弾道を描く」。ボールを自動で追って赤い線を引き、おおよそのキャリー・打ち出し・曲がりを出します。線入りの動画も保存できます。", "a": "swing"}, {"s": "#swCmpCard", "t": "2本を並べて比べる", "x": "前の自分と今日の自分などを並べて同時に再生。「先生に見てもらう」でAIがアドレス・トップ・インパクトを自動でそろえ、違いと練習方法を教えます。", "a": "swing"}, {"s": "#sw3dCard", "t": "3Dスイング（実験版）", "x": "正面（A）と後方（B）の動画をAIで立体のアバターに。指で回して好きな角度から、手の軌道・肩と腰の回転・頭の動きを見られます。ネット接続が必要。", "a": "swing"}, {"s": "#tab-swing", "t": "スイングタブ", "x": "スイング動画をスロー・コマ送りで見て、線・円・角度を描けます。アドレス・トップ・インパクトを記録するとテンポ（約3：1が目安）。", "a": "more"}, {"s": "#swingCard", "t": "スイングチェック", "x": "撮る／動画を選ぶ → 速さを選んで再生。✋送るで画面を左右になぞるとコマ送り。道具を選ぶと線を描けます。", "a": "more"}, {"s": "#verBadge", "t": "バージョン", "x": "いまのアプリの版です。押すと更新内容の一覧。GitHubにアップロードした後、番号が変わっていれば反映されています。", "a": "more"}, {"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか（左奥〜右手前の9か所）。今日のピン位置（カートナビの数字）を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③まわりの点数", "x": "奥・手前・左・右を押して、点数（3ペナルティ〜−2片手でも寄る）を選びます。最初は全部0。0でも曲がり幅のぶんは端から離します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "4方向とも端から「曲がり幅＋点数」を取れる所のうち、ピンにいちばん近い点。下の内訳で、どの方向のためにずらしたかが分かります。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
   // 長押しで説明（どの画面でも）
   (function () {
     var timer = null, start = null, fired = false, bubble = null;
@@ -4731,7 +4792,7 @@
     // 骨格・アドレスの頭・グリッドを重ねる
     function paint(k) {
       var c = CV[k], v = V[k], ctx = c.getContext("2d"), r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-      if (c.width !== Math.round(r.width * dpr)) { c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr); }
+      if (c.width !== Math.round(r.width * dpr) || c.height !== Math.round(r.height * dpr)) { c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr); }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, r.width, r.height);
       if (!(dur(k) > 0)) return;
       var vr = v.getBoundingClientRect(), vw = v.videoWidth || vr.width, vh = v.videoHeight || vr.height, sc = Math.min(vr.width / vw, vr.height / vh);
@@ -4835,6 +4896,444 @@
     });
     window.__cmp = { state: function () { return { t: t, off: off, ai: !!AI, rt: V.R.currentTime, lt: V.L.currentTime, map: AI ? mapR(t) : null, met: AI && { L: AI.L.met, R: AI.R.met } }; }, setAI: function (l, r) { off = 0; showOff(); AI = { L: { raw: l, met: sw3d.api.metrics(l) }, R: { raw: r, met: sw3d.api.metrics(r) } }; setKeys(); coach(); }, go: goKey, coachText: function () { return $("cmpCoach").innerText; } };
   })();
+
+  // ---------- 弾道トレーサー（実験版） ----------
+  var tracer = (function () {
+    var V = $("trV"), CV = $("trC"), FPS = 30;
+    var file = null, url = null, ball = null, res = null, busy = false, abortF = false, manual = null, anim = 0, endAnim = null;
+    var LENS = { "1": 0.84, "0.5": 0.42, "2": 1.68, "auto": 0 };
+    // 番手ごとの打ち出し角・スピンの目安（アマチュア）
+    function clubPrior(id) {
+      var T = { "1W": [13, 3000], "2W": [12, 3400], "3W": [12, 3800], "4W": [12, 4000], "5W": [13, 4300], "7W": [14, 4700], "9W": [15, 5000], "11W": [16, 5300],
+        "2U": [12, 4200], "3U": [13, 4400], "4U": [13, 4600], "UT": [13, 4600], "5U": [14, 4900], "6U": [15, 5200], "7U": [16, 5500],
+        "2I": [11, 4300], "3I": [12, 4600], "4I": [13, 4900], "5I": [14, 5300], "6I": [16, 6000], "7I": [18, 6800], "8I": [20, 7600], "9I": [22, 8400] };
+      if (T[id]) return T[id];
+      var c = CAT[id]; if (c && c[3] === "g") return [26, 9200];
+      return [16, 6000];
+    }
+    // ---- 物理（ボールの飛び方） ----
+    var RHO = 1.2, BM = 0.04593, BR = 0.02135, BA = Math.PI * BR * BR, G = 9.81;
+    function fly(Vs, al, be, rpm, tilt, upto) {
+      var a = al * Math.PI / 180, b = be * Math.PI / 180, dt = 0.01;
+      var vx = Vs * Math.cos(a) * Math.sin(b), vy = Vs * Math.sin(a), vz = Vs * Math.cos(a) * Math.cos(b);
+      var x = 0, y = 0, z = 0, t = 0, w = rpm / 60, tl = tilt * Math.PI / 180, ct = Math.cos(tl), st = Math.sin(tl);
+      var T = [0], X = [0], Y = [0], Z = [0];
+      while (t < 12) {
+        var sp = Math.sqrt(vx * vx + vy * vy + vz * vz); w *= (1 - 0.04 * dt);
+        var S = w * 2 * Math.PI * BR / Math.max(sp, 1), CL = S < 0.3 ? Math.min(0.35, 1.99 * S - 3.25 * S * S) : 0.3, CD = 0.21 + 0.25 * S;
+        var hn = Math.sqrt(vx * vx + vz * vz) || 1, ax = -vz / hn * ct, ay = st, az = vx / hn * ct; // 回転軸
+        var lx = ay * vz - az * vy, ly = az * vx - ax * vz, lz = ax * vy - ay * vx, ln = Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
+        var kd = 0.5 * RHO * BA * CD * sp / BM, kl = 0.5 * RHO * BA * CL * sp * sp / BM / ln;
+        vx += (-kd * vx + kl * lx) * dt; vy += (-kd * vy + kl * ly - G) * dt; vz += (-kd * vz + kl * lz) * dt;
+        x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+        T.push(t); X.push(x); Y.push(y); Z.push(z);
+        if (upto != null && t >= upto) break;
+        if (y < 0 && t > 0.3) break;
+      }
+      return { T: T, X: X, Y: Y, Z: Z };
+    }
+    function at(F, t) { var T = F.T, n = T.length; if (t <= 0) return [0, 0, 0]; if (t >= T[n - 1]) return [F.X[n - 1], F.Y[n - 1], F.Z[n - 1]]; var i = Math.min(n - 2, Math.floor(t / 0.01)); var k = (t - T[i]) / (T[i + 1] - T[i]); return [F.X[i] + (F.X[i + 1] - F.X[i]) * k, F.Y[i] + (F.Y[i + 1] - F.Y[i]) * k, F.Z[i] + (F.Z[i + 1] - F.Z[i]) * k]; }
+    // ---- カメラ ----
+    function cam(p, W, H, tee, dia) {
+      var f = Math.exp(p[6]), phi = p[5], cx = W / 2, cy = H / 2, c = Math.cos(phi), s = Math.sin(phi);
+      var rx = (tee[0] - cx) / f, ry = -(tee[1] - cy) / f, rn = Math.sqrt(rx * rx + ry * ry + 1), D = f * 0.0427 / dia;
+      var px = rx / rn * D, py = ry / rn * D, pz = 1 / rn * D;
+      return { f: f, c: c, s: s, cx: cx, cy: cy, P0: [px, py * c - pz * s, py * s + pz * c] };
+    }
+    function proj(C, P) { var X = P[0] + C.P0[0], Y = P[1] + C.P0[1], Z = P[2] + C.P0[2]; var Yc = Y * C.c + Z * C.s, Zc = -Y * C.s + Z * C.c; if (Zc < 0.2) return null; return [C.cx + C.f * X / Zc, C.cy - C.f * Yc / Zc]; }
+    // ---- あてはめ（レーベンバーグ・マーカート法） ----
+    function solve(A, b) { var n = b.length, M = A.map(function (r, i) { return r.concat([b[i]]); }); for (var i = 0; i < n; i++) { var mx = i; for (var r = i + 1; r < n; r++) if (Math.abs(M[r][i]) > Math.abs(M[mx][i])) mx = r; var tmp = M[i]; M[i] = M[mx]; M[mx] = tmp; if (Math.abs(M[i][i]) < 1e-12) return null; for (var r2 = i + 1; r2 < n; r2++) { var q = M[r2][i] / M[i][i]; for (var k = i; k <= n; k++) M[r2][k] -= q * M[i][k]; } } var x = new Array(n); for (var j = n - 1; j >= 0; j--) { var sum = M[j][n]; for (var k2 = j + 1; k2 < n; k2++) sum -= M[j][k2] * x[k2]; x[j] = sum / M[j][j]; } return x; }
+    function lm(fun, p0, lo, hi, steps) {
+      var p = p0.slice(), r = fun(p), cost = r.reduce(function (a, v) { return a + v * v; }, 0), lam = 1e-2;
+      for (var it = 0; it < 60; it++) {
+        var J = [], n = p.length;
+        for (var j = 0; j < n; j++) { var q = p.slice(); q[j] += steps[j]; var rj = fun(q); J.push(rj.map(function (v, i) { return (v - r[i]) / steps[j]; })); }
+        var A = [], g = [];
+        for (var a = 0; a < n; a++) { A.push([]); var s = 0; for (var i = 0; i < r.length; i++) s += J[a][i] * r[i]; g.push(-s); for (var b = 0; b < n; b++) { var s2 = 0; for (var i2 = 0; i2 < r.length; i2++) s2 += J[a][i2] * J[b][i2]; A[a].push(s2); } }
+        var improved = false;
+        for (var tries = 0; tries < 8; tries++) {
+          var B = A.map(function (row, i) { return row.map(function (v, k) { return i === k ? v * (1 + lam) + 1e-9 : v; }); });
+          var d = solve(B, g); if (!d) { lam *= 10; continue; }
+          var np = p.map(function (v, i) { return Math.max(lo[i], Math.min(hi[i], v + d[i])); });
+          var nr = fun(np), nc = nr.reduce(function (a2, v) { return a2 + v * v; }, 0);
+          if (nc < cost) { var rel = (cost - nc) / cost; p = np; r = nr; cost = nc; lam = Math.max(1e-6, lam / 3); improved = true; if (rel < 1e-7) it = 999; break; }
+          lam *= 8;
+        }
+        if (!improved) break;
+      }
+      return { p: p, cost: cost };
+    }
+    var v0cache = {};
+    function speedFor(id, pr) { // いつもの飛距離（バッグの設定）から、ふだんのボール初速の目安を逆算
+      var cd = CLUB_DEFAULTS.filter(function (c) { return c[0] === id; })[0], yd = cd ? cd[1] : (CAT[id] ? CAT[id][1] : 150), key = id + yd;
+      if (v0cache[key]) return v0cache[key];
+      var lo = 15, hi = 85;
+      for (var i = 0; i < 18; i++) { var mid = (lo + hi) / 2, F = fly(mid, pr[0], 0, pr[1], 0, null), n = F.T.length; if (F.Z[n - 1] / 0.9144 < yd) lo = mid; else hi = mid; }
+      return (v0cache[key] = (lo + hi) / 2);
+    }
+    function fitShot(o) { // o: { obs:[[frame,x,y]], imp, tee, dia, W, H, club, lens, hc }
+      var pr = clubPrior(o.club), fk = LENS[o.lens] || 0, fcen = (fk || 0.84) * Math.max(o.W, o.H), fsig = fk ? 0.1 : 0.8;
+      var V0 = o.v0 || speedFor(o.club, pr);
+      var tmax = 0; o.obs.forEach(function (q) { tmax = Math.max(tmax, (q[0] - o.imp) / FPS); });
+      function fun(p) {
+        var Fl = fly(p[0], p[1], p[2], Math.exp(p[3]), p[4], tmax + 0.08), C = cam(p, o.W, o.H, o.tee, o.dia), out = [];
+        o.obs.forEach(function (q) { var uv = proj(C, at(Fl, (q[0] - o.imp) / FPS + p[7])); if (!uv) { out.push(50, 50); return; } out.push((uv[0] - q[1]) / 3, (uv[1] - q[2]) / 3); });
+        out.push((C.P0[1] + o.hc) / 0.25, Math.log(Math.exp(p[6]) / fcen) / fsig, p[7] / 0.05, (p[3] - Math.log(pr[1])) / 0.35, p[4] / 25, (p[1] - pr[0]) / 6, (p[0] - V0) / (0.2 * V0));
+        return out;
+      }
+      var lo = [15, 2, -30, Math.log(1000), -40, -0.6, Math.log(fcen) - (fk ? 0.4 : 1.2), -0.1], hi = [85, 45, 30, Math.log(11000), 40, 0.9, Math.log(fcen) + (fk ? 0.4 : 1.6), 0.1];
+      var steps = [0.2, 0.2, 0.2, 0.02, 0.4, 0.004, 0.01, 0.002], best = null;
+      var fStarts = fk ? [1] : [0.6, 1, 2, 3.5];
+      [40, 62].forEach(function (V0) { fStarts.forEach(function (fm) { [0.1, 0.3].forEach(function (ph) {
+        var r = lm(fun, [V0, pr[0], 0, Math.log(pr[1]), 0, ph, Math.log(fcen * fm), 0], lo, hi, steps);
+        if (!best || r.cost < best.cost) best = r;
+      }); }); });
+      var p = best.p, C = cam(p, o.W, o.H, o.tee, o.dia), Fl = fly(p[0], p[1], p[2], Math.exp(p[3]), p[4], null), n = Fl.T.length;
+      var carry = Math.sqrt(Fl.X[n - 1] * Fl.X[n - 1] + Fl.Z[n - 1] * Fl.Z[n - 1]) / 0.9144, apex = Math.max.apply(null, Fl.Y);
+      var rms = 0; o.obs.forEach(function (q) { var uv = proj(C, at(Fl, (q[0] - o.imp) / FPS + p[7])); if (uv) rms += (uv[0] - q[1]) * (uv[0] - q[1]) + (uv[1] - q[2]) * (uv[1] - q[2]); }); rms = Math.sqrt(rms / o.obs.length);
+      // 打ち出し方向のまっすぐな線から、着地がどれだけ曲がったか
+      var b = p[2] * Math.PI / 180, lx = Fl.X[n - 1], lz = Fl.Z[n - 1], curve = lx * Math.cos(b) - lz * Math.sin(b);
+      return { p: p, C: C, F: Fl, carry: carry, apex: apex, lat: lx, curve: curve, flight: Fl.T[n - 1], rms: rms, V: p[0], al: p[1], be: p[2], rpm: Math.exp(p[3]), dt0: p[7] };
+    }
+    // ---- 画像処理 ----
+    var cvs = document.createElement("canvas"), cx2 = cvs.getContext("2d", { willReadFrequently: true });
+    function seek(tt) { return new Promise(function (ok) { var done = false, h = function () { if (done) return; done = true; V.removeEventListener("seeked", h); ok(); }; V.addEventListener("seeked", h); setTimeout(h, 1500); try { V.currentTime = Math.max(0, tt); } catch (e) { h(); } }); }
+    function frameT(n) { return (n + 0.3) / FPS; }
+    function grab(x0, y0, w, h) {
+      var W = V.videoWidth, H = V.videoHeight; x0 = Math.max(0, Math.floor(x0)); y0 = Math.max(0, Math.floor(y0)); w = Math.min(W - x0, Math.ceil(w)); h = Math.min(H - y0, Math.ceil(h));
+      if (cvs.width !== W || cvs.height !== H) { cvs.width = W; cvs.height = H; }
+      cx2.drawImage(V, 0, 0, W, H);
+      var d = cx2.getImageData(x0, y0, w, h).data, g = new Uint8Array(w * h);
+      for (var i = 0, j = 0; j < g.length; i += 4, j++) g[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+      return { g: g, x0: x0, y0: y0, w: w, h: h };
+    }
+    function findBall(img, tx, ty) { // タップ付近の白いボールを探す
+      tx = Math.round(tx); ty = Math.round(ty);
+      var win = 40, xs = [], lo = { x: Math.max(img.x0, tx - win), y: Math.max(img.y0, ty - win) }, hiX = Math.min(img.x0 + img.w, tx + win), hiY = Math.min(img.y0 + img.h, ty + win), vals = [];
+      for (var y = lo.y; y < hiY; y++) for (var x = lo.x; x < hiX; x++) vals.push(img.g[(y - img.y0) * img.w + (x - img.x0)]);
+      if (!vals.length) return null;
+      var srt = vals.slice().sort(function (a, b) { return a - b; }), med = srt[srt.length >> 1], mx = srt[Math.floor(srt.length * 0.997)], th = med + Math.max(12, 0.35 * (mx - med));
+      var bw = hiX - lo.x, bh = hiY - lo.y, lab = new Int32Array(bw * bh), best = null, id = 0;
+      for (var yy = 0; yy < bh; yy++) for (var xx = 0; xx < bw; xx++) {
+        var k = yy * bw + xx; if (lab[k] || vals[k] <= th) continue;
+        id++; var st = [k], n = 0, sx = 0, sy = 0, mnx = 1e9, mxx = -1; lab[k] = id;
+        while (st.length) { var q = st.pop(), qx = q % bw, qy = (q / bw) | 0; n++; sx += qx; sy += qy; if (qx < mnx) mnx = qx; if (qx > mxx) mxx = qx;
+          [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (dd) { var nx = qx + dd[0], ny = qy + dd[1]; if (nx < 0 || ny < 0 || nx >= bw || ny >= bh) return; var nk = ny * bw + nx; if (!lab[nk] && vals[nk] > th) { lab[nk] = id; st.push(nk); } }); }
+        if (n < 6 || n > 2500) continue;
+        var cxb = lo.x + sx / n, cyb = lo.y + sy / n, dist = Math.hypot(cxb - tx, cyb - ty);
+        if (!best || dist < best.d) best = { d: dist, x: cxb, y: cyb, dia: Math.max(2 * Math.sqrt(n / Math.PI), mxx - mnx + 1) }; // 下半分は影で暗いので、横幅も見る
+      }
+      return best && best.d < 30 ? best : null;
+    }
+    function presence(img, bx, by, r) {
+      var best = -999, rr = Math.max(1, Math.round(r * 0.4)), R = Math.max(3, Math.round(r * 1.6));
+      var gv = function (x, y) { x -= img.x0; y -= img.y0; if (x < 0 || y < 0 || x >= img.w || y >= img.h) return 0; return img.g[y * img.w + x]; };
+      for (var dy = -4; dy <= 4; dy += 2) for (var dx = -4; dx <= 4; dx += 2) {
+        var x = Math.round(bx + dx), y = Math.round(by + dy), c = 0, cn = 0, ring = 0, rn = 0;
+        for (var yy = -rr; yy <= rr; yy++) for (var xx = -rr; xx <= rr; xx++) { c += gv(x + xx, y + yy); cn++; }
+        for (var k = -R; k <= R; k += 2) { ring += gv(x + k, y - R) + gv(x + k, y + R) + gv(x - R, y + k) + gv(x + R, y + k); rn += 4; }
+        best = Math.max(best, c / cn - ring / rn);
+      }
+      return best;
+    }
+    function blobs(a, b, c, cap, dia) { // bが前後のコマより明るい（暗い）小さなかたまり
+      var w = b.w, h = b.h, n = w * h, m = new Uint8Array(n), lab = new Int32Array(n), out = [];
+      for (var i = 0; i < n; i++) { var v = b.g[i], p = a.g[i], q = c.g[i]; if (v - (p > q ? p : q) > 22 || (p < q ? p : q) - v > 22) m[i] = 1; }
+      var id = 0, st = [];
+      for (var k = 0; k < n; k++) {
+        if (!m[k] || lab[k]) continue;
+        id++; st.length = 0; st.push(k); lab[k] = id; var cnt = 0, sx = 0, sy = 0;
+        while (st.length) { var q2 = st.pop(), qx = q2 % w, qy = (q2 / w) | 0; cnt++; sx += qx; sy += qy;
+          if (qx > 0 && m[q2 - 1] && !lab[q2 - 1]) { lab[q2 - 1] = id; st.push(q2 - 1); }
+          if (qx < w - 1 && m[q2 + 1] && !lab[q2 + 1]) { lab[q2 + 1] = id; st.push(q2 + 1); }
+          if (qy > 0 && m[q2 - w] && !lab[q2 - w]) { lab[q2 - w] = id; st.push(q2 - w); }
+          if (qy < h - 1 && m[q2 + w] && !lab[q2 + w]) { lab[q2 + w] = id; st.push(q2 + w); }
+        }
+        if (cnt >= 2 && cnt <= cap) out.push([b.x0 + sx / cnt, b.y0 + sy / cnt, cnt]);
+      }
+      // 近くのかけら（すじ状のボール）をまとめる
+      var md = Math.max(8, dia * 1.3), merged = [];
+      out.sort(function (u, v) { return v[2] - u[2]; }).forEach(function (o) {
+        var hit = null; for (var i2 = 0; i2 < merged.length; i2++) if (Math.hypot(merged[i2][0] - o[0], merged[i2][1] - o[1]) < md + Math.sqrt(merged[i2][2])) { hit = merged[i2]; break; }
+        if (hit && hit[2] + o[2] <= cap) { var s = hit[2] + o[2]; hit[0] = (hit[0] * hit[2] + o[0] * o[2]) / s; hit[1] = (hit[1] * hit[2] + o[1] * o[2]) / s; hit[2] = s; } else merged.push(o.slice());
+      });
+      return merged;
+    }
+    function track(B, imp, bx, by, r, nFrames, W, H) {
+      var cands = [];
+      for (var k = Math.floor(imp); k < imp + 7; k++) {
+        if (!B[k] || !B[k + 1] || !B[k + 2]) continue;
+        B[k].forEach(function (a) {
+          if (a[1] > by - 2 * r) return;
+          B[k + 1].forEach(function (b) {
+            var dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+            if (dy >= 0 || L < 3 || L > 900) return;
+            var ux = dx / L, uy = dy / L, vx = bx - a[0], vy = by - a[1], perp = Math.abs(vx * uy - vy * ux), along = vx * ux + vy * uy;
+            if (along > 0 || perp > Math.max(40, 0.12 * Math.hypot(vx, vy))) return;
+            B[k + 2].forEach(function (c) {
+              var ex = c[0] - b[0], ey = c[1] - b[1], rho = (ex * dx + ey * dy) / (L * L);
+              if (!(rho > 0.55 && rho < 1.15)) return;
+              var err = Math.hypot(ex - rho * dx, ey - rho * dy);
+              if (err > Math.max(8, 0.25 * L)) return;
+              cands.push([err / Math.max(L, 5) + perp / Math.max(40, Math.hypot(vx, vy)), k, a, b, c]);
+            });
+          });
+        });
+      }
+      cands.sort(function (u, v) { return u[0] - v[0]; });
+      var best = null;
+      cands.slice(0, 60).forEach(function (cd) {
+        var tr = [[cd[1], cd[2][0], cd[2][1]], [cd[1] + 1, cd[3][0], cd[3][1]], [cd[1] + 2, cd[4][0], cd[4][1]]];
+        var vx = tr[2][1] - tr[1][1], vy = tr[2][2] - tr[1][2], coast = 0, i = tr[2][0], exit = false;
+        while (i < nFrames - 2) {
+          i++; if (!B[i]) break;
+          var last = tr[tr.length - 1], px = last[1] + vx * (coast + 1), py = last[2] + vy * (coast + 1);
+          if (px < -20 || py < -20 || px > W + 20 || py > H + 20) { exit = true; break; }
+          var R = Math.max(14, 0.7 * Math.hypot(vx, vy)) * (1 + coast * 0.5), q = null, qd = 1e9;
+          B[i].forEach(function (o) { var d = Math.hypot(o[0] - px, o[1] - py); if (d < R && d < qd) { qd = d; q = o; } });
+          if (!q) { coast++; if (coast > 3) break; continue; }
+          var nvx = (q[0] - last[1]) / (coast + 1), nvy = (q[1] - last[2]) / (coast + 1);
+          vx = 0.5 * vx + 0.5 * nvx; vy = 0.5 * vy + 0.5 * nvy; coast = 0;
+          tr.push([i, q[0], q[1]]);
+        }
+        var sc = tr.length + (exit ? 10 : 0) - 1.5 * (cd[1] - imp);
+        if (!best || sc > best.sc) best = { sc: sc, tr: tr };
+      });
+      return best && best.tr;
+    }
+    // ---- 表示 ----
+    function fit2() { // 動画の表示位置
+      var r = CV.getBoundingClientRect(), vr = V.getBoundingClientRect(), W = V.videoWidth || 1, H = V.videoHeight || 1, sc = Math.min(vr.width / W, vr.height / H);
+      return { r: r, sc: sc, bx: vr.left - r.left + (vr.width - W * sc) / 2, by: vr.top - r.top + (vr.height - H * sc) / 2 };
+    }
+    function pathAt(tt, full) { // 時刻 tt（インパクトからの秒）までの線（動画の座標）
+      if (!res) return [];
+      var pts = [], R = res.fit, tEnd = full ? R.flight : Math.min(tt, R.flight);
+      var lastObs = (res.obs[res.obs.length - 1][0] - res.imp) / FPS + R.dt0;
+      pts.push([res.tee[0], res.tee[1]]);
+      res.obs.forEach(function (q) { var ts = (q[0] - res.imp) / FPS + R.dt0; if (ts <= tEnd) pts.push([q[1], q[2]]); });
+      if (res.ok && tEnd > lastObs) for (var t = lastObs + 0.02; t <= tEnd + 1e-6; t += 0.02) { var uv = proj(R.C, at(R.F, t)); if (uv) pts.push(uv); }
+      return pts;
+    }
+    function draw(ctxOverride, geo) {
+      var ctx = ctxOverride || CV.getContext("2d"), g = geo, dpr = window.devicePixelRatio || 1;
+      if (!ctxOverride) {
+        g = fit2(); if (CV.width !== Math.round(g.r.width * dpr) || CV.height !== Math.round(g.r.height * dpr)) { CV.width = Math.round(g.r.width * dpr); CV.height = Math.round(g.r.height * dpr); }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, g.r.width, g.r.height);
+      }
+      var P = function (p) { return [g.bx + p[0] * g.sc, g.by + p[1] * g.sc]; };
+      if (ball && !res) { var c = P([ball.x, ball.y]); ctx.strokeStyle = "#ffd65a"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(c[0], c[1], Math.max(9, ball.dia * g.sc * 1.3), 0, Math.PI * 2); ctx.stroke(); }
+      if (manual) { ctx.fillStyle = "#ff5a3c"; manual.pts.forEach(function (q) { var c2 = P([q[1], q[2]]); ctx.beginPath(); ctx.arc(c2[0], c2[1], 5, 0, Math.PI * 2); ctx.fill(); }); }
+      if (!res) return;
+      var tt = endAnim ? endAnim.t : (V.currentTime - (res.imp + 0.3) / FPS);
+      var pts = pathAt(tt, false);
+      if (pts.length > 1) {
+        ctx.lineCap = "round"; ctx.lineJoin = "round";
+        [[10, "rgba(255,60,40,.25)"], [5, "rgba(255,70,40,.9)"], [2, "rgba(255,240,200,.95)"]].forEach(function (st) {
+          ctx.strokeStyle = st[1]; ctx.lineWidth = st[0] * Math.max(0.6, g.sc * 2); ctx.beginPath();
+          pts.forEach(function (p, i) { var c3 = P(p); if (i) ctx.lineTo(c3[0], c3[1]); else ctx.moveTo(c3[0], c3[1]); }); ctx.stroke();
+        });
+      }
+      if (res.ok && tt >= res.fit.flight - 0.01) { // 着地とヤード
+        var e = pts[pts.length - 1]; if (e) { var c4 = P(e); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(c4[0], c4[1], 5, 0, Math.PI * 2); ctx.fill();
+          var txt = "約" + res.yd + "Y"; ctx.font = "900 " + Math.round(Math.max(18, 44 * g.sc)) + "px sans-serif"; ctx.textAlign = "center"; ctx.lineWidth = 5; ctx.strokeStyle = "rgba(0,0,0,.7)"; ctx.strokeText(txt, c4[0], c4[1] - 14); ctx.fillStyle = "#fff"; ctx.fillText(txt, c4[0], c4[1] - 14); }
+      }
+    }
+    function prog(t, pct) { $("trProg").textContent = t; if (typeof pct === "number") $("trBar").style.width = Math.round(pct) + "%"; }
+    function scrubSync() { if (V.duration > 0) $("trScrub").value = String(Math.round(V.currentTime / V.duration * 1000)); }
+    V.addEventListener("seeked", function () { if (!busy) { draw(); scrubSync(); } });
+    V.addEventListener("timeupdate", function () { if (!busy) scrubSync(); });
+    function loop() { if (V.paused && !endAnim) return; draw(); anim = requestAnimationFrame(loop); }
+    V.addEventListener("play", function () { endAnim = null; cancelAnimationFrame(anim); anim = requestAnimationFrame(loop); $("trPlay").textContent = "⏸ 止める"; });
+    V.addEventListener("pause", function () { $("trPlay").textContent = "▶ 再生"; draw(); });
+    V.addEventListener("ended", function () { // 動画が終わっても、弾道は着地まで描き続ける
+      if (!res) return;
+      var t0 = V.currentTime - (res.imp + 0.3) / FPS; if (t0 >= res.fit.flight) { draw(); return; }
+      var s0 = performance.now(); endAnim = { t: t0 };
+      (function step() { if (!endAnim) return; endAnim.t = t0 + (performance.now() - s0) / 1000; draw(); if (endAnim.t < res.fit.flight + 0.05) anim = requestAnimationFrame(step); else { endAnim.t = res.fit.flight; draw(); } })();
+    });
+    // 1秒に何コマの動画か（ふつうは30。60で撮った動画にも合わせる）
+    function measureFps() {
+      if (!V.requestVideoFrameCallback) { V.pause(); return; }
+      var ts = [], n = 0;
+      var cb = function (now, md) { ts.push(md.mediaTime); n++; if (n < 10 && !V.paused) V.requestVideoFrameCallback(cb); else done(); };
+      var fin = false, done = function () { if (fin) return; fin = true; V.pause(); try { V.currentTime = 0; } catch (e) {}
+        var d = []; for (var i = 1; i < ts.length; i++) { var x = ts[i] - ts[i - 1]; if (x > 0.002) d.push(x); }
+        if (d.length >= 3) { d.sort(function (a, b) { return a - b; }); var f = 1 / d[0]; // いちばん短い間隔＝1コマ
+          FPS = [24, 25, 30, 50, 60, 120, 240].reduce(function (a, b) { return Math.abs(b - f) < Math.abs(a - f) ? b : a; }, 30); } };
+      V.requestVideoFrameCallback(cb); setTimeout(done, 1500);
+    }
+    function setFile(f) {
+      if (!f) return; file = f; res = null; ball = null; manual = null; endAnim = null;
+      if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(f);
+      V.src = url; V.hidden = false; $("trEmpty").hidden = true; $("trRes").hidden = true; $("trSave").hidden = true; $("trManual").hidden = true;
+      $("trInfo").textContent = f.name.length > 22 ? f.name.slice(0, 20) + "…" : f.name;
+      FPS = 30;
+      try { V.load(); var pp = V.play(); if (pp && pp.then) pp.then(function () { measureFps(); }).catch(function () {}); } catch (e) {}
+      V.addEventListener("loadedmetadata", function once() { V.removeEventListener("loadedmetadata", once); $("trScrub").disabled = false; hint("① アドレスの場面まで動かして、ボールを指でタップ"); $("trRun").disabled = true; draw(); });
+    }
+    function hint(t) { $("trHint").textContent = t; $("trHint").hidden = !t; }
+    $("trCam").addEventListener("change", function () { setFile(this.files && this.files[0]); this.value = ""; });
+    $("trPick").addEventListener("change", function () { setFile(this.files && this.files[0]); this.value = ""; });
+    $("trScrub").addEventListener("input", function () { V.pause(); endAnim = null; if (V.duration > 0) V.currentTime = +this.value / 1000 * V.duration; });
+    $("trBack").addEventListener("click", function () { V.pause(); endAnim = null; V.currentTime = Math.max(0, V.currentTime - 1 / FPS); });
+    $("trFwd").addEventListener("click", function () { V.pause(); endAnim = null; V.currentTime = Math.min(V.duration || 0, V.currentTime + 1 / FPS); });
+    $("trPlay").addEventListener("click", function () {
+      if (!(V.duration > 0)) return;
+      if (!V.paused) { V.pause(); return; }
+      endAnim = null;
+      if (res && (V.ended || V.currentTime >= V.duration - 0.05 || V.currentTime > (res.imp + 0.3) / FPS)) V.currentTime = Math.max(0, (res.imp - 20) / FPS);
+      V.play();
+    });
+    // タップ：ボールの指定（手動モードでは弾道の点）
+    $("trTap").addEventListener("click", function (e) {
+      if (busy || !(V.videoWidth > 0)) return;
+      var g = fit2(), x = (e.clientX - g.r.left - g.bx) / g.sc, y = (e.clientY - g.r.top - g.by) / g.sc;
+      if (x < 0 || y < 0 || x > V.videoWidth || y > V.videoHeight) return;
+      if (manual) { manual.pts.push([Math.round(V.currentTime * FPS - 0.3), x, y]); V.currentTime = Math.min(V.duration, V.currentTime + 1 / FPS); $("trManDone").disabled = manual.pts.length < 3; hint("ボールの位置をタップ（" + manual.pts.length + "点）。3点以上で「これで計算」"); return; }
+      V.pause(); res = null; endAnim = null; $("trRes").hidden = true; $("trSave").hidden = true;
+      var img = grab(x - 60, y - 60, 120, 120), b = findBall(img, x, y);
+      ball = b ? { x: b.x, y: b.y, dia: Math.max(6, b.dia), t: V.currentTime, auto: true } : { x: x, y: y, dia: 0.009 * Math.max(V.videoWidth, V.videoHeight), t: V.currentTime, auto: false };
+      hint(""); $("trRun").disabled = false; draw();
+      prog(b ? "ボールを見つけました（黄色の丸）。「弾道を描く」を押してください。" : "ボールがはっきり見えないので、タップした位置を使います。できればボールの真上をタップしてください。", 0);
+    });
+    function clubSel() { return $("trClub").value || "7I"; }
+    function fillClubs() {
+      var s = $("trClub"), cur = s.value; s.innerHTML = "";
+      CLUB_DEFAULTS.slice().reverse().forEach(function (c) { var o = document.createElement("option"); o.value = c[0]; o.textContent = c[0] + "（いつも " + c[1] + "Y）"; s.appendChild(o); });
+      if (cur) s.value = cur; if (!s.value && s.options.length) s.selectedIndex = 0;
+    }
+    function finish(obs, imp, how) {
+      prog("飛び方を計算しています…", 92);
+      return new Promise(function (ok) { setTimeout(function () {
+        var W = V.videoWidth, H = V.videoHeight, base = { obs: obs, imp: imp, tee: [ball.x, ball.y], dia: ball.dia, W: W, H: H, club: clubSel(), lens: $("trLens").value, hc: 1.2 };
+        var R = fitShot(base), carries = [R.carry];
+        [[0.8, 1], [1.6, 1], [1.2, 0.85], [1.2, 1.15]].forEach(function (v) { var o = Object.assign({}, base, { hc: v[0], dia: ball.dia * v[1] }); carries.push(fitShot(o).carry); });
+        var lo = Math.min.apply(null, carries), hi = Math.max.apply(null, carries);
+        res = { ok: R.rms <= 6 && obs.length >= 5, fit: R, obs: obs, imp: imp, tee: [ball.x, ball.y], yd: Math.round(R.carry / 5) * 5, lo: Math.floor(Math.min(lo, R.carry * 0.9) / 5) * 5, hi: Math.ceil(Math.max(hi, R.carry * 1.1) / 5) * 5, how: how, club: base.club, lens: base.lens };
+        showRes(); ok();
+      }, 30); });
+    }
+    function showRes() {
+      var R = res.fit, n = res.obs.length, dur = (res.obs[n - 1][0] - res.obs[0][0]) / FPS;
+      var conf = n >= 18 && res.lens !== "auto" && R.rms < 3 ? 3 : n >= 8 && R.rms < 4 ? 2 : 1;
+      if (res.lens === "auto" && conf > 2) conf = 2;
+      var dirDeg = R.be, dir = Math.abs(dirDeg) < 1.5 ? "まっすぐ" : (dirDeg > 0 ? "右へ " : "左へ ") + Math.abs(dirDeg).toFixed(0) + "°";
+      var cv = R.curve / 0.9144, shape = Math.abs(cv) < 4 ? "ストレート" : cv > 0 ? (cv > 12 ? "スライス" : "フェード") : (cv < -12 ? "フック" : "ドロー");
+      var land = R.lat / 0.9144, landT = Math.abs(land) < 3 ? "ほぼ真ん中" : (land > 0 ? "右へ " : "左へ ") + Math.round(Math.abs(land)) + "Y";
+      var cd = CLUB_DEFAULTS.filter(function (c) { return c[0] === res.club; })[0], cmp = "";
+      if (cd) { var d = res.yd - cd[1]; cmp = "いつもの" + res.club + "（" + cd[1] + "Y）" + (Math.abs(d) < 5 ? "とほぼ同じ" : "より " + Math.abs(d) + "Y " + (d > 0 ? "長い" : "短い")); }
+      var box = $("trRes"); box.hidden = false;
+      if (!res.ok) {
+        box.innerHTML = "<div class='tr-big' style='font-size:16px'>ボールの線は引けましたが、ヤードは出せませんでした</div>" +
+          "<p class='map-note' style='margin:6px 0 0;'>ボールを " + n + "コマ（" + dur.toFixed(1) + "秒）しか追えなかったか、動きが計算と合いませんでした（" + (n < 8 ? "ボールがすぐ画面の外に出た" : "カメラが遠い・ズームしている可能性") + "）。" +
+          "スマホをボールの2〜4m後ろに置き、1×で、画面の上半分に空を広く入れて撮ると出せるようになります。" + (res.lens === "auto" ? "" : "ズームして撮ったときは「レンズ」を「ズームした・わからない」にしてもう一度。") + "</p>" +
+          "<table><tr><td>打ち出し</td><td>" + dir + "</td></tr></table>";
+        $("trSave").hidden = !(window.MediaRecorder && CV.captureStream);
+        V.currentTime = Math.max(0, (res.imp - 20) / FPS);
+        prog("線を引きました（ヤードは出せませんでした）。「▶ 再生」で見られます。", 100);
+        return;
+      }
+      box.innerHTML = "<div class='tr-big'>キャリー 約<b>" + res.yd + "</b>Y<small>（" + res.lo + "〜" + res.hi + "Y くらい）</small></div>" +
+        "<div class='tr-conf'>確かさ " + ["", "★☆☆ 低い（参考程度）", "★★☆ ふつう", "★★★ 高め"][conf] + "・ボールを " + n + "コマ（" + dur.toFixed(1) + "秒）追えました" + (res.how === "manual" ? "（手動）" : "") + "</div>" +
+        (cmp ? "<p class='tr-cmp'>" + cmp + "</p>" : "") +
+        "<table><tr><td>打ち出し</td><td>" + dir + "</td></tr><tr><td>曲がり</td><td>" + shape + (shape === "ストレート" ? "" : "（" + Math.round(Math.abs(cv)) + "Y）") + "</td></tr><tr><td>着地</td><td>" + landT + "</td></tr>" +
+        "<tr><td>ボール初速</td><td>約" + Math.round(R.V) + "m/s（" + Math.round(R.V * 2.237) + "mph）</td></tr><tr><td>打ち出し角</td><td>約" + Math.round(R.al) + "°</td></tr><tr><td>いちばん高い所</td><td>約" + Math.round(R.apex) + "m</td></tr></table>" +
+        "<p class='map-note' style='margin:6px 0 0;'>▶ 再生で、赤い線が伸びていきます（見えなくなった後は計算の線）。数字はスマホの動画からの推定で、弾道測定器ほど正確ではありません。「今日の傾向」を見る目安にしてください。" + (res.lens === "auto" ? "レンズ（ズーム）を選ぶと確かさが上がります。" : "") + "</p>";
+      $("trSave").hidden = !(window.MediaRecorder && CV.captureStream);
+      V.currentTime = Math.max(0, (res.imp - 20) / FPS);
+      prog("できました。「▶ 再生」で弾道を見てください。", 100);
+    }
+    $("trStop").addEventListener("click", function () { abortF = true; });
+    $("trRun").addEventListener("click", function () {
+      if (!ball || busy) return;
+      busy = true; abortF = false; manual = null; res = null; V.pause(); this.disabled = true; $("trStop").hidden = false; $("trManual").hidden = true; $("trRes").hidden = true; $("trSave").hidden = true;
+      var W = V.videoWidth, H = V.videoHeight, r = ball.dia / 2, n0 = Math.round(ball.t * FPS - 0.3), nEnd = Math.floor((V.duration || 0) * FPS) - 1;
+      var c0 = null, miss = 0, imp = null, n = n0;
+      prog("インパクトを探しています…", 2);
+      function stopMsg(m) { busy = false; $("trRun").disabled = false; $("trStop").hidden = true; prog(m, 0); draw(); }
+      // ① インパクト：ボールが消えたコマ
+      (function scan() {
+        if (abortF) return stopMsg("中止しました。");
+        if (n > nEnd || n > n0 + FPS * 15) return stopMsg("インパクトが見つかりませんでした。アドレスの場面（打つ前）でボールをタップしてから押してください。");
+        seek(frameT(n)).then(function () {
+          var img = grab(ball.x - 3 * r - 8, ball.y - 3 * r - 8, 6 * r + 16, 6 * r + 16), p = presence(img, ball.x, ball.y, r);
+          if (c0 === null) c0 = Math.max(8, p);
+          if (p < 0.4 * c0) miss++; else miss = 0;
+          if (miss >= 6) { imp = n - 5; return phase2(); }
+          n++; if ((n - n0) % 5 === 0) prog("インパクトを探しています… " + ((n - n0) / FPS).toFixed(1) + "秒", 2 + Math.min(18, (n - n0) / 3)); scan();
+        });
+      })();
+      // ② インパクトのあと：動いた小さな点を集める
+      function phase2() {
+        var k0 = imp - 1, k1 = Math.min(nEnd, imp + FPS * 2.6), roiH = Math.min(H, ball.y + 3 * r), cap = Math.max(1500, 20 * ball.dia * ball.dia), B = {}, win = [], k = k0;
+        (function step() {
+          if (abortF) return stopMsg("中止しました。");
+          if (k > k1) return phase3(B, k1 - k0);
+          seek(frameT(k)).then(function () {
+            win.push({ k: k, img: grab(0, 0, W, roiH) }); if (win.length > 3) win.shift();
+            if (win.length === 3) B[win[1].k] = blobs(win[0].img, win[1].img, win[2].img, cap, ball.dia).filter(function (o) { return o[1] < ball.y - r; });
+            prog("ボールを追いかけています… " + (k - k0) + "/" + (k1 - k0) + "コマ", 20 + 70 * (k - k0) / (k1 - k0));
+            k++; setTimeout(step, 0);
+          });
+        })();
+      }
+      function phase3(B, nF) {
+        var tr = track(B, imp, ball.x, ball.y, r, imp + nF, W, H);
+        if (!tr || tr.length < 3) { busy = false; $("trRun").disabled = false; $("trStop").hidden = true; $("trManual").hidden = false; resImpact = imp; prog("ボールを自動で見つけられませんでした。「手動でボールを指定」で、飛んでいくボールを数コマ分タップすると計算できます。", 0); V.currentTime = frameT(imp); return; }
+        resImpact = imp;
+        finish(tr, imp - 0.5, "auto").then(function () { busy = false; $("trRun").disabled = false; $("trStop").hidden = true; $("trManual").hidden = false; });
+      }
+    });
+    var resImpact = null;
+    $("trManual").addEventListener("click", function () {
+      if (!ball) return; res = null; manual = { pts: [] }; $("trManBar").hidden = false; $("trRes").hidden = true; $("trManDone").disabled = true;
+      if (resImpact !== null) V.currentTime = frameT(resImpact);
+      hint("飛んでいくボールをタップ → 1コマ進みます。3点以上で「これで計算」"); draw();
+    });
+    $("trManCancel").addEventListener("click", function () { manual = null; $("trManBar").hidden = true; hint(""); draw(); });
+    $("trManDone").addEventListener("click", function () {
+      if (!manual || manual.pts.length < 3) return;
+      var pts = manual.pts.slice(); manual = null; $("trManBar").hidden = true; hint("");
+      var imp = resImpact !== null ? resImpact - 0.5 : pts[0][0] - 1.5;
+      busy = true; finish(pts, imp, "manual").then(function () { busy = false; });
+    });
+    // 線入り動画の保存
+    $("trSave").addEventListener("click", function () {
+      if (!res || busy) return;
+      var btn = this, W = V.videoWidth, H = V.videoHeight, k = Math.min(1, 720 / Math.min(W, H)), ow = Math.round(W * k / 2) * 2, oh = Math.round(H * k / 2) * 2;
+      var oc = document.createElement("canvas"); oc.width = ow; oc.height = oh; var octx = oc.getContext("2d");
+      var mime = ["video/mp4", "video/webm;codecs=vp9", "video/webm"].filter(function (m) { try { return MediaRecorder.isTypeSupported(m); } catch (e) { return false; } })[0];
+      if (!mime) { prog("この端末では動画の保存ができません。画面を録画して保存してください。", 0); return; }
+      var stream = oc.captureStream(30), rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5000000 }), chunks = [];
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      busy = true; btn.disabled = true; prog("動画を作っています…（そのままお待ちください）", 10);
+      var geo = { r: { width: ow, height: oh }, sc: k, bx: 0, by: 0 }, start = Math.max(0, (res.imp - 25) / FPS), impT = (res.imp + 0.3) / FPS, tail = null;
+      function paint(tt) { octx.drawImage(V, 0, 0, ow, oh); var save = endAnim; endAnim = tt != null ? { t: tt } : null; draw(octx, geo); endAnim = save; }
+      rec.onstop = function () {
+        var blob = new Blob(chunks, { type: mime.split(";")[0] }), ext = mime.indexOf("mp4") >= 0 ? "mp4" : "webm", name = "tracer_" + res.club + "_" + res.yd + "Y." + ext;
+        busy = false; btn.disabled = false;
+        var f = null; try { f = new File([blob], name, { type: blob.type }); } catch (e) {}
+        if (f && navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: "弾道トレーサー" }).catch(function () {}); prog("できました。共有メニューから「ビデオを保存」で写真に保存できます。", 100); }
+        else { var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); prog("できました（" + name + "）。", 100); }
+        window.__trLastBlob = blob;
+      };
+      seek(start).then(function () {
+        rec.start(200); V.play();
+        (function frame() {
+          if (!V.paused && !V.ended) { paint(null); requestAnimationFrame(frame); return; }
+          if (!tail) tail = { t0: V.currentTime - impT, s: performance.now() };
+          var tt = tail.t0 + (performance.now() - tail.s) / 1000; paint(Math.min(tt, res.fit.flight));
+          if (tt < res.fit.flight + 1.2) requestAnimationFrame(frame); else rec.stop();
+        })();
+      });
+    });
+    document.querySelector('[data-tab="swing"], #tab-swing') && document.getElementById("tab-swing").addEventListener("click", fillClubs);
+    window.addEventListener("resize", function () { draw(); });
+    fillClubs();
+    return { fps: function () { return FPS; }, dbgPath: function (t, full) { return pathAt(t, full).map(function (q) { return [Math.round(q[0]), Math.round(q[1])]; }); }, dbgBall: function (x, y) { var img = grab(x - 60, y - 60, 120, 120); var g = []; for (var i = 0; i < img.g.length; i += 1) g.push(img.g[i]); return { b: findBall(img, x, y), x0: img.x0, y0: img.y0, w: img.w, h: img.h, g: g }; }, fit: fitShot, fly: fly, state: function () { return { ball: ball, res: res && { yd: res.yd, lo: res.lo, hi: res.hi, n: res.obs.length, imp: res.imp, V: res.fit.V, al: res.fit.al, be: res.fit.be, rpm: res.fit.rpm, f: res.fit.C.f, curve: res.fit.curve, lat: res.fit.lat, rms: res.fit.rms, obs: res.obs } }; }, tap: function (x, y) { var g = fit2(); $("trTap").dispatchEvent(new MouseEvent("click", { clientX: g.r.left + g.bx + x * g.sc, clientY: g.r.top + g.by + y * g.sc, bubbles: true })); } };
+  })();
+  window.__tr = tracer;
 
   // ---------- おすすめ番手（コースでまず見る1行） ----------
   var clubNowAct = null;
@@ -5257,8 +5756,9 @@
   })();
 
   // ---------- バージョンと更新内容 ----------
-  var APP_VER = "1.7.0", APP_DATE = "2026-09-28";
+  var APP_VER = "1.8.0", APP_DATE = "2026-09-29";
   var CHANGELOG = [
+    { v: "1.8", d: "9/29", t: "新機能「弾道トレーサー（実験版）」：後ろから撮った動画でボールを自動で追い、テレビ中継のような赤い線を表示。おおよそのキャリー（幅つき）・打ち出し方向・曲がり（フェード／ドロー等）・初速を推定し、マイ番手のいつもの飛距離と比べます。見失ったときは手動で指定、線入り動画の保存にも対応。60コマ/秒の動画にも自動で合わせます。比べる画面の線がずれることがある不具合も修正" },
     { v: "1.7", d: "9/28", t: "新機能「2本を並べて比べる（先生モード）」：2本の動画を同時に再生・スロー・コマ送り、右だけずらして合わせる。AIでアドレス・トップ・インパクトを自動でそろえ、骨格・背骨・アドレスの頭を重ねて表示し、先生のように違いと練習方法を説明" },
     { v: "1.6.2", d: "9/28", t: "3Dスイングを分かりやすく：元の動画を小窓で同時表示、場面ボタン（アドレス・トップ・インパクト・フィニッシュ）、アドレスの形を白く残す、見どころカード（◎○△と一言。押すとその場面を見やすい向きで）、色の説明" },
     { v: "1.6.1", d: "9/28", t: "3Dスイング：iPhoneで解析が止まる問題を修正（動画の読み方・AIの読み込み表示・GPUが固まったらCPUに切替・処理を約2倍速く）。中止ボタンと進み具合の表示" },
