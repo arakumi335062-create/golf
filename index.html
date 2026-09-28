@@ -510,57 +510,79 @@
   @keyframes pgIn { from { opacity: .3; transform: translateX(24px); } to { opacity: 1; transform: none; } }
   @keyframes pgInR { from { opacity: .3; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .app.pg-anim-l > .card, .app.pg-anim-r > .card { animation: none !important; } }
-  .rm { position: fixed; inset: 0; z-index: 1200; background: var(--surface); color: var(--ink); display: flex; flex-direction: column; gap: 8px; padding: calc(8px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
+  .rm { position: fixed; inset: 0; z-index: 1200; background: var(--surface); color: var(--ink); display: flex; flex-direction: column; gap: 10px; padding: calc(8px + env(safe-area-inset-top, 0px)) 14px calc(12px + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
   .rm[hidden] { display: none; }
-  .rm-top { display: flex; align-items: center; gap: 6px; }
-  .rm-top button { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; font-size: 13px; padding: 0 10px; cursor: pointer; }
-  .rm-sq { width: 48px; font-size: 18px !important; }
-  .rm-hole { flex: 1; text-align: center; line-height: 1.2; }
-  .rm-hole b { display: block; font-size: 22px; }
-  .rm-hole small { font-size: 12px; color: var(--ink-soft); }
-  .rm-sum { text-align: center; font-size: 13px; color: var(--ink-soft); min-height: 18px; }
-  .rm-sum b { color: var(--ink); font-size: 15px; }
-  .rm-club { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 18px; border: 3px solid var(--accent); background: var(--surface); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
-  .rm-club > span:first-child { flex: none; min-width: 104px; height: 88px; padding: 0 10px; border-radius: 14px; background: var(--accent); color: #fff; font-size: 44px; font-weight: 900; display: grid; place-items: center; letter-spacing: 1px; }
-  .rm-ctx { flex: 1; min-width: 0; line-height: 1.4; }
-  .rm-ctx b { display: block; font-size: 16px; }
-  .rm-ctx small { display: block; font-size: 13px; color: var(--ink-soft); }
-  .rm-dist { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; }
-  .rm-dist div { border-radius: 12px; background: var(--surface-2, #f1f4f0); padding: 8px 4px; }
-  .rm-dist b { display: block; font-size: 30px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
-  .rm-dist small { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
-  .rm-dist .main { background: var(--accent-soft); }
-  .rm-dist .main b { color: var(--accent); font-size: 36px; }
-  .rm-dist.one { grid-template-columns: 1fr; }
-  .rm-haz { font-size: 14px; font-weight: 700; line-height: 1.5; min-height: 0; }
-  .rm-haz span { display: inline-block; margin: 2px 4px 0 0; padding: 2px 8px; border-radius: 999px; background: #fdf1d6; color: #5a4310; }
-  .rm-haz span.wt { background: #dcebfa; color: #184a7a; }
-  .rm-haz span.ob, .rm-haz span.dg { background: #fbe1dc; color: #8a2413; }
-  .rm-wind { display: flex; align-items: center; gap: 4px; }
-  .rm-wind > span { font-size: 13px; font-weight: 700; color: var(--ink-soft); width: 22px; }
-  .rm-wind button { flex: 1; min-height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; padding: 0 2px; }
+  .rm-top { display: flex; align-items: center; gap: 8px; }
+  .rm-sq { flex: none; width: 52px; height: 52px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 20px; font-weight: 900; cursor: pointer; }
+  .rm-sq:disabled { opacity: .3; }
+  .rm-hole { flex: 1; text-align: center; line-height: 1.15; }
+  .rm-hole b { display: block; font-size: 26px; font-weight: 900; }
+  .rm-hole small { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
+  .rm-club { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px 8px 12px; border-radius: 22px; border: none; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
+  .rm-club-name { font-size: 64px; font-weight: 900; line-height: 1.05; letter-spacing: 1px; }
+  .rm-club-cap { font-size: 15px; font-weight: 700; opacity: .92; min-height: 1.2em; }
+  .rm-big { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .rm-big b { font-size: 104px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+  .rm-big b small { font-size: 28px; letter-spacing: 0; margin-left: 4px; }
+  .rm-big .lab { font-size: 16px; font-weight: 800; color: var(--ink-soft); margin-top: 4px; }
+  .rm-big .edges { font-size: 18px; font-weight: 800; margin-top: 8px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .rm-big .edges span { color: var(--ink-soft); font-weight: 700; font-size: 14px; }
+  .rm-line { width: 100%; min-height: 56px; border-radius: 16px; border: none; padding: 10px 14px; font: inherit; font-size: 18px; font-weight: 800; line-height: 1.35; text-align: left; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .rm-line[hidden] { display: none; }
+  .rm-line .n { flex: none; font-size: 12px; font-weight: 700; opacity: .75; }
+  .rm-line .t { flex: 1; }
+  .rm-line.bk { background: #fdf1d6; color: #5a4310; }
+  .rm-line.wt { background: #dcebfa; color: #184a7a; }
+  .rm-line.ob, .rm-line.dg { background: #fbe1dc; color: #8a2413; }
+  .rm-line.tip { background: #fff4e5; color: #4a2c0a; }
+  .rm-club[hidden] { display: none; }
+  .rm-choose { display: flex; flex-direction: column; gap: 10px; }
+  .rm-choose[hidden] { display: none; }
+  .rm-choose .q { text-align: center; font-size: 22px; font-weight: 900; }
+  .rm-choose .q small { display: block; font-size: 14px; color: var(--ink-soft); font-weight: 700; }
+  .rm-choose .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rm-choose button { min-height: 200px; border-radius: 20px; border: none; font: inherit; font-size: 26px; font-weight: 900; cursor: pointer; line-height: 1.2; color: #fff; }
+  .rm-choose button small { display: block; font-size: 14px; font-weight: 700; opacity: .9; }
+  .rm-choose [data-gm="ap"] { background: #b8561f; }
+  .rm-choose [data-gm="putt"] { background: #2e6b45; }
+  .rm-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .rm-seg[hidden] { display: none; }
+  .rm-seg button { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+  .rm-seg button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+  .rm-big .green { font-size: 64px; font-weight: 900; color: #2e6b45; line-height: 1.1; }
+  .rm-out { width: 100%; min-height: 64px; border-radius: 18px; border: none; background: #2e6b45; color: #fff; font: inherit; font-size: 20px; font-weight: 900; cursor: pointer; }
+  .rm-tip { margin: -4px 0 0; font-size: 12px; color: var(--ink-soft); text-align: center; }
+  .rm-sheet-bg { position: fixed; inset: 0; z-index: 1250; background: rgba(10,20,15,.45); display: flex; align-items: flex-end; }
+  .rm-sheet-bg[hidden] { display: none; }
+  .rm-sheet { width: 100%; max-height: 92vh; overflow-y: auto; background: var(--surface); color: var(--ink); border-radius: 22px 22px 0 0; padding: 14px 14px calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px; }
+  .rm-sheet-h { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 900; }
+  .rm-sheet-h span { flex: 1; }
+  .rm-sheet-h button, .rm-back { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; min-height: 40px; padding: 0 14px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .rm-lab { font-size: 13px; font-weight: 800; color: var(--ink-soft); margin-top: 2px; }
+  .rm-wind { display: flex; align-items: center; gap: 6px; }
+  .rm-wind button { flex: 1; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; padding: 0 2px; }
   .rm-wind button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .rm-wind i { width: 6px; }
-  .rm-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .rm-acts button { min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
-  .rm-out { width: 100%; min-height: 60px; border-radius: 16px; border: none; background: #2e6b45; color: #fff; font: inherit; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: auto; }
-  .rm-score { border: 2px solid #2e6b45; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-  .rm-score[hidden] { display: none; }
-  .rm-lab { font-size: 13px; font-weight: 800; color: var(--ink-soft); }
-  .rm-grid { display: grid; gap: 6px; }
-  .rm-grid.g6 { grid-template-columns: repeat(6, 1fr); }
-  .rm-grid.g5 { grid-template-columns: repeat(5, 1fr); }
-  .rm-grid.g4 { grid-template-columns: repeat(4, 1fr); }
+  .rm-wind button:disabled { opacity: .35; }
+  .rm-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .rm-acts button { min-height: 56px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+  .rm-exit { min-height: 52px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2, #f1f4f0); color: var(--ink); font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+  .rm-q { font-size: 24px; font-weight: 900; text-align: center; margin: 4px 0; }
+  .rm-grid { display: grid; gap: 8px; }
   .rm-grid.g3 { grid-template-columns: repeat(3, 1fr); }
-  .rm-grid button { min-height: 50px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 20px; font-weight: 900; cursor: pointer; line-height: 1.1; padding: 2px; }
-  .rm-grid button small { display: block; font-size: 10px; font-weight: 700; color: var(--ink-soft); }
+  .rm-grid.g4 { grid-template-columns: repeat(4, 1fr); }
+  .rm-grid.g5 { grid-template-columns: repeat(5, 1fr); }
+  .rm-grid button { min-height: 72px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 32px; font-weight: 900; cursor: pointer; line-height: 1.05; padding: 2px; }
+  .rm-grid button small { display: block; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+  .rm-grid.sm button { min-height: 48px; font-size: 18px; }
   .rm-grid button[aria-pressed="true"] { background: #2e6b45; border-color: #2e6b45; color: #fff; }
   .rm-grid button[aria-pressed="true"] small { color: #e6f1e8; }
-  .rm-save { min-height: 56px; border-radius: 14px; border: none; background: #2e6b45; color: #fff; font: inherit; font-size: 17px; font-weight: 900; cursor: pointer; }
-  .rm-save:disabled { opacity: .4; }
-  .rm-toast { position: fixed; left: 12px; right: 12px; top: calc(64px + env(safe-area-inset-top, 0px)); z-index: 1300; margin: 0 auto; max-width: 440px; background: var(--ink); color: var(--surface); border-radius: 14px; padding: 12px 14px; font-size: 15px; font-weight: 700; line-height: 1.5; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  .rm-grid button.par { border: 2px solid #2e6b45; }
+  .rm-toast { position: fixed; left: 12px; right: 12px; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 1300; margin: 0 auto; max-width: 440px; background: var(--ink); color: var(--surface); border-radius: 16px; padding: 12px 14px; font-size: 16px; font-weight: 700; line-height: 1.5; box-shadow: 0 10px 30px rgba(0,0,0,.3); display: flex; align-items: center; gap: 10px; }
   .rm-toast[hidden] { display: none; }
-  .rm-tip { font-size: 12px; color: var(--ink-soft); text-align: center; }
+  .rm-toast .tt { flex: 1; }
+  .rm-toast button { flex: none; border: 1px solid rgba(255,255,255,.5); background: none; color: var(--surface); border-radius: 999px; min-height: 40px; padding: 0 12px; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+  @media (max-height: 700px) { .rm-club-name { font-size: 52px; } .rm-big b { font-size: 84px; } }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rm-line.bk { background: #3d321a; color: #f5e2b3; } :root:not([data-theme="light"]) .rm-line.wt { background: #16324d; color: #cfe4fa; } :root:not([data-theme="light"]) .rm-line.ob, :root:not([data-theme="light"]) .rm-line.dg { background: #43201a; color: #f8cfc6; } :root:not([data-theme="light"]) .rm-line.tip { background: #3a2a14; color: #ffe2bd; } }
   .rm-start { display: block; width: 100%; min-height: 56px; margin: 0 0 10px; border-radius: 14px; border: none; background: #2e6b45; color: #fff; font: inherit; font-size: 17px; font-weight: 900; cursor: pointer; }
   .cond-row { display: flex; flex-wrap: wrap; gap: 6px; }
   .cond-row button { min-height: 40px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
@@ -1632,34 +1654,41 @@
 
 <div class="rm" id="rm" hidden role="dialog" aria-label="ラウンド画面（プレーファースト）">
   <div class="rm-top">
-    <button type="button" id="rmExit">✕ 通常画面</button>
     <button type="button" class="rm-sq" id="rmPrev" aria-label="前のホール">◀</button>
     <div class="rm-hole" id="rmHole"></div>
     <button type="button" class="rm-sq" id="rmNext" aria-label="次のホール">▶</button>
+    <button type="button" class="rm-sq" id="rmMenuBtn" aria-label="メニュー（風・調子・写真・ルール）">≡</button>
   </div>
-  <div class="rm-sum" id="rmSum"></div>
-  <button type="button" class="rm-club" id="rmClub"><span id="rmClubName">-</span><span class="rm-ctx"><b id="rmHead"></b><small id="rmSub"></small></span></button>
-  <div class="rm-dist" id="rmDist"></div>
-  <div class="rm-haz" id="rmHaz"></div>
-  <div class="rm-cond">
-    <div class="tip-now" id="rmTipNow"></div>
-    <div class="rm-cond-top"><span id="rmCondSum">今日の調子：未選択</span><button type="button" id="rmCondBtn">調子を選ぶ</button></div>
-    <div class="cond-row" id="rmCondPick" hidden></div>
+  <button type="button" class="rm-club" id="rmClub"><span class="rm-club-name" id="rmClubName">-</span><span class="rm-club-cap" id="rmHead"></span></button>
+  <div class="rm-choose" id="rmChoose" hidden>
+    <div class="q" id="rmChooseQ">グリーン周りです<small>次はどっち？</small></div>
+    <div class="row"><button type="button" data-gm="ap">アプローチ<small>グリーンの外から</small></button><button type="button" data-gm="putt">パター<small>グリーンに乗った</small></button></div>
   </div>
-  <div class="rm-wind" role="group" aria-label="風">
-    <span>風</span>
-    <button type="button" data-wd="none">なし</button><button type="button" data-wd="against">向かい</button><button type="button" data-wd="with">追い</button>
-    <i></i>
-    <button type="button" data-ws="2">弱</button><button type="button" data-ws="4">中</button><button type="button" data-ws="7">強</button>
+  <div class="rm-seg" id="rmSeg" hidden role="group" aria-label="アプローチかパターか"><button type="button" data-gm="ap">アプローチ</button><button type="button" data-gm="putt">パター</button></div>
+  <div class="rm-big" id="rmDist"></div>
+  <button type="button" class="rm-line" id="rmLine" hidden></button>
+  <button type="button" class="rm-out" id="rmOut">⛳ ホールアウト</button>
+  <p class="rm-tip" id="rmTip"></p>
+  <div class="rm-sheet-bg" id="rmMenu" hidden>
+    <div class="rm-sheet" role="dialog" aria-label="メニュー">
+      <div class="rm-sheet-h"><span>メニュー</span><button type="button" id="rmMenuClose">閉じる</button></div>
+      <div class="rm-lab">風（番手に反映）</div>
+      <div class="rm-wind" role="group" aria-label="風の向き"><button type="button" data-wd="none">なし</button><button type="button" data-wd="against">向かい</button><button type="button" data-wd="with">追い</button></div>
+      <div class="rm-wind" role="group" aria-label="風の強さ"><button type="button" data-ws="2">弱</button><button type="button" data-ws="4">中</button><button type="button" data-ws="7">強</button></div>
+      <div class="rm-lab">今日の調子（出やすいミス → 打つ前の気づき）</div>
+      <div class="cond-row" id="rmCondPick"></div>
+      <div class="rm-lab">詳しく見る</div>
+      <div class="rm-acts">
+        <button type="button" id="rmAim">🎯 狙う1点</button>
+        <button type="button" id="rmPhoto">🗺 写真</button>
+        <button type="button" id="rmRule">📖 困った</button>
+      </div>
+      <button type="button" class="rm-exit" id="rmExit">通常画面に戻る</button>
+    </div>
   </div>
-  <div class="rm-acts">
-    <button type="button" id="rmAim">🎯 狙う1点</button>
-    <button type="button" id="rmPhoto">🗺 写真</button>
-    <button type="button" id="rmRule">📖 困った</button>
+  <div class="rm-sheet-bg" id="rmScoreBg" hidden>
+    <div class="rm-sheet" id="rmScore" role="dialog" aria-label="スコア入力"></div>
   </div>
-  <div class="rm-score" id="rmScore" hidden></div>
-  <button type="button" class="rm-out" id="rmOut">⛳ ホールアウト（スコアを入れる）</button>
-  <p class="rm-tip" id="rmTip">画面はつけたまま。ティーに着くと次のホールに自動で切り替わります。</p>
 </div>
 <div class="rm-toast" id="rmToast" hidden role="status"></div>
 <nav class="tabbar" id="tabbar" aria-label="画面の切り替え">
@@ -3644,7 +3673,7 @@
     $("ruleBack").addEventListener("click", function () { ruleOpen = ""; renderRules(); });
   }
 
-  var HELP = [{"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmTipNow", "t": "打つ前の気づき", "x": "今日の調子×今の番手で、気をつけることを1つ。「次」で別の気づき。考えることは1つだけに。", "a": "misslog"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "手前エッジ・ピン（なければセンター）・奥エッジまで。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数・パット・罰打をタップで入れて保存すると、評価が出て次のホールへ進みます。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか。今日のピン位置を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③障害物の点数", "x": "ペナルティ3・寄せにくい2・バンカー1・寄せやすい0。種類を選んでから位置を押します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "障害物側の端から「曲がり幅＋点数」内側を狙う。図のタップでも選べます。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
+  var HELP = [{"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか。今日のピン位置を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③障害物の点数", "x": "ペナルティ3・寄せにくい2・バンカー1・寄せやすい0。種類を選んでから位置を押します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "障害物側の端から「曲がり幅＋点数」内側を狙う。図のタップでも選べます。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
   // 長押しで説明（どの画面でも）
   (function () {
     var timer = null, start = null, fired = false, bubble = null;
@@ -3809,21 +3838,12 @@
     paintTip($("tipPutt"), "putt");
     try { rmTipPaint(); } catch (e) {}
   }
-  function rmTipPaint() {
-    var el = $("rmTipNow"); if (!el) return;
-    var r = null; try { r = photoHole.remainNow(); } catch (e) {}
-    var cat;
-    if (r && r.rem <= 45) cat = "ap";
-    else { var info = null; try { info = clubNowInfo("hole"); } catch (e) {} cat = info ? (info.club === "寄せ" ? "ap" : clubCat(info.club)) : "iron"; }
-    paintTip(el, cat);
-  }
   document.addEventListener("click", function (e) {
     var b = e.target.closest && e.target.closest("[data-cond]");
     if (b) { toggleCond(b.getAttribute("data-cond")); return; }
     var n = e.target.closest && e.target.closest(".tip-next");
     if (n) { tipIdx++; renderCond(); }
   });
-  $("rmCondBtn").addEventListener("click", function () { var p = $("rmCondPick"); p.hidden = !p.hidden; this.textContent = p.hidden ? "調子を選ぶ" : "閉じる"; });
 
   // ---------- おすすめ番手（コースでまず見る1行） ----------
   var clubNowAct = null;
@@ -3901,14 +3921,18 @@
     document.getElementById("cnSub").textContent = info.sub;
     b.setAttribute("aria-label", "おすすめ番手 " + info.club + "。" + info.head + "。" + info.sub);
   }
-  // ---------- ラウンド画面（プレーファースト） ----------
-  var rmWake = null, rmToastT = null, rmSel = null;
+  // ---------- ラウンド画面（プレーファースト）：見る物は「番手・距離・ひと言」の3つだけ ----------
+  var rmWake = null, rmToastT = null, rmSel = null, rmStep = 1, rmUndo = null, rmLineIdx = 0, rmLineList = [];
+  var rmGreen = { hole: 0, mode: "" }; // グリーン周りで選んだもの（ap / putt）
   function rmIsOn() { var r = document.getElementById("rm"); return r && !r.hidden; }
   function wakeOn() { try { if (navigator.wakeLock && document.visibilityState === "visible") navigator.wakeLock.request("screen").then(function (w) { rmWake = w; }).catch(function () {}); } catch (e) {} }
   function wakeOff() { try { if (rmWake) rmWake.release(); } catch (e) {} rmWake = null; }
   document.addEventListener("visibilitychange", function () { if (rmIsOn() && document.visibilityState === "visible") wakeOn(); });
-  function rmToast(msg, ms) {
-    var t = $("rmToast"); t.innerHTML = msg; t.hidden = false;
+  function rmToast(msg, ms, act) {
+    var t = $("rmToast");
+    t.innerHTML = "<span class='tt'>" + msg + "</span>" + (act ? "<button type='button' id='rmToastAct'>" + act.label + "</button>" : "");
+    t.hidden = false;
+    if (act) $("rmToastAct").onclick = function () { t.hidden = true; act.fn(); };
     clearTimeout(rmToastT); rmToastT = setTimeout(function () { t.hidden = true; }, ms || 2600);
   }
   function rmOpen(silent) {
@@ -3919,121 +3943,184 @@
     $("rm").hidden = false; document.documentElement.style.overflow = "hidden";
     wakeOn();
     try { photoHole.gpsStart(); } catch (e) {}
-    rmScoreClose();
+    rmScoreClose(); $("rmMenu").hidden = true;
     rmRender();
-    if (!silent) rmToast("ラウンド画面にしました。<br>おすすめ番手と残り距離だけ見て、テンポよくどうぞ。");
+    if (!silent) rmToast("見るのは「番手・距離・ひと言」だけ。<br>風や調子は右上の ≡ から。", 3200);
   }
   function rmClose() {
-    $("rm").hidden = true; document.documentElement.style.overflow = "";
+    $("rm").hidden = true; $("rmMenu").hidden = true; document.documentElement.style.overflow = "";
     if (state.rm) { state.rm.on = false; saveState(); }
     wakeOff();
   }
-  function rmLeaveTo(fn) { $("rm").hidden = true; document.documentElement.style.overflow = ""; wakeOff(); try { fn(); } catch (e) {} if (state.rm) { state.rm.on = false; saveState(); } }
-  function rmHazHtml(list) {
-    return list.filter(function (h) { return h.off <= 35; }).slice(0, 4).map(function (h) {
-      var sym = { bk: "B", wt: "池", ob: "OB", dg: "林" }[h.t] || "";
-      return "<span class='" + h.t + "'>" + sym + " " + (h.two ? h.reach + "／越え" + h.carry : h.reach) + "</span>";
-    }).join("");
+  function rmLeaveTo(fn) { rmClose(); try { fn(); } catch (e) {} }
+  var HZ_SYM = { bk: "バンカー", wt: "池", ob: "OB", dg: "林" };
+  // ひと言（危険 → 気づき の順に1つずつ）
+  function rmLines(hz, maxYd, cat) {
+    var out = [];
+    hz.filter(function (h) { return h.off <= 35 && h.reach <= maxYd + 20; }).forEach(function (h) {
+      out.push({ cls: h.t, t: "⚠ " + HZ_SYM[h.t] + " " + (h.two ? h.reach + "〜越え" + h.carry + "yd" : h.reach + "yd") });
+    });
+    try { tipsFor(cat).forEach(function (x) { out.push({ cls: "tip", t: "💡 " + x.x, n: x.n }); }); } catch (e) {}
+    return out;
   }
+  function rmPaintLine() {
+    var el = $("rmLine"), L = rmLineList;
+    if (!L.length) { el.hidden = true; return; }
+    var x = L[rmLineIdx % L.length];
+    el.hidden = false; el.className = "rm-line " + x.cls;
+    el.innerHTML = "<span class='t'>" + x.t + "</span>" + (L.length > 1 ? "<span class='n'>" + (rmLineIdx % L.length + 1) + "/" + L.length + " ▶</span>" : "");
+  }
+  function rmTipPaint() { if (rmIsOn()) rmRender(); }
   function rmRender() {
     if (!rmIsOn()) return;
     var cd = COURSE_DATA[state.course]; if (!cd || !state.hole) return;
     var h = cd.holes[state.hole - 1];
-    $("rmHole").innerHTML = "<b>" + state.hole + "番　Par" + h[0] + "</b><small>" + h[1] + "yd" + (cd.teeNames ? "・" + cd.teeNames[teeIndex()] : "") + "</small>";
-    $("rmPrev").disabled = state.hole <= 1; $("rmNext").disabled = state.hole >= cd.holes.length;
-    // 今日の合計
     var rd = (state.rounds || []).filter(function (x) { return x.d === todayStr() && x.course === state.course; })[0];
-    if (rd && Object.keys(rd.h).length) { var st = roundStats(rd), rel = st.tot - st.par; $("rmSum").innerHTML = "今日 <b>" + st.tot + "</b>（" + st.n + "H・" + (rel >= 0 ? "+" : "") + rel + "）" + (rd.h[state.hole] ? "　このホール " + rd.h[state.hole].s + " 入力済み" : ""); }
-    else $("rmSum").textContent = "";
-    // おすすめ番手
+    var sumTxt = "";
+    if (rd && Object.keys(rd.h).length) { var st = roundStats(rd), rel = st.tot - st.par; sumTxt = "・今日 " + (rel >= 0 ? "+" : "") + rel; }
+    $("rmHole").innerHTML = "<b>" + state.hole + "番 Par" + h[0] + "</b><small>" + h[1] + "yd" + sumTxt + (rd && rd.h[state.hole] ? "・入力済 " + rd.h[state.hole].s : "") + "</small>";
+    $("rmPrev").disabled = state.hole <= 1; $("rmNext").disabled = state.hole >= cd.holes.length;
     var info = null; try { info = clubNowInfo("hole"); } catch (e) {}
-    $("rmClubName").textContent = info ? info.club : "-";
-    $("rmHead").textContent = info ? info.head : "マイ番手の飛距離を入れると出ます";
-    $("rmSub").textContent = info ? info.sub : "";
-    // 距離
     var r = null; try { r = photoHole.remainNow(); } catch (e) {}
-    if (r && info) { var eq = (info.head.match(/→(\d+yd相当)/) || [])[1]; $("rmHead").textContent = (eq ? "風など込みで" + eq + "　" : "") + info.sub.replace(/　/g, " "); $("rmSub").textContent = r.rem <= 45 ? "押すとアプローチの打ち方へ" : "押すと狙う1点へ"; }
-    var dist = $("rmDist"), hz = [];
+    var cap = "", hz = [], maxYd = 999, cat = "iron", clubTxt = info ? info.club : "-";
+    if (rmGreen.hole !== state.hole || !r || r.rem > 55) rmGreen = { hole: state.hole, mode: "" }; // ホールが変わる・離れたら聞き直す
+    var near = r && r.rem <= 45, gm = near ? rmGreen.mode : "";
+    $("rmChoose").hidden = !(near && !gm);
+    $("rmSeg").hidden = !(near && gm);
+    $("rmClub").hidden = near && !gm;
+    $("rmDist").style.display = near && !gm ? "none" : "";
+    document.querySelectorAll("#rmSeg [data-gm]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.gm === gm ? "true" : "false"); });
+    if (near && !gm) $("rmChooseQ").innerHTML = "グリーン周り　残り約" + r.rem + "yd<small>次はどっち？</small>";
+    if (gm === "putt") {
+      $("rmClubName").textContent = "パター";
+      $("rmHead").textContent = "押すとラインと強さを見る";
+      $("rmDist").innerHTML = "<div class='green'>グリーン上</div><div class='lab'>ピンまで約" + r.rem + "yd（GPSの目安）</div>";
+      rmLineList = rmLines([], 0, "putt"); if (!rmLineList.length) rmLineList = [{ cls: "tip", t: "💡 強さを先に決める。カップを30cm過ぎる強さで" }];
+      rmPaintLine.key = state.hole + "|p"; rmPaintLine();
+      rmRenderMenu(); return;
+    }
     if (r) {
-      var half = (r.depth || 30) / 2;
-      dist.className = "rm-dist";
-      dist.innerHTML = "<div><b>" + Math.max(0, Math.round(r.remC - half)) + "</b><small>手前エッジ</small></div><div class='main'><b>" + r.rem + "</b><small>" + (r.pin ? "ピン" : "センター") + "</small></div><div><b>" + Math.round(r.remC + half) + "</b><small>奥エッジ</small></div>";
+      if (r.rem <= 45) {
+        cat = "ap"; cap = "押すと落とし場所を見る";
+        var apd = Math.max(5, Math.min(50, r.rem));
+        if (state.apDist !== apd || !apSafestId) { state.apDist = apd; try { renderApproach(); } catch (e) {} }
+        var an = apSafestId ? (AP_CLUBS.filter(function (c) { return c.id === apSafestId; })[0] || {}).name : null;
+        clubTxt = an || "寄せ";
+        if (an) cap = "いちばん安全な寄せ ・ 押すと落とし場所";
+      }
+      else if (info) {
+        var eq = (info.head.match(/→(\d+yd相当)/) || [])[1], nx = (info.sub.match(/次は残り約(\d+)yd/) || [])[1];
+        cap = nx ? "届かない → 次は残り約" + nx + "yd" : eq ? "風など込みで " + eq : "グリーンを狙う";
+        cat = clubCat(info.club); maxYd = r.rem;
+      }
       try { hz = photoHole.hazAhead() || []; } catch (e) {}
+      var half = (r.depth || 30) / 2;
+      $("rmDist").innerHTML = "<b>" + r.rem + "<small>yd</small></b><div class='lab'>" + (r.pin ? "ピンまで" : "グリーン中心まで") + "</div><div class='edges'><span>手前</span> " + Math.max(0, Math.round(r.remC - half)) + "　<span>奥</span> " + Math.round(r.remC + half) + "</div>";
     } else {
+      cap = info ? "ティーショット" + (teeHazNote && teeHazNote.indexOf("かからない") > 0 ? "（" + teeHazNote.replace("にかからない番手", "を避ける") + "）" : "") : "";
+      if (info) { cat = clubCat(info.club); var td = state.clubDist[String(info.club).replace(/[◎△]/g, "")]; if (typeof td === "number") maxYd = td; }
       var ti = null; try { ti = photoHole.teeInfo(); } catch (e) {}
-      dist.className = "rm-dist" + (ti && ti.pin ? "" : " one");
-      dist.innerHTML = ti ? (ti.pin ? "<div><b>" + Math.round(ti.len - ti.depth / 2) + "</b><small>手前エッジ</small></div><div class='main'><b>" + ti.pin + "</b><small>ピン（ティーから）</small></div><div><b>" + Math.round(ti.len + ti.depth / 2) + "</b><small>奥エッジ</small></div>"
-        : "<div class='main'><b>" + ti.len + "</b><small>ティー → グリーン中心（道なり）</small></div>")
-        : "<div class='main'><b>" + h[1] + "</b><small>スコアカードの距離（航空写真を登録すると現在地から測ります）</small></div>";
+      $("rmDist").innerHTML = ti ? (ti.pin ? "<b>" + ti.pin + "<small>yd</small></b><div class='lab'>ピンまで（ティーから）</div><div class='edges'><span>手前</span> " + Math.round(ti.len - ti.depth / 2) + "　<span>奥</span> " + Math.round(ti.len + ti.depth / 2) + "</div>"
+        : "<b>" + ti.len + "<small>yd</small></b><div class='lab'>グリーン中心まで（道なり）</div>")
+        : "<b>" + h[1] + "<small>yd</small></b><div class='lab'>ホールの距離（航空写真を登録すると現在地から測ります）</div>";
       try { hz = photoHole.hazTee() || []; } catch (e) {}
     }
-    $("rmHaz").innerHTML = rmHazHtml(hz);
-    try { rmTipPaint(); } catch (e) {}
-    // 風
+    $("rmClubName").textContent = clubTxt;
+    $("rmHead").textContent = info ? cap : "マイ番手の飛距離を入れると出ます";
+    var key = state.hole + "|" + (r ? "b" : "t");
+    var list = rmLines(hz, maxYd, cat);
+    if (JSON.stringify(list) !== JSON.stringify(rmLineList)) { if (rmPaintLine.key !== key) rmLineIdx = 0; rmLineList = list; }
+    rmPaintLine.key = key;
+    rmPaintLine();
+    rmRenderMenu();
+  }
+  function rmRenderMenu() {
     document.querySelectorAll("#rm [data-wd]").forEach(function (b) { b.setAttribute("aria-pressed", state.windDir === b.dataset.wd ? "true" : "false"); });
     document.querySelectorAll("#rm [data-ws]").forEach(function (b) { b.setAttribute("aria-pressed", state.windDir !== "none" && +b.dataset.ws === state.windSpeed ? "true" : "false"); b.disabled = state.windDir === "none"; });
-    $("rmTip").textContent = (photoHole.gpsOn() ? "📍 GPSオン。" : "📍 GPSオフ（位置情報を許可すると距離が自動で出ます）。") + "ティーに着くと次のホールに自動で切り替わります。";
+    var wtxt = state.windDir === "against" && state.windSpeed ? "向かい風" : state.windDir === "with" && state.windSpeed ? "追い風" : "";
+    var act = []; try { act = condActive().map(function (k) { return (TEND.filter(function (t) { return t.k === k; })[0] || {}).n; }); } catch (e) {}
+    $("rmTip").textContent = (photoHole.gpsOn() ? "📍GPS" : "📍GPSオフ") + (wtxt ? "・" + wtxt + (state.windSpeed >= 7 ? "強" : state.windSpeed >= 4 ? "中" : "弱") : "") + (act.length ? "・調子：" + act.join("・") : "") + "　≡ で変更";
   }
+  $("rmLine").addEventListener("click", function () { rmLineIdx++; rmPaintLine(); });
   function rmAuto() { // ティーに着いたら次のホールへ
     if (!rmIsOn()) return;
     var n = 0; try { n = photoHole.nearTee(30); } catch (e) {}
     if (!n || n === state.hole) return;
     var rd = (state.rounds || []).filter(function (x) { return x.d === todayStr() && x.course === state.course; })[0];
-    var doneNow = rd && rd.h[state.hole];
-    if (n === state.hole + 1 || doneNow) { selectHole(n); rmScoreClose(); rmToast("⛳ " + n + "番ティーです。おすすめ番手を出しました。"); rmRender(); }
+    if (n === state.hole + 1 || (rd && rd.h[state.hole])) { selectHole(n); rmScoreClose(); rmLineIdx = 0; rmToast("⛳ " + n + "番ティーです"); rmRender(); }
   }
+  // ---- スコア：①打数 → ②パット（押したら保存して次のホールへ）
+  var SC_NAME = { "-2": "イーグル", "-1": "バーディ", "0": "パー", "1": "ボギー", "2": "ダボ", "3": "トリプル" };
   function rmScoreUI() {
     var cd = COURSE_DATA[state.course]; if (!cd || !state.hole) return;
     var par = cd.holes[state.hole - 1][0], box = $("rmScore");
     var cur = holeRec(false);
-    if (!rmSel) rmSel = cur ? { s: cur.s, p: cur.p, pen: cur.pen || 0, fw: cur.fw || "" } : { s: 0, p: 2, pen: 0, fw: "" };
-    var names = { "-2": "イーグル", "-1": "バーディ", "0": "パー", "1": "ボギー", "2": "ダボ", "3": "トリプル", "4": "+4" };
-    var sBtns = "";
-    for (var d = -1; d <= 4; d++) { var v = par + d; if (v < 1) continue; sBtns += "<button type='button' data-rs='" + v + "' aria-pressed='" + (rmSel.s === v) + "'>" + v + "<small>" + names[d] + "</small></button>"; }
-    var more = rmSel.s > par + 4 ? rmSel.s : par + 5;
-    var html = "<div class='rm-lab'>打数（" + state.hole + "番 Par" + par + "）</div><div class='rm-grid g6'>" + sBtns + "</div>" +
-      "<div class='rm-grid g4'><button type='button' data-rs='" + more + "' aria-pressed='" + (rmSel.s === more) + "'>" + more + "<small>それ以上は＋</small></button><button type='button' data-rsp='1'>＋1</button><button type='button' data-rsp='-1'>−1</button><span></span></div>" +
-      "<div class='rm-lab'>パット</div><div class='rm-grid g5'>" + [0, 1, 2, 3, 4].map(function (v) { return "<button type='button' data-rp='" + v + "' aria-pressed='" + (rmSel.p === v) + "'>" + v + "</button>"; }).join("") + "</div>" +
-      "<div class='rm-lab'>罰打（OB・池）" + (par > 3 ? "／ティーショット" : "") + "</div><div class='rm-grid " + (par > 3 ? "g6" : "g3") + "'>" + [0, 1, 2].map(function (v) { return "<button type='button' data-rpen='" + v + "' aria-pressed='" + (rmSel.pen === v) + "'>" + v + "</button>"; }).join("") +
-      (par > 3 ? [["L", "左"], ["ok", "FW"], ["R", "右"]].map(function (x) { return "<button type='button' data-rfw='" + x[0] + "' aria-pressed='" + (rmSel.fw === x[0]) + "'>" + x[1] + "</button>"; }).join("") : "") + "</div>" +
-      "<button type='button' class='rm-save' id='rmSave'" + (rmSel.s ? "" : " disabled") + ">" + (rmSel.s ? "保存して" + (state.hole < cd.holes.length ? "次のホールへ ▶" : "ラウンド終了") : "打数を選んでください") + "</button>";
-    box.innerHTML = html; box.hidden = false;
-    $("rmOut").textContent = "✕ スコア入力を閉じる";
+    if (!rmSel) rmSel = cur ? { s: cur.s, p: cur.p, pen: cur.pen || 0, fw: cur.fw || "", more: false } : { s: 0, p: -1, pen: 0, fw: "", more: false };
+    var html = "<div class='rm-sheet-h'><span>" + state.hole + "番 Par" + par + "</span><button type='button' data-rx='close'>✕ 閉じる</button></div>";
+    if (rmStep === 1) {
+      html += "<div class='rm-q'>打数は？</div><div class='rm-grid g3'>";
+      var list = rmSel.more ? [4, 5, 6, 7, 8, 9].map(function (d) { return par + d; }) : [-1, 0, 1, 2, 3].map(function (d) { return par + d; });
+      list.forEach(function (v) { var d = v - par; if (v < 1) return; html += "<button type='button' data-rs='" + v + "'" + (d === 0 ? " class='par'" : "") + " aria-pressed='" + (rmSel.s === v) + "'>" + v + "<small>" + (SC_NAME[d] || "+" + d) + "</small></button>"; });
+      html += "<button type='button' data-rx='more' style='font-size:22px'>" + (rmSel.more ? "◀" : "もっと") + "<small>" + (rmSel.more ? "戻る" : par + 4 + "以上") + "</small></button></div>";
+      html += "<p class='rm-tip' style='margin:4px 0 0'>押すと次へ（パット）</p>";
+    } else {
+      html += "<div class='rm-q'>" + rmSel.s + "打　パットは？</div><div class='rm-grid g5'>" + [1, 2, 3, 4].map(function (v) { return "<button type='button' data-rp='" + v + "'" + (v === 2 ? " class='par'" : "") + ">" + v + "</button>"; }).join("") + "<button type='button' data-rp='0' style='font-size:22px'>0<small>寄せて入った</small></button></div>";
+      html += "<div class='rm-lab'>入れたいときだけ（パットの前に）</div><div class='rm-grid g3 sm'>" + [0, 1, 2].map(function (v) { return "<button type='button' data-rpen='" + v + "' aria-pressed='" + (rmSel.pen === v) + "'>" + (v ? "罰打 +" + v : "罰打なし") + "</button>"; }).join("") + "</div>";
+      if (par > 3) html += "<div class='rm-grid g3 sm'>" + [["L", "ティー 左"], ["ok", "ティー FW"], ["R", "ティー 右"]].map(function (x) { return "<button type='button' data-rfw='" + x[0] + "' aria-pressed='" + (rmSel.fw === x[0]) + "'>" + x[1] + "</button>"; }).join("") + "</div>";
+      html += "<p class='rm-tip' style='margin:2px 0 0'>パットを押すと保存して次のホールへ</p><button type='button' class='rm-back' data-rx='back'>← 打数を直す</button>";
+    }
+    box.innerHTML = html; $("rmScoreBg").hidden = false;
   }
-  $("rmScore").addEventListener("click", function (e) {
+  function rmScoreClose() { $("rmScoreBg").hidden = true; rmSel = null; rmStep = 1; }
+  $("rmScoreBg").addEventListener("click", function (e) {
+    if (e.target === this) { rmScoreClose(); return; }
     var b = e.target.closest("button"); if (!b || !rmSel) return;
-    if (b.dataset.rs) rmSel.s = +b.dataset.rs;
-    else if (b.dataset.rsp) rmSel.s = Math.max(1, Math.min(15, (rmSel.s || COURSE_DATA[state.course].holes[state.hole - 1][0]) + +b.dataset.rsp));
-    else if (b.dataset.rp !== undefined) rmSel.p = +b.dataset.rp;
-    else if (b.dataset.rpen !== undefined) rmSel.pen = +b.dataset.rpen;
-    else if (b.dataset.rfw) rmSel.fw = rmSel.fw === b.dataset.rfw ? "" : b.dataset.rfw;
-    else if (b.id === "rmSave") { rmSaveScore(); return; }
-    if (rmSel.p > rmSel.s && rmSel.s) rmSel.p = rmSel.s;
-    rmScoreUI();
+    var x = b.dataset.rx;
+    if (x === "close") { rmScoreClose(); return; }
+    if (x === "more") { rmSel.more = !rmSel.more; rmScoreUI(); return; }
+    if (x === "back") { rmStep = 1; rmScoreUI(); return; }
+    if (b.dataset.rs) { rmSel.s = +b.dataset.rs; rmStep = 2; rmScoreUI(); return; }
+    if (b.dataset.rpen !== undefined) { rmSel.pen = +b.dataset.rpen; rmScoreUI(); return; }
+    if (b.dataset.rfw) { rmSel.fw = rmSel.fw === b.dataset.rfw ? "" : b.dataset.rfw; rmScoreUI(); return; }
+    if (b.dataset.rp !== undefined) { rmSel.p = Math.min(+b.dataset.rp, rmSel.s); rmSaveScore(); }
   });
   function rmSaveScore() {
     var cd = COURSE_DATA[state.course]; if (!cd || !rmSel || !rmSel.s) return;
+    var hole = state.hole, prevRec = holeRec(false) ? JSON.parse(JSON.stringify(holeRec(false))) : null;
     var h = holeRec(true); if (!h) return;
-    h.s = rmSel.s; h.p = Math.min(rmSel.p, rmSel.s); h.pen = rmSel.pen; if (cd.holes[state.hole - 1][0] > 3) h.fw = rmSel.fw;
+    h.s = rmSel.s; h.p = rmSel.p; h.pen = rmSel.pen; if (cd.holes[hole - 1][0] > 3) h.fw = rmSel.fw;
     saveState(); try { renderScore(); renderHoleReview(); } catch (e) {}
-    var rv = null; try { rv = proHoleReview(state.hole); } catch (e) {}
+    var rv = null; try { rv = proHoleReview(hole); } catch (e) {}
     var rd = roundToday(), st = roundStats(rd), rel = st.tot - st.par;
-    var msg = state.hole + "番 <b>" + h.s + "</b>" + (rv ? "　評価 " + rv.grade + "（" + rv.label + "）" : "") + "<br>今日 " + st.tot + "（" + (rel >= 0 ? "+" : "") + rel + "）" + (rv && rv.next && rv.next[0] ? "<br><small>" + rv.next[0] + "</small>" : "");
     rmScoreClose();
-    if (state.hole < cd.holes.length) { selectHole(state.hole + 1); rmToast(msg, 4200); }
-    else rmToast("🏁 お疲れさまでした！ 合計 <b>" + st.tot + "</b>（" + (rel >= 0 ? "+" : "") + rel + "）<br>ホールごとの評価は通常画面のスコアで見られます。", 6000);
+    rmUndo = { hole: hole, prev: prevRec };
+    var undo = { label: "取り消す", fn: function () {
+      var r2 = roundToday(); if (rmUndo.prev) r2.h[rmUndo.hole] = rmUndo.prev; else delete r2.h[rmUndo.hole];
+      saveState(); selectHole(rmUndo.hole); try { renderScore(); } catch (e) {} rmRender(); rmToast(rmUndo.hole + "番の入力を取り消しました");
+    } };
+    var msg = hole + "番 <b>" + h.s + "</b>" + (rv ? "　" + rv.grade + "（" + rv.label + "）" : "") + "<br>今日 " + (rel >= 0 ? "+" : "") + rel;
+    if (hole < cd.holes.length) { selectHole(hole + 1); rmLineIdx = 0; rmToast(msg, 5000, undo); }
+    else rmToast("🏁 お疲れさまでした！ 合計 <b>" + st.tot + "</b>（" + (rel >= 0 ? "+" : "") + rel + "）", 7000, undo);
     rmRender();
   }
   $("rmStart").addEventListener("click", function () { rmOpen(false); });
   $("rmExit").addEventListener("click", rmClose);
-  $("rmPrev").addEventListener("click", function () { if (state.hole > 1) { selectHole(state.hole - 1); rmScoreClose(); rmRender(); } });
-  $("rmNext").addEventListener("click", function () { var cd = COURSE_DATA[state.course]; if (cd && state.hole < cd.holes.length) { selectHole(state.hole + 1); rmScoreClose(); rmRender(); } });
-  $("rmClub").addEventListener("click", function () { var info = null; try { info = clubNowInfo("hole"); } catch (e) {} if (info && info.go) rmLeaveTo(info.go); });
+  $("rmMenuBtn").addEventListener("click", function () { $("rmMenu").hidden = false; try { renderCond(); } catch (e) {} });
+  $("rmMenuClose").addEventListener("click", function () { $("rmMenu").hidden = true; });
+  $("rmMenu").addEventListener("click", function (e) { if (e.target === this) this.hidden = true; });
+  $("rmPrev").addEventListener("click", function () { if (state.hole > 1) { selectHole(state.hole - 1); rmScoreClose(); rmLineIdx = 0; rmRender(); } });
+  $("rmNext").addEventListener("click", function () { var cd = COURSE_DATA[state.course]; if (cd && state.hole < cd.holes.length) { selectHole(state.hole + 1); rmScoreClose(); rmLineIdx = 0; rmRender(); } });
+  $("rmClub").addEventListener("click", function () {
+    var r = null; try { r = photoHole.remainNow(); } catch (e) {}
+    if (r && r.rem <= 45 && rmGreen.mode === "putt") { rmLeaveTo(function () { state.mode = "putt"; showTab("putt"); }); return; }
+    if (r && r.rem <= 45) { rmLeaveTo(function () { state.apDist = Math.max(5, Math.min(50, r.rem)); state.mode = "approach"; try { applyStateToUI(); } catch (e) {} state.pg.approach = 1; showTab("approach"); }); return; }
+    var info = null; try { info = clubNowInfo("hole"); } catch (e) {} if (info && info.go) rmLeaveTo(info.go);
+  });
+  document.querySelectorAll("#rm [data-gm]").forEach(function (b) { b.addEventListener("click", function () { rmGreen = { hole: state.hole, mode: b.dataset.gm }; rmLineIdx = 0; rmRender(); }); });
   $("rmAim").addEventListener("click", function () { rmLeaveTo(function () { var r = photoHole.remainNow(); if (r && r.rem > 45) setDistance(Math.min(250, Math.max(50, Math.round(r.rem / 5) * 5))); state.pg.shot = 2; showTab("shot"); }); });
   $("rmPhoto").addEventListener("click", function () { rmLeaveTo(function () { state.pg.hole = 2; showTab("hole"); }); });
   $("rmRule").addEventListener("click", function () { rmLeaveTo(function () { state.pg.rules = 0; showTab("rules"); }); });
-  $("rmOut").addEventListener("click", function () { if ($("rmScore").hidden) { rmScoreUI(); $("rmScore").scrollIntoView({ block: "end" }); } else { rmScoreClose(); } });
-  function rmScoreClose() { $("rmScore").hidden = true; rmSel = null; $("rmOut").textContent = "⛳ ホールアウト（スコアを入れる）"; }
+  $("rmOut").addEventListener("click", function () { rmStep = 1; rmSel = null; rmScoreUI(); });
   document.querySelectorAll("#rm [data-wd]").forEach(function (b) { b.addEventListener("click", function () { state.windDir = b.dataset.wd; if (state.windDir !== "none" && !state.windSpeed) state.windSpeed = 4; if (state.windDir === "none") state.windSpeed = 0; try { applyStateToUI(); } catch (e) {} update(); rmRender(); }); });
   document.querySelectorAll("#rm [data-ws]").forEach(function (b) { b.addEventListener("click", function () { state.windSpeed = +b.dataset.ws; try { applyStateToUI(); } catch (e) {} update(); rmRender(); }); });
   document.getElementById("clubNow").addEventListener("click", function () { if (clubNowAct) clubNowAct(); });
