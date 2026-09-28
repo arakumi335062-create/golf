@@ -649,9 +649,18 @@
   .s3-row button { flex: 1; min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; padding: 0 6px; }
   .s3-row button.big { flex: 1.6; background: #6b3fa0; border-color: #6b3fa0; color: #fff; font-size: 16px; }
   .s3-row button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
-  .s3-met { margin-top: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .s3-met div { border-radius: 12px; background: var(--surface-2, #f1f4f0); padding: 8px 10px; font-size: 12px; color: var(--ink-soft); font-weight: 700; }
-  .s3-met b { display: block; font-size: 20px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .s3-met { margin-top: 6px; display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .s3-met button { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; text-align: left; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 12px; font: inherit; cursor: pointer; }
+  .s3-met .jd { font-size: 22px; font-weight: 900; width: 30px; text-align: center; }
+  .s3-met .jd.g { color: #2e8b57; } .s3-met .jd.o { color: #caa21b; } .s3-met .jd.b { color: #d9731f; }
+  .s3-met .tx b { display: block; font-size: 15px; }
+  .s3-met .tx small { display: block; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+  .s3-met .val { font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .s3-pip { position: absolute; right: 8px; top: 8px; width: 32%; max-height: 42%; border-radius: 8px; border: 2px solid rgba(255,255,255,.7); background: #000; object-fit: contain; pointer-events: none; }
+  .s3-pip[hidden] { display: none; }
+  .s3-phase { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); color: #fff; font-size: 20px; font-weight: 900; text-shadow: 0 2px 6px rgba(0,0,0,.7); pointer-events: none; white-space: nowrap; }
+  .s3-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+  .s3-legend i { display: inline-block; width: 16px; height: 6px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
   .s3-sync { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
   .s3-sync input { flex: 1; }
   .help-link { position: absolute; right: 0; top: 4px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 800; font-size: 16px; display: grid; place-items: center; text-decoration: none; }
@@ -1018,7 +1027,7 @@
 
 <div class="app">
   <header class="top">
-    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.6</button></h1>
+    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.6.2</button></h1>
     <button type="button" class="help-link" id="helpBtn" aria-label="使い方ガイドと取扱説明書">？</button>
     <p id="ctxLine">①ピンと距離 → ②曲がり幅 → ③障害物の点数 → ④狙う1点</p>
     <button type="button" class="club-now" id="clubNow" hidden><span class="cn-club" id="cnClub"></span><span class="cn-txt"><b id="cnHead"></b><small id="cnSub"></small></span><span class="cn-go">▶</span></button>
@@ -1802,10 +1811,15 @@
       <div class="s3-slot" id="s3SlotB"><b>B 後方から</b><small id="s3InfoB">なくてもOK</small><div class="row"><label>撮る<input type="file" id="s3CamB" accept="video/*" capture="environment" hidden></label><label>選ぶ<input type="file" id="s3PickB" accept="video/*" hidden></label></div></div>
     </div>
     <button type="button" class="s3-run" id="s3Run" disabled>🧍 3Dにする（解析）</button>
-    <div class="s3-prog" id="s3Prog">動画は1スイング3〜6秒くらいに（長いときは最初の8秒を使います）。全身が入るように撮ってください。</div>
+    <button type="button" class="pin-clear" id="s3Stop" hidden style="margin-top:6px;">中止する</button>
+    <div class="s3-prog" id="s3Prog">動画は1スイング3〜6秒くらいに（長いときは最初の6秒を使います）。全身が入るように撮ってください。解析は1本30秒〜1分ほどです。</div>
     <div class="s3-bar"><i id="s3Bar"></i></div>
     <div id="s3Out" hidden>
-      <div class="s3-view" id="s3View"><canvas id="s3Cv" width="720" height="792"></canvas><div class="s3-hud" id="s3Hud"></div></div>
+      <div class="s3-view" id="s3View"><canvas id="s3Cv" width="720" height="792"></canvas><div class="s3-hud" id="s3Hud"></div><video id="s3Pip" class="s3-pip" playsinline muted preload="auto" hidden></video><div class="s3-phase" id="s3Phase"></div></div>
+      <div class="s3-legend"><span><i style="background:#ffb347"></i>左手・左足</span><span><i style="background:#9be28f"></i>右手・右足</span><span><i style="background:#7cc4ff"></i>体</span><span><i style="background:rgba(255,255,255,.6)"></i>アドレスの形</span><span><i style="background:linear-gradient(90deg,#a64dff,#ffd23f)"></i>手の通り道</span></div>
+      <div class="s3-row" role="group" aria-label="場面へ移動">
+        <button type="button" data-s3k="addr">アドレス</button><button type="button" data-s3k="top">トップ</button><button type="button" data-s3k="imp">インパクト</button><button type="button" data-s3k="fin">フィニッシュ</button>
+      </div>
       <input type="range" class="sw-scrub" id="s3Scrub" min="0" max="1000" value="0" aria-label="3Dの再生位置">
       <div class="s3-row">
         <button type="button" id="s3Back">◀ 1コマ</button>
@@ -1820,16 +1834,19 @@
       </div>
       <div class="s3-row">
         <button type="button" id="s3Trail" aria-pressed="true">手の軌道</button>
+        <button type="button" id="s3Ghost" aria-pressed="true">アドレスの形</button>
+        <button type="button" id="s3PipBtn" aria-pressed="true">元の動画</button>
         <button type="button" id="s3Side">右打ち</button>
         <button type="button" id="s3Mode">A＋B合成</button>
       </div>
       <div class="s3-sync" id="s3SyncRow" hidden><span>Bのタイミング</span><input type="range" id="s3Sync" min="-50" max="50" value="0"><span id="s3SyncV">±0</span></div>
+      <div class="miss-label" style="margin-top:12px;">見どころ（押すと、その場面を見やすい向きで表示）</div>
       <div class="s3-met" id="s3Met"></div>
       <p class="map-note">指で左右・上下になぞると回転、2本指（パソコンはホイール）で拡大縮小。数字はAIの推定による目安です。左打ちの人は「右打ち」を押して「左打ち」に（目標の向きと、後方の動画の合わせ方が切り替わります）。後方の動画は、飛球線の後ろ（目標の反対側）から撮ってください。</p>
     </div>
   </section>
 
-  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.6.0（2026/9/28）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
+  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.6.2（2026/9/28）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
 </div>
 
 <div class="rm" id="rm" hidden role="dialog" aria-label="ラウンド画面（プレーファースト）">
@@ -4222,6 +4239,7 @@
     var raw = { A: null, B: null };
     var t = 0, playing = false, speed = 0.25, raf = 0, lastTs = 0;
     var yaw = 0, pitch = 0.12, zoom = 1, trail = true, hand = 1, mode = "fuse", syncOff = 0, curView = "diag"; // hand: 1=右打ち -1=左打ち
+    var ghost = true, pipOn = true, pipUrl = null, pipSeekAt = 0;
     var cv = $("s3Cv"), cx = cv.getContext("2d");
     function setFile(k, f) {
       if (!f) return; files[k] = f;
@@ -4234,44 +4252,90 @@
       $("s3Pick" + k).addEventListener("change", function () { setFile(k, this.files && this.files[0]); this.value = ""; });
     });
     function prog(txt, pct) { $("s3Prog").textContent = txt; if (typeof pct === "number") $("s3Bar").style.width = Math.round(pct) + "%"; }
+    var abortFlag = false, stageT0 = 0;
+    function withTimeout(pr, ms, msg) { return Promise.race([pr, new Promise(function (_, rj) { setTimeout(function () { rj(new Error(msg)); }, ms); })]); }
+    function checkAbort() { if (abortFlag) throw new Error("中止しました。"); }
+    // モデル（約9MB）は自分で読み込んで進み具合を表示する
+    function fetchModel() {
+      return fetch(MP_MODEL).then(function (res) {
+        if (!res.ok) throw new Error("AIのモデルを読み込めませんでした（" + res.status + "）");
+        var total = +res.headers.get("content-length") || 9400000;
+        if (!res.body || !res.body.getReader) return res.arrayBuffer().then(function (ab) { return new Uint8Array(ab); });
+        var rd = res.body.getReader(), got = 0, chunks = [];
+        return (function pump() {
+          return rd.read().then(function (x) {
+            checkAbort();
+            if (x.done) { var out = new Uint8Array(got), o = 0; chunks.forEach(function (c) { out.set(c, o); o += c.length; }); return out; }
+            chunks.push(x.value); got += x.value.length;
+            prog("AIのモデルを読み込み中… " + (got / 1048576).toFixed(1) + " / " + (total / 1048576).toFixed(1) + "MB", 3 + 17 * Math.min(1, got / total));
+            return pump();
+          });
+        })();
+      });
+    }
     function loadModel() {
       if (landmarker) return Promise.resolve(landmarker);
-      prog("AIの部品を読み込んでいます（初回は少し時間がかかります）…", 3);
-      return import(MP_JS).then(function (vision) {
-        return vision.FilesetResolver.forVisionTasks(MP_WASM).then(function (fs) {
-          var make = function (dg) { return vision.PoseLandmarker.createFromOptions(fs, { baseOptions: { modelAssetPath: MP_MODEL, delegate: dg }, runningMode: "VIDEO", numPoses: 1, minPoseDetectionConfidence: 0.5, minPresenceConfidence: 0.5, minTrackingConfidence: 0.5 }); };
-          return make("GPU").catch(function () { return make("CPU"); });
+      prog("AIの部品を読み込んでいます…", 2);
+      var visionP = withTimeout(import(MP_JS), 40000, "AIの部品（プログラム）を読み込めませんでした。電波の良い所でもう一度押してください。");
+      return visionP.then(function (vision) {
+        checkAbort();
+        return withTimeout(vision.FilesetResolver.forVisionTasks(MP_WASM), 40000, "AIの部品（本体）を読み込めませんでした。電波の良い所でもう一度押してください。").then(function (fsr) {
+          return withTimeout(fetchModel(), 90000, "AIのモデルの読み込みに時間がかかりすぎました。Wi-Fiのある所でもう一度押してください。").then(function (buf) {
+            checkAbort();
+            var make = function (dg) { return vision.PoseLandmarker.createFromOptions(fsr, { baseOptions: { modelAssetBuffer: buf, delegate: dg }, runningMode: "VIDEO", numPoses: 1, minPoseDetectionConfidence: 0.5, minPresenceConfidence: 0.5, minTrackingConfidence: 0.5 }); };
+            prog("AIを準備中（GPU）…", 21);
+            return withTimeout(make("GPU"), 20000, "gpu").catch(function () { prog("AIを準備中（CPU）…", 21); return withTimeout(make("CPU"), 30000, "AIの準備ができませんでした（CPU）。"); });
+          });
         });
       }).then(function (lm) { landmarker = lm; return lm; });
     }
-    function seekTo(v, tt) { return new Promise(function (res) { var done = false; var h = function () { if (done) return; done = true; v.removeEventListener("seeked", h); res(); }; v.addEventListener("seeked", h); v.currentTime = tt; setTimeout(h, 1500); }); }
+    function seekTo(v, tt) { return new Promise(function (res) { var done = false; var h = function () { if (done) return; done = true; v.removeEventListener("seeked", h); res(); }; v.addEventListener("seeked", h); try { v.currentTime = tt; } catch (e) { h(); } setTimeout(h, 2000); }); }
+    function waitEv(el, ev, ms) { return new Promise(function (res) { var done = false; var h = function () { if (done) return; done = true; el.removeEventListener(ev, h); res(true); }; el.addEventListener(ev, h); setTimeout(function () { if (!done) { done = true; el.removeEventListener(ev, h); res(false); } }, ms); }); }
+    // iPhoneのSafariは画面にない動画のコマを読み出さないので、小さく画面に置いて一度再生してから読む
     function analyze(file, label, p0, p1) {
-      return new Promise(function (resolve, reject) {
-        var v = document.createElement("video"); v.muted = true; v.playsInline = true; v.preload = "auto";
-        v.src = URL.createObjectURL(file);
-        v.addEventListener("error", function () { reject(new Error("この動画は読み込めません")); });
-        v.addEventListener("loadeddata", function () {
-          var dur = Math.min(8, v.duration || 0), fps = 30, n = Math.max(1, Math.floor(dur * fps));
-          var W = [], P = [], i = 0;
+      var v = document.createElement("video");
+      v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.setAttribute("muted", ""); v.preload = "auto";
+      v.style.cssText = "position:fixed;right:0;bottom:0;width:120px;height:90px;opacity:0.01;pointer-events:none;z-index:-1;";
+      document.body.appendChild(v);
+      var url = URL.createObjectURL(file); v.src = url;
+      var cvs = document.createElement("canvas"), c2 = cvs.getContext("2d");
+      var cleanup = function () { try { v.pause(); } catch (e) {} v.removeAttribute("src"); try { v.load(); } catch (e) {} v.remove(); URL.revokeObjectURL(url); };
+      prog(label + "の動画を読み込み中…", p0);
+      try { v.load(); } catch (e) {}
+      return waitEv(v, "loadedmetadata", 15000).then(function (ok) {
+        if (!ok && !(v.duration > 0)) throw new Error(label + "の動画を読み込めませんでした（iPhoneの「写真」から選び直すか、撮り直してください）。");
+        var pp = null; try { pp = v.play(); } catch (e) {}
+        return Promise.resolve(pp).catch(function () {}).then(function () { return new Promise(function (r) { setTimeout(r, 250); }); }).then(function () { try { v.pause(); } catch (e) {} });
+      }).then(function () {
+        var dur = Math.min(6, v.duration || 0), fps = 15, n = Math.max(1, Math.floor(dur * fps));
+        var vw = v.videoWidth || 360, vh = v.videoHeight || 640, k = Math.min(1, 480 / Math.max(vw, vh));
+        cvs.width = Math.max(2, Math.round(vw * k)); cvs.height = Math.max(2, Math.round(vh * k));
+        var W = [], P = [], errs = 0, lastErr = "";
+        return new Promise(function (resolve, reject) {
+          var i = 0;
           (function step() {
-            if (i >= n) { URL.revokeObjectURL(v.src); resolve({ fps: fps, n: n, W: W, P: P }); return; }
-            seekTo(v, i / fps).then(function () {
+            if (abortFlag) { cleanup(); reject(new Error("中止しました。")); return; }
+            if (i >= n) { cleanup(); resolve({ fps: fps, n: n, W: W, P: P }); return; }
+            seekTo(v, Math.min(dur - 0.01, i / fps + 0.001)).then(function () {
               var r = null;
+              try { c2.drawImage(v, 0, 0, cvs.width, cvs.height); } catch (e) {}
               tsNext += Math.round(1000 / fps);
-              try { r = landmarker.detectForVideo(v, tsNext); } catch (e) { r = null; }
+              try { r = landmarker.detectForVideo(cvs, tsNext); } catch (e) { r = null; errs++; lastErr = e && e.message ? e.message : String(e); }
+              if (errs > 12 && W.every(function (x) { return !x; })) { cleanup(); reject(new Error("AIの処理でエラーが続きました：" + lastErr.slice(0, 80))); return; }
               var ok = r && r.worldLandmarks && r.worldLandmarks[0] && r.landmarks && r.landmarks[0];
-              if (ok) { var lv = r.landmarks[0], vis = [11, 12, 23, 24].reduce(function (a, k) { return a + (lv[k].visibility || 0); }, 0) / 4; if (vis < 0.5) ok = false; } // 肩と腰がはっきり見えるコマだけ使う
+              if (ok) { var lv = r.landmarks[0], vis = [11, 12, 23, 24].reduce(function (a, q) { return a + (lv[q].visibility || 0); }, 0) / 4; if (vis < 0.5) ok = false; } // 肩と腰がはっきり見えるコマだけ使う
               if (ok) {
                 W.push(r.worldLandmarks[0].map(function (q) { return [q.x, q.y, q.z]; }));
                 P.push(r.landmarks[0].map(function (q) { return [q.x, q.y, q.visibility || 1]; }));
               } else { W.push(null); P.push(null); }
               i++;
-              prog(label + "を解析中… " + i + "/" + n + "コマ", p0 + (p1 - p0) * i / n);
+              var sec = Math.round((Date.now() - stageT0) / 1000);
+              prog(label + "を解析中… " + i + "/" + n + "コマ（" + sec + "秒）", p0 + (p1 - p0) * i / n);
               setTimeout(step, 0);
             });
           })();
-        }, { once: true });
-      });
+        });
+      }, function (e) { cleanup(); throw e; });
     }
     function fill(arr) { // 見つからなかったコマを前後で補う
       var n = arr.length, last = -1;
@@ -4352,13 +4416,29 @@
       }
       return out;
     }
+    function judge(v, g0, g1, o0, o1) { return v >= g0 && v <= g1 ? "g" : v >= o0 && v <= o1 ? "o" : "b"; }
+    var JD = { g: "◎", o: "○", b: "△" };
     function renderMet() {
-      var m = D.met, box = $("s3Met");
-      var cell = function (lab, val, note) { return "<div>" + lab + "<b>" + val + "</b>" + (note || "") + "</div>"; };
-      box.innerHTML = cell("トップの肩の回転", Math.round(m.sh) + "°", "<small>目安 80〜100°</small>") + cell("トップの腰の回転", Math.round(m.hp) + "°", "<small>目安 40〜50°</small>") +
-        cell("捻転差（肩−腰）", Math.round(m.xf) + "°", "<small>大きいほど力をためやすい</small>") + cell("テンポ（バック：ダウン）", m.tempo ? m.tempo.toFixed(1) + " : 1" : "-", "<small>目安 約3：1</small>") +
-        (typeof m.headMax === "number" ? cell("頭の左右の動き（最大）", Math.round(m.headMax) + "cm", "<small>インパクトまで。少ないほど安定</small>") + cell("頭の上下（インパクト）", (m.headY >= 0 ? "+" : "") + Math.round(m.headY) + "cm", "<small>＋は伸び上がり</small>") : "");
+      var m = D.met, box = $("s3Met"), cards = [];
+      var sh = Math.round(m.sh), hp = Math.round(m.hp), xf = Math.round(m.xf);
+      var js = judge(sh, 80, 105, 60, 115);
+      cards.push({ j: js, t: "トップで肩が回った角度", v: sh + "°", d: js === "g" ? "しっかり回っています（目安80〜100°）" : sh < 80 ? "回転が浅め。手だけで上げていないか（目安80〜100°）" : "回りすぎ。体が起き上がっていないか", k: "top", view: "top" });
+      var jh = judge(hp, 30, 55, 20, 65);
+      cards.push({ j: jh, t: "トップで腰が回った角度", v: hp + "°", d: jh === "g" ? "ちょうど良い回り方（目安40〜50°）" : hp < 30 ? "腰が止まりすぎ。窮屈で手打ちになりやすい" : "腰が回りすぎ。ねじれ（捻転）が逃げやすい", k: "top", view: "top" });
+      var jx = xf >= 35 ? "g" : xf >= 20 ? "o" : "b";
+      cards.push({ j: jx, t: "捻転差（肩−腰）", v: xf + "°", d: jx === "g" ? "上半身と下半身のねじれで、力をためられています" : "肩と腰の差が小さめ。肩を回し、腰は我慢するイメージ", k: "top", view: "top" });
+      if (m.tempo) { var jt = judge(m.tempo, 2.6, 3.4, 2.2, 4); cards.push({ j: jt, t: "テンポ（バック：ダウン）", v: m.tempo.toFixed(1) + ":1", d: jt === "g" ? "プロに近いリズム（約3：1）" : m.tempo < 2.6 ? "上げるのが速め。トップまでゆっくり「イチ・ニ・サン」" : "切り返しで間が空きすぎ／ダウンが速すぎ", k: "addr", view: "front", play: true }); }
+      if (typeof m.headMax === "number") {
+        var hm = Math.round(m.headMax), jhm = hm <= 5 ? "g" : hm <= 10 ? "o" : "b";
+        cards.push({ j: jhm, t: "頭の左右の動き（インパクトまで）", v: hm + "cm", d: jhm === "g" ? "頭が動かず安定しています" : "頭が左右に動いています。白いアドレスの形と比べてください", k: "imp", view: "front" });
+        var hy = Math.round(m.headY), jhy = Math.abs(hy) <= 4 ? "g" : Math.abs(hy) <= 8 ? "o" : "b";
+        cards.push({ j: jhy, t: "インパクトでの頭の上下", v: (hy > 0 ? "+" : "") + hy + "cm", d: jhy === "g" ? "前傾がキープできています" : hy > 0 ? "伸び上がっています（トップ・シャンクの原因）" : "沈み込んでいます（ダフリの原因）", k: "imp", view: "back" });
+      }
+      box.innerHTML = cards.map(function (c, i) { return "<button type='button' data-s3c='" + i + "'><span class='jd " + c.j + "'>" + JD[c.j] + "</span><span class='tx'><b>" + c.t + "</b><small>" + c.d + "</small></span><span class='val'>" + c.v + "</span></button>"; }).join("") +
+        "<p class='map-note' style='margin:4px 0 0;'>見方のコツ：<b>真上</b>＝肩・腰の回転と手の通り道、<b>正面</b>＝頭と体重の左右の動き、<b>後方</b>＝前傾の角度とスイングの通り道。◎○△は一般的な目安で、AIの推定なので±数°・数cmの誤差があります。</p>";
+      box.querySelectorAll("[data-s3c]").forEach(function (b) { b.addEventListener("click", function () { var c = cards[+b.dataset.s3c]; stop(); goKey(c.k); setView(c.view); if (c.play) { speed = 0.5; document.querySelectorAll("[data-s3sp]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.s3sp === "0.5" ? "true" : "false"); }); play(); } try { $("s3View").scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {} }); });
     }
+    function goKey(k) { if (!D) return; var m = D.met, f = k === "addr" ? m.addr : k === "top" ? m.top : k === "imp" ? m.imp : D.n - 1; t = f / D.fps; draw(); }
     // ---- 描画 ----
     var BONES = [[11, 12, "t"], [11, 23, "t"], [12, 24, "t"], [23, 24, "t"], [11, 13, "l"], [13, 15, "l"], [12, 14, "r"], [14, 16, "r"], [23, 25, "l"], [25, 27, "l"], [27, 31, "l"], [24, 26, "r"], [26, 28, "r"], [28, 32, "r"]];
     var COL = { t: "#7cc4ff", l: "#ffb347", r: "#9be28f" };
@@ -4395,6 +4475,14 @@
           cx.beginPath(); cx.moveTo(h0.x, h0.y); cx.lineTo(h1.x, h1.y); cx.stroke();
         }
       }
+      // アドレスの形（白く薄く）
+      if (ghost && D.met && i !== D.met.addr) {
+        var gf = D.F[D.met.addr];
+        cx.strokeStyle = "rgba(255,255,255,.28)"; cx.lineCap = "round";
+        BONES.forEach(function (bn) { var g1 = proj(gf[bn[0]], W, H), g2 = proj(gf[bn[1]], W, H); cx.lineWidth = 10 * zoom; cx.beginPath(); cx.moveTo(g1.x, g1.y); cx.lineTo(g2.x, g2.y); cx.stroke(); });
+        var gh = proj([gf[0][0], gf[0][1] + 0.02, gf[0][2] - 0.04], W, H), gr0 = 0.12 * gh.f * Math.min(W, H) * 0.34 * zoom;
+        cx.fillStyle = "rgba(255,255,255,.22)"; cx.beginPath(); cx.arc(gh.x, gh.y, gr0, 0, Math.PI * 2); cx.fill();
+      }
       // 体（奥から順に）
       var parts = BONES.map(function (bn) { var p1 = proj(f[bn[0]], W, H), p2 = proj(f[bn[1]], W, H); return { p1: p1, p2: p2, z: (p1.z + p2.z) / 2, c: COL[bn[2]], w: bn[2] === "t" ? 16 : 13 }; });
       var nose = f[0], head = proj([nose[0], nose[1] + 0.02, nose[2] - 0.04], W, H);
@@ -4415,8 +4503,11 @@
       // 手（グリップ）
       var hd = proj([(f[15][0] + f[16][0]) / 2, (f[15][1] + f[16][1]) / 2, (f[15][2] + f[16][2]) / 2], W, H);
       cx.fillStyle = "#fff"; cx.beginPath(); cx.arc(hd.x, hd.y, 8, 0, Math.PI * 2); cx.fill();
-      var m = D.met, ph = i < m.addr ? "" : i <= m.top ? (i === m.top ? "トップ" : "バックスイング") : i <= m.imp ? (i === m.imp ? "インパクト" : "ダウンスイング") : "フォロー";
-      $("s3Hud").textContent = (i / D.fps).toFixed(2) + "秒　" + ph + (playing ? "　" + (speed === 1 ? "等速" : speed + "×") : "");
+      var m = D.met, ph = i < m.addr ? "構え" : i <= m.top ? (i === m.top ? "トップ" : "バックスイング") : i <= m.imp ? (i === m.imp ? "インパクト" : "ダウンスイング") : "フォロー";
+      $("s3Hud").textContent = (i / D.fps).toFixed(2) + "秒" + (playing ? "　" + (speed === 1 ? "等速" : speed + "×") : "");
+      $("s3Phase").textContent = i === m.addr ? "アドレス" : i === m.top ? "トップ" : i === m.imp ? "インパクト" : ph;
+      var pv = $("s3Pip");
+      if (pipOn && pipUrl && pv.readyState >= 1) { var want = i / D.fps; if (Math.abs(pv.currentTime - want) > 0.04 && Date.now() - pipSeekAt > 60) { pipSeekAt = Date.now(); try { pv.currentTime = want; } catch (e) {} } }
       $("s3Scrub").value = String(Math.round(i / Math.max(1, D.n - 1) * 1000));
       $("s3Play").textContent = playing ? "⏸ 止める" : "▶ 再生";
     }
@@ -4429,14 +4520,24 @@
     function play() { if (!D) return; playing = true; lastTs = 0; raf = requestAnimationFrame(loop); draw(); }
     function stop() { playing = false; cancelAnimationFrame(raf); draw(); }
     $("s3Play").addEventListener("click", function () { if (playing) stop(); else play(); });
-    $("s3Back").addEventListener("click", function () { stop(); t = Math.max(0, t - 1 / 30); draw(); });
-    $("s3Fwd").addEventListener("click", function () { stop(); if (D) t = Math.min((D.n - 1) / D.fps, t + 1 / 30); draw(); });
+    $("s3Back").addEventListener("click", function () { stop(); if (D) t = Math.max(0, t - 1 / D.fps); draw(); });
+    $("s3Fwd").addEventListener("click", function () { stop(); if (D) t = Math.min((D.n - 1) / D.fps, t + 1 / D.fps); draw(); });
     $("s3Scrub").addEventListener("input", function () { var v = +this.value; stop(); if (D) t = v / 1000 * (D.n - 1) / D.fps; draw(); });
     document.querySelectorAll("[data-s3sp]").forEach(function (b) { b.addEventListener("click", function () { speed = +b.dataset.s3sp; document.querySelectorAll("[data-s3sp]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); draw(); }); });
     var VIEWS = { front: [0, 0.12], back: [Math.PI / 2, 0.12], top: [0, 1.45], diag: [Math.PI / 4, 0.42], target: [-Math.PI / 2, 0.12] };
     function setView(k) { curView = k; yaw = VIEWS[k][0] * (k === "front" || k === "top" ? 1 : hand); pitch = VIEWS[k][1]; document.querySelectorAll("[data-s3v]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.s3v === k ? "true" : "false"); }); draw(); }
     document.querySelectorAll("[data-s3v]").forEach(function (b) { b.addEventListener("click", function () { setView(b.dataset.s3v); }); });
     $("s3Trail").addEventListener("click", function () { trail = !trail; this.setAttribute("aria-pressed", trail ? "true" : "false"); draw(); });
+    $("s3Ghost").addEventListener("click", function () { ghost = !ghost; this.setAttribute("aria-pressed", ghost ? "true" : "false"); draw(); });
+    $("s3PipBtn").addEventListener("click", function () { pipOn = !pipOn; this.setAttribute("aria-pressed", pipOn ? "true" : "false"); $("s3Pip").hidden = !pipOn || !pipUrl; draw(); });
+    document.querySelectorAll("[data-s3k]").forEach(function (b) { b.addEventListener("click", function () { stop(); goKey(b.dataset.s3k); }); });
+    function setPip(file) {
+      var pv = $("s3Pip");
+      if (pipUrl) { URL.revokeObjectURL(pipUrl); pipUrl = null; }
+      if (!file) { pv.hidden = true; return; }
+      pipUrl = URL.createObjectURL(file); pv.src = pipUrl; pv.hidden = !pipOn;
+      try { pv.load(); var pp = pv.play(); if (pp && pp.then) pp.then(function () { pv.pause(); draw(); }).catch(function () {}); } catch (e) {}
+    }
     $("s3Side").addEventListener("click", function () { hand = -hand; this.textContent = hand > 0 ? "右打ち" : "左打ち"; if (raw.A) { build(); setView(curView); } });
     $("s3Mode").addEventListener("click", function () { mode = mode === "fuse" ? "A" : mode === "A" ? "B" : "fuse"; this.textContent = mode === "fuse" ? "A＋B合成" : mode === "A" ? "Aだけ" : "Bだけ"; if (raw.A) build(); });
     $("s3Sync").addEventListener("input", function () { syncOff = +this.value; $("s3SyncV").textContent = (syncOff > 0 ? "+" : syncOff < 0 ? "" : "±") + syncOff + "コマ"; if (raw.A) build(); });
@@ -4462,9 +4563,10 @@
       if (!fill(r.W)) return null;
       if (r.P) fill(r.P); r.W = smooth(r.W); return r;
     }
+    $("s3Stop").addEventListener("click", function () { abortFlag = true; prog("中止しています…"); });
     $("s3Run").addEventListener("click", function () {
       if (!files.A) return;
-      var btn = this; btn.disabled = true;
+      var btn = this; btn.disabled = true; abortFlag = false; stageT0 = Date.now(); $("s3Stop").hidden = false;
       loadModel().then(function () {
         return analyze(files.A, "A（正面）", 5, files.B ? 52 : 98);
       }).then(function (ra) {
@@ -4477,12 +4579,12 @@
         if (files.B && !raw.B) prog("Bの動画で人が見つからなかったので、Aだけで作りました。", 100);
         else prog("できました。指で回して見てください。" + (raw.B ? "（A＋Bを合成）" : "（Aだけ。奥行きは推定）"), 100);
         mode = "fuse"; $("s3Mode").textContent = "A＋B合成"; syncOff = 0; $("s3Sync").value = "0"; $("s3SyncV").textContent = "±0";
-        $("s3Out").hidden = false; t = 0; build(); setView("diag");
-        btn.disabled = false;
+        $("s3Out").hidden = false; t = 0; setPip(files.A); build(); setView("diag"); goKey("addr");
+        btn.disabled = false; $("s3Stop").hidden = true;
       }).catch(function (err) {
-        btn.disabled = false;
+        btn.disabled = false; $("s3Stop").hidden = true;
         var msg = err && err.message ? err.message : String(err);
-        if (/fetch|import|network|Failed|load/i.test(msg) && !/人が見つかり/.test(msg)) msg = "AIの部品を読み込めませんでした。インターネットにつながっているときに、もう一度押してください。";
+        if (/Failed to fetch|NetworkError|import|dynamically imported/i.test(msg)) msg = "AIの部品を読み込めませんでした。インターネットにつながっているときに、もう一度押してください。";
         prog(msg, 0);
       });
     });
@@ -4911,8 +5013,10 @@
   })();
 
   // ---------- バージョンと更新内容 ----------
-  var APP_VER = "1.6.0", APP_DATE = "2026-09-28";
+  var APP_VER = "1.6.2", APP_DATE = "2026-09-28";
   var CHANGELOG = [
+    { v: "1.6.2", d: "9/28", t: "3Dスイングを分かりやすく：元の動画を小窓で同時表示、場面ボタン（アドレス・トップ・インパクト・フィニッシュ）、アドレスの形を白く残す、見どころカード（◎○△と一言。押すとその場面を見やすい向きで）、色の説明" },
+    { v: "1.6.1", d: "9/28", t: "3Dスイング：iPhoneで解析が止まる問題を修正（動画の読み方・AIの読み込み表示・GPUが固まったらCPUに切替・処理を約2倍速く）。中止ボタンと進み具合の表示" },
     { v: "1.6", d: "9/28", t: "新機能（実験版）「3Dスイング」：正面と後方の動画から、AIで立体のアバターを作って好きな角度から再生。手の軌道、肩・腰の回転、捻転差、頭の動き、テンポの目安" },
     { v: "1.5", d: "9/28", t: "新機能「スイング」タブ：動画を撮る・選ぶ、スロー（0.1×〜等速）、コマ送り、指でなぞって送る、直線・手書き・円・角度、グリッド、左右反転、テンポ（バック：ダウン）" },
     { v: "1.4", d: "9/28", t: "ピン位置を9か所に。③を「4方向の点数（3〜−2、最初は0）」に作り直し、④に方向ごとの内訳表（shun氏ターゲットナビ準拠）。画面にバージョン表示" },
