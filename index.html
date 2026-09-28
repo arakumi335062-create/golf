@@ -891,6 +891,40 @@
   .sub-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); margin: 12px 0 6px; }
 
   /* 十字配置（グリーンを中心に上下左右） */
+  .ptb { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15); color: #fff; font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; vertical-align: middle; background: #8b928d; }
+  .ptb.p3 { background: #c63b2e; } .ptb.p2 { background: #d9731f; } .ptb.p1 { background: #caa21b; } .ptb.p0 { background: #8b928d; } .ptb.pm1 { background: #26a08f; } .ptb.pm2 { background: #2f72b8; }
+  .pen-chip { min-height: 52px; }
+  .pts6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .pts6 button { min-height: 62px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; padding: 4px 2px; line-height: 1.3; }
+  .pts6 button small { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+  .pts6 button[aria-pressed="true"] { background: #cfe6d3; border-color: #2e6b45; box-shadow: inset 0 0 0 2px #2e6b45; }
+  .pts-foot { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
+  .pts-foot span { flex: 1; }
+  .pts-foot button { border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); border-radius: 999px; min-height: 38px; padding: 0 12px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .aim-break { margin-top: 10px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+  .aim-break:empty { display: none; }
+  .aim-break .ab-h { padding: 8px 10px; font-size: 14px; font-weight: 800; border-bottom: 1px solid var(--line); }
+  .aim-break table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .aim-break th { font-size: 11px; color: var(--ink-soft); text-align: left; padding: 6px 8px; font-weight: 700; border-bottom: 1px solid var(--line); }
+  .aim-break td { padding: 8px 6px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .aim-break td:nth-child(3) { font-size: 13px; }
+  .aim-break td.d { white-space: normal; }
+  .aim-break th { white-space: nowrap; }
+  #penaltyChoices .chip[aria-pressed="true"].pen-chip { background: #cfe6d3; border-color: #2e6b45; color: var(--ink); box-shadow: inset 0 0 0 2px #2e6b45; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #penaltyChoices .chip[aria-pressed="true"].pen-chip { background: #24452f; } }
+  .aim-break tr:last-child td { border-bottom: none; }
+  .aim-break td.d { font-weight: 900; font-size: 16px; }
+  .aim-break tr.bind td { background: #fff4d9; font-weight: 800; }
+  .aim-break .why { display: inline-block; margin-left: 4px; border: 1px solid #c9a24a; color: #7a5a12; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .aim-break tr.bind td { background: #3a3218; } :root:not([data-theme="light"]) .aim-break .why { color: #f0d58a; } :root:not([data-theme="light"]) .pts6 button[aria-pressed="true"] { background: #24452f; } }
+  .grid9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .grid9 .p9 { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; min-height: 64px; }
+  .grid9 .p9 span { font-size: 14px; font-weight: 800; }
+  .p9-ico { width: 40px; height: 24px; }
+  .p9-ico ellipse { fill: var(--turf-soft, #dcead9); stroke: var(--turf-edge, #4e9a5a); stroke-width: 1.5; }
+  .p9-ico circle { fill: #e0472f; }
+  .p9[aria-pressed="true"] .p9-ico ellipse { fill: rgba(255,255,255,.25); stroke: #fff; }
+  .p9[aria-pressed="true"] .p9-ico circle { fill: #fff; }
   .cross { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto auto; gap: 6px; }
   .cross .c-top { grid-column: 2; grid-row: 1; }
   .cross .c-left { grid-column: 1; grid-row: 2; }
@@ -1392,12 +1426,16 @@
 
   <section class="card step-card" id="pinCard" data-step="1" data-tabs="shot">
     <div class="step-head"><span class="step-num">1</span><h2>ピンの位置と残り距離</h2><span class="step-badge">選択中</span><span class="step-sum" id="sum1"></span></div>
-    <div class="cross" id="pinChoices" role="group" aria-label="ピンの位置">
-      <button type="button" class="chip pin-chip c-top" id="pin-back" data-val="back" aria-pressed="false"><span class="dot-mark">◓</span>奥</button>
-      <button type="button" class="chip pin-chip c-left" id="pin-left" data-val="left" aria-pressed="false"><span class="dot-mark">◔</span>左</button>
-      <button type="button" class="chip pin-chip c-mid" id="pin-center" data-val="center" aria-pressed="false"><span class="dot-mark">◉</span>真ん中</button>
-      <button type="button" class="chip pin-chip c-right" id="pin-right" data-val="right" aria-pressed="false"><span class="dot-mark">◕</span>右</button>
-      <button type="button" class="chip pin-chip c-bot" id="pin-front" data-val="front" aria-pressed="false"><span class="dot-mark">◒</span>手前</button>
+    <div class="grid9" id="pinChoices" role="group" aria-label="ピンの位置（9か所）">
+      <button type="button" class="chip pin-chip p9" id="pin-backLeft" data-val="backLeft" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="10" cy="6" r="3"/></svg><span>左奥</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-back" data-val="back" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="18" cy="6" r="3"/></svg><span>奥</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-backRight" data-val="backRight" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="26" cy="6" r="3"/></svg><span>右奥</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-left" data-val="left" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="10" cy="11" r="3"/></svg><span>左</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-center" data-val="center" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="18" cy="11" r="3"/></svg><span>真ん中</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-right" data-val="right" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="26" cy="11" r="3"/></svg><span>右</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-frontLeft" data-val="frontLeft" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="10" cy="16" r="3"/></svg><span>左手前</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-front" data-val="front" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="18" cy="16" r="3"/></svg><span>手前</span></button>
+      <button type="button" class="chip pin-chip p9" id="pin-frontRight" data-val="frontRight" aria-pressed="false"><svg class="p9-ico" viewBox="0 0 36 22" aria-hidden="true"><ellipse cx="18" cy="11" rx="16" ry="10"/><circle cx="26" cy="16" r="3"/></svg><span>右手前</span></button>
     </div>
     <div class="sub-label">ピンまでの距離</div>
     <div class="dist-row">
@@ -1430,22 +1468,25 @@
 
   <section class="card step-card" id="penaltyCard" data-step="3" data-tabs="shot">
     <div class="step-head"><span class="step-num">3</span><h2>コース状況を点数で把握</h2><span class="step-badge">選択中</span><span class="step-sum" id="sum3"></span></div>
-    <div class="sub-label">障害物の種類（点数）→ 次に位置をタップ</div>
-    <div class="choices c4" id="hazTypeChoices" role="group" aria-label="障害物の種類">
-      <button type="button" class="chip haz-chip" data-val="3" data-pts="3" aria-pressed="true"><span class="pts">③</span>ペナルティ<small>OB・池</small></button>
-      <button type="button" class="chip haz-chip" data-val="2" data-pts="2" aria-pressed="false"><span class="pts">②</span>寄せにくい<small>深ラフ・崖</small></button>
-      <button type="button" class="chip haz-chip" data-val="1" data-pts="1" aria-pressed="false"><span class="pts">①</span>バンカー<small>&nbsp;</small></button>
-      <button type="button" class="chip haz-chip" data-val="0" data-pts="0" aria-pressed="false"><span class="pts">⓪</span>寄せやすい<small>花道など</small></button>
-    </div>
-    <p class="map-note" id="hazTypeNote" style="margin-top:6px;"></p>
-    <div class="sub-label">障害物の位置（複数OK・同じ種類でもう一度タップで解除）</div>
-    <div class="cross" id="penaltyChoices" role="group" aria-label="障害物の位置">
-      <button type="button" class="chip pen-chip c-top" id="pen-back" data-val="back" aria-pressed="false"><span class="dot-mark">▔</span>奥</button>
-      <button type="button" class="chip pen-chip c-left" id="pen-left" data-val="left" aria-pressed="false"><span class="dot-mark">▌</span>左</button>
+    <p class="map-note" style="margin:0 0 6px;">グリーンのまわり4方向の点数を選びます。最初はすべて0。変えたい方向だけ選んでください。</p>
+    <div class="sub-label">方向（押して選ぶ）</div>
+    <div class="cross" id="penaltyChoices" role="group" aria-label="方向">
+      <button type="button" class="chip pen-chip c-top" id="pen-back" data-val="back" aria-pressed="false">奥 <span class="ptb" data-b="back">0</span></button>
+      <button type="button" class="chip pen-chip c-left" id="pen-left" data-val="left" aria-pressed="false">左 <span class="ptb" data-b="left">0</span></button>
       <div class="green-pill c-mid" aria-hidden="true">グリーン</div>
-      <button type="button" class="chip pen-chip c-right" id="pen-right" data-val="right" aria-pressed="false"><span class="dot-mark">▐</span>右</button>
-      <button type="button" class="chip pen-chip c-bot" id="pen-front" data-val="front" aria-pressed="false"><span class="dot-mark">▁</span>手前</button>
+      <button type="button" class="chip pen-chip c-right" id="pen-right" data-val="right" aria-pressed="true">右 <span class="ptb" data-b="right">0</span></button>
+      <button type="button" class="chip pen-chip c-bot" id="pen-front" data-val="front" aria-pressed="false">手前 <span class="ptb" data-b="front">0</span></button>
     </div>
+    <div class="sub-label" id="ptsLabel">右の点数</div>
+    <div class="pts6" id="ptsChoices" role="group" aria-label="点数">
+      <button type="button" data-v="3"><span class="ptb p3">3</span>点<small>ペナルティ</small></button>
+      <button type="button" data-v="2"><span class="ptb p2">2</span>点<small>アプローチしにくい</small></button>
+      <button type="button" data-v="1"><span class="ptb p1">1</span>点<small>バンカー</small></button>
+      <button type="button" data-v="0"><span class="ptb p0">0</span>点<small>普通に寄る</small></button>
+      <button type="button" data-v="-1"><span class="ptb pm1">−1</span>点<small>寄せやすい</small></button>
+      <button type="button" data-v="-2"><span class="ptb pm2">−2</span>点<small>片手でも寄る</small></button>
+    </div>
+    <div class="pts-foot"><span id="ptsNote"></span><button type="button" id="ptsReset">すべて0に戻す</button></div>
   </section>
 
   <section class="card step-card" id="mapCard" data-step="4" data-tabs="shot">
@@ -1453,6 +1494,7 @@
     <div class="aim-box">
       <div class="aim-head" id="aimHead">ピンの位置を選んでください</div>
       <div class="aim-why" id="aimWhy"></div>
+      <div class="aim-break" id="aimBreak"></div>
       <div class="tip-now" id="tipShot" style="margin-top:8px;"></div>
     </div>
     <div class="map-wrap" style="margin-top:10px;">
@@ -1871,6 +1913,8 @@
     if (!Array.isArray(state.penalties)) state.penalties = [];
     if (typeof state.penaltyPts !== "object" || !state.penaltyPts) state.penaltyPts = {};
     state.penalties.forEach(function (sd) { if (typeof state.penaltyPts[sd] !== "number") state.penaltyPts[sd] = 3; }); // 旧データは全部ペナルティ扱い
+    Object.keys(state.penaltyPts).forEach(function (sd) { if (["back", "front", "left", "right"].indexOf(sd) < 0 || typeof state.penaltyPts[sd] !== "number" || state.penaltyPts[sd] === 0) delete state.penaltyPts[sd]; });
+    state.penalties = ["back", "front", "left", "right"].filter(function (sd) { return typeof state.penaltyPts[sd] === "number"; });
     if (state.course === "nukata") state.course = "nukata_w"; // 旧額田の互換
     if (typeof state.holeNotes !== "object" || !state.holeNotes) state.holeNotes = {};
     if (typeof state.clubSkill !== "object" || !state.clubSkill) state.clubSkill = {};
@@ -1889,6 +1933,7 @@
     if (typeof state.customCourses !== "object" || !state.customCourses || Array.isArray(state.customCourses)) state.customCourses = {};
     if (typeof state.pg !== "object" || !state.pg || Array.isArray(state.pg)) state.pg = {};
     if (typeof state.onePage !== "boolean") state.onePage = true;
+    if (state.pin && ["center", "right", "left", "back", "front", "backRight", "backLeft", "frontRight", "frontLeft"].indexOf(state.pin) < 0) state.pin = null;
   }
   function loadState() {
     try {
@@ -1967,46 +2012,44 @@
     };
   }
 
-  // 障害物：種類（点数）を選んでから位置をタップ。同じ種類でもう一度タップで解除（複数の位置OK）
+  // グリーンのまわり4方向の点数（−2〜3、最初はすべて0）。要る距離＝曲がり幅＋点数（shun氏ターゲットナビ準拠）
   var HAZ = {
-    3: { name: "ペナルティ", mark: "③", note: "3点＝OB・池などのペナルティエリア（1打罰）" },
-    2: { name: "寄せにくい", mark: "②", note: "2点＝深いラフ・崖・砲台の下など、次が難しい場所" },
-    1: { name: "バンカー",   mark: "①", note: "1点＝バンカー（出すだけなら大きな傷にならない）" },
-    0: { name: "寄せやすい", mark: "⓪", note: "0点＝花道など普通に寄せられる場所（それでも球はグリーンに残す）" }
+    3: { name: "ペナルティ", mark: "3", note: "3点＝OBやペナルティエリアなど1打のペナルティ", loss: 1.5 },
+    2: { name: "アプローチしにくい", mark: "2", note: "2点＝かなり難しいアプローチ（深いラフ・崖・砲台の下など）", loss: 0.8 },
+    1: { name: "バンカー", mark: "1", note: "1点＝上手く打てれば寄るアプローチ（バンカーなど）", loss: 0.5 },
+    0: { name: "普通に寄る", mark: "0", note: "0点＝普通に行けば寄るアプローチ", loss: 0.25 },
+    "-1": { name: "寄せやすい", mark: "−1", note: "−1点＝簡単に寄るアプローチ（花道・受けたグリーンなど）", loss: 0.15 },
+    "-2": { name: "片手でも寄る", mark: "−2", note: "−2点＝片手でも寄るアプローチ", loss: 0.1 }
   };
+  var PT_COLOR = { 3: "#c63b2e", 2: "#d9731f", 1: "#caa21b", 0: "#8b928d", "-1": "#26a08f", "-2": "#2f72b8" };
+  function ptCls(v) { return v < 0 ? "pm" + (-v) : "p" + v; }
+  var SIDES4 = ["back", "front", "left", "right"];
   var SIDE_NAME = { left: "左", right: "右", back: "奥", front: "手前" };
-  function hazPts(side) { var v = state.penaltyPts[side]; return typeof v === "number" ? v : 3; }
-  function togglePenalty(side) {
-    var i = state.penalties.indexOf(side);
-    if (i >= 0 && hazPts(side) === state.hazType) {
-      state.penalties.splice(i, 1);           // 同じ種類 → 解除
-      delete state.penaltyPts[side];
-    } else {
-      if (i < 0) state.penalties.push(side);  // 新規 or 種類の付け替え
-      state.penaltyPts[side] = state.hazType;
-    }
-    setPenaltyUI();
-    saveHoleNote();
-    update();
+  function hazPts(side) { var v = state.penaltyPts[side]; return typeof v === "number" ? v : 0; }
+  function syncPenalties() { state.penalties = SIDES4.filter(function (sd) { return hazPts(sd) !== 0; }); }
+  var dirSel = "right";
+  function selectDir(side) { dirSel = side; setPenaltyUI(); }
+  function setPts(side, v) {
+    if (v === 0) delete state.penaltyPts[side]; else state.penaltyPts[side] = v;
+    syncPenalties(); setPenaltyUI(); saveHoleNote(); update();
   }
+  function togglePenalty(side) { selectDir(side); } // 図のまわりをタップ → その方向を選ぶ
   document.querySelectorAll("#penaltyChoices .chip").forEach(function (chip) {
-    chip.addEventListener("click", function () { togglePenalty(chip.dataset.val); });
+    chip.addEventListener("click", function () { selectDir(chip.dataset.val); });
   });
+  document.querySelectorAll("#ptsChoices [data-v]").forEach(function (b) {
+    b.addEventListener("click", function () { setPts(dirSel, +b.dataset.v); });
+  });
+  $("ptsReset").addEventListener("click", function () { state.penaltyPts = {}; syncPenalties(); setPenaltyUI(); saveHoleNote(); update(); });
   function setPenaltyUI() {
-    document.querySelectorAll("#penaltyChoices .chip").forEach(function (c) {
-      var on = state.penalties.indexOf(c.dataset.val) >= 0;
-      c.setAttribute("aria-pressed", on ? "true" : "false");
-      if (on) c.setAttribute("data-pts", String(hazPts(c.dataset.val))); else c.removeAttribute("data-pts");
-      var base = SIDE_NAME[c.dataset.val];
-      var lbl = c.lastChild;
-      if (lbl && lbl.nodeType === 3) lbl.nodeValue = on ? base + " " + HAZ[hazPts(c.dataset.val)].mark : base;
-    });
+    document.querySelectorAll("#penaltyChoices .chip").forEach(function (c) { c.setAttribute("aria-pressed", c.dataset.val === dirSel ? "true" : "false"); c.removeAttribute("data-pts"); });
+    document.querySelectorAll("#penaltyChoices .ptb").forEach(function (b) { var v = hazPts(b.dataset.b); b.className = "ptb " + ptCls(v); b.textContent = v < 0 ? "−" + (-v) : String(v); });
+    var cur = hazPts(dirSel);
+    document.querySelectorAll("#ptsChoices [data-v]").forEach(function (b) { b.setAttribute("aria-pressed", +b.dataset.v === cur ? "true" : "false"); });
+    if ($("ptsLabel")) $("ptsLabel").textContent = SIDE_NAME[dirSel] + "の点数";
+    if ($("ptsNote")) $("ptsNote").textContent = HAZ[cur].note;
   }
-  var setHazTypeUI = bindChips("hazTypeChoices", function (v) {
-    state.hazType = parseInt(v, 10);
-    $("hazTypeNote").textContent = HAZ[state.hazType].note;
-    saveState();
-  });
+
   var setPinUI = bindChips("pinChoices", function (v) {
     state.pin = v; update();
   });
@@ -3673,7 +3716,7 @@
     $("ruleBack").addEventListener("click", function () { ruleOpen = ""; renderRules(); });
   }
 
-  var HELP = [{"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか。今日のピン位置を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③障害物の点数", "x": "ペナルティ3・寄せにくい2・バンカー1・寄せやすい0。種類を選んでから位置を押します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "障害物側の端から「曲がり幅＋点数」内側を狙う。図のタップでも選べます。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
+  var HELP = [{"s": "#condPick", "t": "今日の調子", "x": "右に出る・ダフリ・トップなど、今日出やすいミスを押すと、番手に合わせて気をつけることを1つだけ出します。点線は記録から自動で気づいたもの（押すと外せます）。", "a": "misslog"}, {"s": "#rmLine", "t": "ひと言", "x": "行く先の危険（バンカー・池・OB）と、今日の調子に合わせた気づきを1つずつ。押すと次のひと言。", "a": "misslog"}, {"s": "#rmMenuBtn", "t": "メニュー", "x": "風・今日の調子・狙う1点・写真・ルール・通常画面に戻る。", "a": "setup"}, {"s": "#rmStart", "t": "ラウンド開始", "x": "コースで使う大きな1画面に切り替えます。おすすめ番手・残り距離・危険・風・スコア入力だけ。GPSと画面の自動消灯防止もオン。", "a": "setup"}, {"s": "#rmClub", "t": "おすすめ番手", "x": "今の状況で持つ番手。押すと詳しい画面（狙う1点など）へ。", "a": "shot"}, {"s": "#rmDist", "t": "残り距離", "x": "大きい数字がピン（なければセンター）まで。下に手前・奥エッジ。GPSで自動更新。", "a": "prep"}, {"s": "#rmOut", "t": "ホールアウト", "x": "打数 → パットの2タップで保存して次のホールへ。間違えたら「取り消す」。", "a": "score"}, {"s": "#phPickHaz", "t": "障害物", "x": "バンカー・池は手前の端→奥の端の2回タップ、OB・林は1回。何個でも置けて、届く・越える距離が写真に出ます。ティーの番手選びにも使います。", "a": "prep"}, {"s": "#courseSend", "t": "コースデータを送る", "x": "コース・航空写真・障害物だけを1つのファイルに。パソコンで登録→スマホで受け取る、に使います。", "a": "more"}, {"s": "#courseRecv", "t": "受け取る", "x": "送られたコースデータを取り込みます。ラウンドや記録は消えません。", "a": "more"}, {"s": "#clubNow", "t": "おすすめ番手", "x": "今の状況でまず持つ番手。ティーでは作戦どおりの番手、GPSでボール位置がわかれば残り距離＋風・傾斜込みの番手、45yd以内は寄せ。押すと詳しい画面へ。", "a": "shot"}, {"s": "#pgbar", "t": "ページ切り替え", "x": "1画面に収まるようにページを分けています。押すか、画面を左右にスワイプで切り替え。", "a": "setup"}, {"s": "#pgnav", "t": "前後のページ", "x": "となりのページへ。左右スワイプでも同じです。", "a": "setup"}, {"s": "#viewChoices", "t": "画面の出し方", "x": "1画面ずつ（ページ切り替え）か、縦に全部並べてスクロールか。", "a": "setup"}, {"s": "#helpBtn", "t": "使い方ガイド", "x": "手順ガイド（光る所を順番に案内）と、取扱説明書Q&Aを開きます。", "a": "qa"}, {"s": "#guideStartBtn", "t": "手順ガイド", "x": "準備・ラウンド中・ルール・振り返りの4コース。画面の光る所を1つずつ案内します。", "a": "qa"}, {"s": "#tab-hole", "t": "ホールタブ", "x": "ラウンド中の基本画面。ホール番号、ピン位置、航空写真、スコア、ミスの記録。", "a": "setup"}, {"s": "#tab-shot", "t": "ショットタブ", "x": "①〜④で狙う1点、足元の傾斜、風と番手、落としどころ。", "a": "shot"}, {"s": "#tab-approach", "t": "アプローチタブ", "x": "50yd以内の寄せ。クラブごとの落とす場所と、バンカーの打ち方。", "a": "approach"}, {"s": "#tab-putt", "t": "パタータブ", "x": "距離・傾斜・曲がりから、狙う場所とタッチ。", "a": "putt"}, {"s": "#tab-rules", "t": "ルールタブ", "x": "何打目？カウンターと、ドロップ・池・OBなどの図解。", "a": "rules"}, {"s": "#tab-prep", "t": "準備タブ", "x": "目標スコア、マイ番手、得意距離、コース・ティー、作戦シート、バックアップ。", "a": "prep"}, {"s": "#ctxLine", "t": "いまの状態", "x": "コース・ホール・Par・距離・ティー・グリーン・ピン・目標スコアを1行で表示。", "a": "setup"}, {"s": "#goalChoices", "t": "目標スコア", "x": "100切り・90切り・80切りで、散らばりの見積もりと作戦（評価の基準）が変わります。控えめに選ぶほど安全側。", "a": "setup"}, {"s": "#unitChoices", "t": "単位", "x": "ヤードかメートル。表示が全部切り替わります。", "a": "setup"}, {"s": "#holeChips", "t": "ホール番号", "x": "押すとそのホールの情報・航空写真・前回のミスが出ます。", "a": "prep"}, {"s": "#holeInfo", "t": "ホール情報", "x": "Par・距離・ハンデ・2打目の目安と、目標スコアに合わせた作戦。", "a": "prep"}, {"s": "#pinIn", "t": "今日のピン位置", "x": "カートナビの数字（手前エッジから・左右）を入れると、旗と距離、①のピン位置に反映。その日だけ有効。", "a": "prep"}, {"s": "#phTeeSel", "t": "使うティー", "x": "ティーを切り替えると、距離・2打目の目安・航空写真のティー位置が変わります。", "a": "prep"}, {"s": "#phSide", "t": "左G・右G", "x": "ツーグリーンのどちらを使うか。コースごとに保存。", "a": "prep"}, {"s": "#phGpsBtn", "t": "現在地を表示", "x": "オンにすると、ティーから離れたら自動で自分とグリーンのアップに。ピンまで・エッジまでの距離が出ます。", "a": "prep"}, {"s": "#phViewBtn", "t": "全体／アップの切り替え", "x": "ホール全体の写真と、ボール〜グリーンのアップを切り替えます。", "a": "prep"}, {"s": "#phBallBtn", "t": "ボール位置", "x": "タップした地点をボール位置にしてアップ表示（GPSなしで予習するとき）。", "a": "prep"}, {"s": "#phApplyBtn", "t": "この残り距離で狙いを見る", "x": "残り距離をショット（45yd以内はアプローチ）に入れて、そのタブに移ります。", "a": "prep"}, {"s": "#phEditBtn", "t": "位置を直す", "x": "航空写真のティー・曲がり角・グリーンの位置を編集します。", "a": "prep"}, {"s": "#phPlan", "t": "作戦", "x": "グリーンを狙う番手と、得意な距離を残す刻み方。", "a": "more"}, {"s": "#phCanvas", "t": "航空写真", "x": "タップするとティーから／残りの距離。国土地理院の写真です。", "a": "prep"}, {"s": "#scoreCard", "t": "スコア", "x": "ホールが終わったら打数・パット・罰打・ティーショットを入力。プロ目線の評価（S〜D）が出ます。", "a": "score"}, {"s": "#holeReview", "t": "ホールの評価", "x": "目標スコアと比べた評価と、良かった点・失った所・次のホールへのひと言。", "a": "score"}, {"s": "#missCard", "t": "ミスの記録", "x": "番手・どうなった・原因・メモを残すと、次に同じホール・番手で表示。振り返りに練習メニュー。", "a": "misslog"}, {"s": "#gpsMark", "t": "打点を記録", "x": "打つ前に押します。ボール地点で「ここまでの距離」を押すと飛距離が出ます。", "a": "more"}, {"s": "#gpsMeasure", "t": "ここまでの距離", "x": "飛距離を測って、打った番手を押すと実測として記録。マイ番手の見直しに使います。", "a": "more"}, {"s": "#pinChoices", "t": "①ピンの位置", "x": "グリーンのどこにピンがあるか（左奥〜右手前の9か所）。今日のピン位置（カートナビの数字）を入れると自動で選ばれます。", "a": "shot"}, {"s": "#distSlider", "t": "①残り距離", "x": "ピンまでの距離。−5／＋5で微調整。", "a": "shot"}, {"s": "#lieChoices", "t": "ライ", "x": "フェアウェイ・ラフ（約7%飛ばない）・バンカー（約15%）。バンカーを選ぶと打ち方が出ます。", "a": "shot"}, {"s": "#curveCard", "t": "②曲がり幅", "x": "残り距離×目標スコア別の%（得意・苦手で増減）。球が散らばる片側の幅。", "a": "shot"}, {"s": "#penaltyCard", "t": "③まわりの点数", "x": "奥・手前・左・右を押して、点数（3ペナルティ〜−2片手でも寄る）を選びます。最初は全部0。0でも曲がり幅のぶんは端から離します。", "a": "shot"}, {"s": "#mapCard", "t": "④狙う1点", "x": "4方向とも端から「曲がり幅＋点数」を取れる所のうち、ピンにいちばん近い点。下の内訳で、どの方向のためにずらしたかが分かります。", "a": "shot"}, {"s": "#slopeCard", "t": "足元の傾斜", "x": "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向き・番手の補正。", "a": "slope"}, {"s": "#windCard", "t": "風と天気", "x": "天気を取得、または向かい風・追い風と風速を入力。3m/sで約1番手。持つべき番手を表示。", "a": "wind"}, {"s": "#dropCard", "t": "落としどころ", "x": "グリーンの傾斜・球の高さ・速さから、番手ごとに「ピンの○yd手前に落とす」。", "a": "wind"}, {"s": "#bkAp", "t": "ガードバンカー", "x": "距離・砂の状態・アゴの高さで、番手・フェース・砂を取る所・振り幅。", "a": "bunker"}, {"s": "#bkShot", "t": "フェアウェイバンカー", "x": "ボールから打つ・短く持つ・3/4。アゴが高いときは出すのが先。", "a": "bunker"}, {"s": "#approachCard", "t": "アプローチ", "x": "距離・傾斜・ライ・ボール位置から、クラブごとの落とす場所と★（ミスへの強さ）。", "a": "approach"}, {"s": "#puttCard", "t": "パター", "x": "距離（フィート）・上り下り・曲がり・傾きの強さから、狙う場所とタッチ。", "a": "putt"}, {"s": "#scBox", "t": "何打目？カウンター", "x": "結果を押すと次が何打目か。プレ4からOB→6打目など。カップインでスコアに自動入力。", "a": "rules"}, {"s": "#rulesList", "t": "ルール早わかり", "x": "困った場面を押すと、図・手順・罰打。", "a": "rules"}, {"s": "#clubCard", "t": "マイ番手", "x": "番手ごとの平均飛距離、◎得意・△苦手、クラブの入れ替え。全部の計算の土台。", "a": "prep"}, {"s": ".skill-btn", "t": "得意・苦手", "x": "押すたびに◎得意→△苦手→普通。散らばりと番手選びが変わります。", "a": "prep"}, {"s": "#distSkillCard", "t": "得意・苦手な距離", "x": "20yd刻みで◎△。刻む場所・ティーショット・Par5の作戦に使います。", "a": "prep"}, {"s": "#shotSuggCard", "t": "実測の飛距離", "x": "GPSで測った飛距離の中央値。設定とずれたら「直す」。", "a": "more"}, {"s": "#planCard", "t": "作戦シート", "x": "18ホールの作戦（ティーの番手・成功率・残り・前回のミス）を一覧に。前日の確認に。", "a": "more"}, {"s": "#backupCard", "t": "バックアップ", "x": "全部のデータを1つのファイルに書き出し／戻す。ラウンド後に1回がおすすめ。", "a": "more"}, {"s": "#greenSideWrap", "t": "ツーグリーン", "x": "オンにすると左右2つのグリーンを登録・切り替えできます。", "a": "prep"}, {"s": "#teeChoiceWrap", "t": "使うティー", "x": "バック・レギュラー・フロント・レディースなど。距離が切り替わります。", "a": "prep"}, {"s": ".ce-bar", "t": "コースの登録", "x": "スコアカードを見てPar・距離・HCPを入れると、一覧にないコースも使えます。", "a": "prep"}, {"s": "#courseCard", "t": "コースとホール", "x": "コースを選んでホール番号を押します。", "a": "prep"}];
   // 長押しで説明（どの画面でも）
   (function () {
     var timer = null, start = null, fired = false, bubble = null;
@@ -4288,7 +4331,7 @@
       { tab: "hole", s: "#phApplyBtn", t: "⑤ この残り距離で狙いを見る", a: "tap", x: "残り距離をショット画面へ送ります（45yd以内ならアプローチへ）。", d: "残り距離が出たら押す", need: "現在地かボール位置を入れると出ます" },
       { tab: "shot", s: "#pinCard", t: "⑥ ショット ①ピンと距離", a: "idle", x: "ピンの位置・残り距離・ライ（芝・ラフ・バンカー）を合わせます。", d: "ピンの位置と距離を合わせる" },
       { tab: "shot", s: "#curveCard", t: "⑦ ②曲がり幅", x: "距離と目標スコアから、球が散らばる片側の幅が自動で出ます。得意・苦手な番手で増減します。", d: "見るだけでOK" },
-      { tab: "shot", s: "#penaltyCard", t: "⑧ ③障害物の点数", a: "idle", x: "OB・池（3）、寄せにくい（2）、バンカー（1）、寄せやすい（0）。種類を選んでから、ある方向を押します。", d: "池やOBのある側を押す" },
+      { tab: "shot", s: "#penaltyCard", t: "⑧ ③障害物の点数", a: "idle", x: "奥・手前・左・右を押して点数を選びます。3＝ペナルティ、2＝アプローチしにくい、1＝バンカー、0＝普通（最初は全部0）、−1・−2＝寄せやすい。", d: "池やOBのある方向を押して3点に" },
       { tab: "shot", s: "#mapCard", t: "⑨ ④狙う1点", x: "障害物から『曲がり幅＋点数』だけ内側が狙う1点。ピンではなく、この点に打ちます。", d: "表示された1点を確認" },
       { tab: "shot", s: "#slopeCard", t: "⑩ 足元の傾斜", a: "tap", x: "左足上がり・下がり、つま先上がり・下がり。ボール位置・振り方と、狙いの向きの補正が出ます。", d: "平らでなければ押す" },
       { tab: "shot", s: "#windCard", t: "⑪ 風と番手", a: "idle", x: "天気を取るか、向かい風・追い風を入れると持つべき番手が出ます。3m/sで約1番手。", d: "旗のなびき方で風を入れる" },
@@ -4484,19 +4527,32 @@
   // 座標系: 1ヤード = 6px。グリーンは楕円（横35×縦32ヤード）、中心 (180, 210)。上=奥、下=手前。
   var S = 6;
   var C = { x: 180, y: 210 };
-  var GREEN = { w: 35 * S, h: 32 * S }; // 210×192px
+  var GREEN = { w: 30 * S, h: 24 * S }; // 横30×縦24ヤード（資料と同じ）
   var GA = GREEN.w / 2, GB = GREEN.h / 2;
   var css = getComputedStyle(document.documentElement);
   function tok(name) { return css.getPropertyValue(name).trim(); }
 
-  // ピンは端から約5ヤード内側
+  // ピンは端から約3ヤード内側（資料と同じ置き方）
+  var PIN_IN = 3;
+  var DG = Math.SQRT1_2;
   var PIN_OFFSET = {
     center: { x: 0, y: 0 },
-    right:  { x: GA - 5 * S, y: 0 },
-    left:   { x: -(GA - 5 * S), y: 0 },
-    back:   { x: 0, y: -(GB - 5 * S) },
-    front:  { x: 0, y: GB - 5 * S }
+    right:  { x: GA - PIN_IN * S, y: 0 },
+    left:   { x: -(GA - PIN_IN * S), y: 0 },
+    back:   { x: 0, y: -(GB - PIN_IN * S) },
+    front:  { x: 0, y: GB - PIN_IN * S },
+    backRight:  { x: (GA - PIN_IN * S) * DG, y: -(GB - PIN_IN * S) * DG },
+    backLeft:   { x: -(GA - PIN_IN * S) * DG, y: -(GB - PIN_IN * S) * DG },
+    frontRight: { x: (GA - PIN_IN * S) * DG, y: (GB - PIN_IN * S) * DG },
+    frontLeft:  { x: -(GA - PIN_IN * S) * DG, y: (GB - PIN_IN * S) * DG }
   };
+  var PIN_NAME = { center: "真ん中", right: "右", left: "左", back: "奥", front: "手前", backRight: "右奥", backLeft: "左奥", frontRight: "右手前", frontLeft: "左手前" };
+  function pinKey9(col, row) { // col: -1左 0 1右 / row: -1奥 0 1手前
+    var v = row < 0 ? "back" : row > 0 ? "front" : "", h = col < 0 ? "Left" : col > 0 ? "Right" : "";
+    if (!v && !h) return "center";
+    if (!v) return h === "Left" ? "left" : "right";
+    return v + h;
+  }
   // 障害物帯（楕円のすぐ外側。帯の長さはグリーンの約75%）
   function penaltyRect(side) {
     var TH = 30, GAP = 8;
@@ -4519,11 +4575,12 @@
     var kx = (x - C.x) / GA, ky = (y - C.y) / GB;
     return kx * kx + ky * ky <= 1;
   }
-  // 障害物がある向きだけを見て、端から「曲がり幅＋点数」ヤード内側までを許容範囲にする
+  // 4方向すべてで、狙う1点を通る縦・横の線に沿って端から「曲がり幅＋点数」内側を許容範囲にする
+  function needYd(curveYd, side) { return Math.max(0, curveYd + hazPts(side)); }
   function aimBounds(curveYd, ref) {
     var b = { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity };
-    state.penalties.forEach(function (side) {
-      var need = (curveYd + hazPts(side)) * S;
+    SIDES4.forEach(function (side) {
+      var need = needYd(curveYd, side) * S;
       var e = edgeAt(side, ref.x, ref.y);
       if (side === "back")  b.minY = Math.max(b.minY, e + need);
       if (side === "front") b.maxY = Math.min(b.maxY, e - need);
@@ -4645,25 +4702,28 @@
       return;
     }
 
-    // 障害物帯（点数ごとに色分け）
-    state.penalties.forEach(function (side) {
-      var pr = penaltyRect(side);
-      var pts = hazPts(side);
-      svg.appendChild(el("rect", {
-        x: pr.x, y: pr.y, width: pr.w, height: pr.h, rx: 12,
-        fill: tok("--haz" + pts), opacity: 0.9
-      }));
-      var pt = el("text", {
-        x: pr.x + pr.w / 2, y: pr.y + pr.h / 2,
-        "font-size": 12, "font-weight": "700", fill: "#fff",
-        "text-anchor": "middle", "dominant-baseline": "middle",
-        "font-family": "inherit"
-      });
-      pt.textContent = HAZ[pts].mark + " " + HAZ[pts].name;
-      if (pr.vert) pt.setAttribute("transform", "rotate(-90 " + (pr.x + pr.w / 2) + " " + (pr.y + pr.h / 2) + ")");
-      svg.appendChild(pt);
+    // まわりのリング（グリーンを囲む四角の対角線で奥・手前・左・右の4つに分ける）
+    var RING = 8 * S, GAPR = 4;
+    function ringPath(side) {
+      var ia = GA + GAPR, ib = GB + GAPR, oa = GA + RING, ob = GB + RING;
+      var t1 = Math.atan2(GB * oa, GA * ob), t0 = Math.atan2(GB * ia, GA * ib); // 対角線と外・内の楕円が交わる角度
+      var rng = { right: [-1, 1], left: [Math.PI - 1, Math.PI + 1], back: [-Math.PI + 1, -1], front: [1, Math.PI - 1] }[side];
+      function ang(k, outer) { var t = outer ? t1 : t0; return { right: [-t, t], left: [Math.PI - t, Math.PI + t], back: [-Math.PI + t, -t], front: [t, Math.PI - t] }[side][k]; }
+      var pts = [], N = 22, i, a0 = ang(0, true), a1 = ang(1, true);
+      for (i = 0; i <= N; i++) { var tt = a0 + (a1 - a0) * i / N; pts.push((C.x + oa * Math.cos(tt)).toFixed(1) + "," + (C.y + ob * Math.sin(tt)).toFixed(1)); }
+      a0 = ang(1, false); a1 = ang(0, false);
+      for (i = 0; i <= N; i++) { var t2 = a0 + (a1 - a0) * i / N; pts.push((C.x + ia * Math.cos(t2)).toFixed(1) + "," + (C.y + ib * Math.sin(t2)).toFixed(1)); }
+      return "M" + pts.join("L") + "Z";
+    }
+    SIDES4.forEach(function (side) {
+      var v = hazPts(side), sel = side === dirSel;
+      svg.appendChild(el("path", { d: ringPath(side), fill: v === 0 ? tok("--turf-edge") : PT_COLOR[v], "fill-opacity": v === 0 ? 0.35 : 0.85, stroke: sel ? "#fff" : tok("--turf-edge"), "stroke-width": sel ? 3 : 1 }));
+      var mid = { right: [C.x + GA + RING / 2 + 2, C.y], left: [C.x - GA - RING / 2 - 2, C.y], back: [C.x, C.y - GB - RING / 2 - 2], front: [C.x, C.y + GB + RING / 2 + 2] }[side];
+      svg.appendChild(el("circle", { cx: mid[0], cy: mid[1], r: 12, fill: PT_COLOR[v], stroke: "#fff", "stroke-width": 2 }));
+      var tx = el("text", { x: mid[0], y: mid[1] + 0.5, "font-size": 12, "font-weight": "900", fill: "#fff", "text-anchor": "middle", "dominant-baseline": "middle", "font-family": "inherit" });
+      tx.textContent = v < 0 ? "−" + (-v) : String(v);
+      svg.appendChild(tx);
     });
-
     // ピン座標・曲がり幅
     var off = PIN_OFFSET[state.pin];
     var pin = { x: C.x + off.x, y: C.y + off.y };
@@ -4676,9 +4736,8 @@
       x: clampAxis(pin.x, b.minX, b.maxX),
       y: clampAxis(pin.y, b.minY, b.maxY)
     };
-    // 楕円なので、ずらした後の位置で端を測り直す（1回補正）
-    b = aimBounds(curveYd, aim);
-    aim = { x: clampAxis(pin.x, b.minX, b.maxX), y: clampAxis(pin.y, b.minY, b.maxY) };
+    // 楕円なので、ずらした後の位置で端を測り直す（収まるまで数回）
+    for (var it = 0; it < 6; it++) { b = aimBounds(curveYd, aim); aim = { x: clampAxis(pin.x, b.minX, b.maxX), y: clampAxis(pin.y, b.minY, b.maxY) }; }
     var shiftX = aim.x - pin.x, shiftY = aim.y - pin.y;
     var shift = Math.sqrt(shiftX * shiftX + shiftY * shiftY);
 
@@ -4719,7 +4778,7 @@
 
     // ラベル
     if (shift > 0.5) {
-      var hasV = state.penalties.indexOf("back") >= 0 || state.penalties.indexOf("front") >= 0;
+      var hasV = true;
       var wl;
       if (hasV) {
         var lx = pin.x - rPx - 46;
@@ -4733,7 +4792,7 @@
     svg.appendChild(label(aim.x, aim.y + 20, "狙う1点", { fs: 12 }));
     // 散らばりの円ラベル：下→上の順に、障害物帯と重ならない位置へ
     var noteY = aim.y + rPx + 18;
-    var hasFront = state.penalties.indexOf("front") >= 0, hasBack = state.penalties.indexOf("back") >= 0;
+    var hasFront = true, hasBack = true;
     var frontTop = C.y + GB + 4;
     if (noteY > 380 || (hasFront && noteY > frontTop - 12)) {
       noteY = aim.y - rPx - 14;
@@ -4744,43 +4803,32 @@
     // 打つ方向
     svg.appendChild(label(72, 402, "⬆ 打つ方向", { fs: 10 }));
 
-    // ---- 結論（見出し＋根拠） ----
+    // ---- 結論（見出し＋内訳） ----
     var cvTxt = toDisp1(curveYd);
     var head, why = [];
     var conflictX = b.minX > b.maxX, conflictY = b.minY > b.maxY;
+    var rows = SIDES4.map(function (side) {
+      var need = needYd(curveYd, side), atPin = edgeYd(pin, side), atAim = edgeYd(aim, side);
+      return { side: side, v: hazPts(side), need: need, pinE: atPin, aimE: atAim, bind: shift > 0.5 && atPin + 0.05 < need && Math.abs(atAim - need) < 0.15 };
+    });
     if (shift > 0.5) {
       var hp = [];
       var xYd = Math.abs(shiftX) / S, yYd = Math.abs(shiftY) / S;
-      if (xYd >= 0.5) hp.push((shiftX > 0 ? "右" : "左") + " 約" + fmtD(xYd));
-      if (yYd >= 0.5) hp.push((shiftY > 0 ? "手前" : "奥") + " 約" + fmtD(yYd));
+      if (xYd >= 0.25) hp.push((shiftX > 0 ? "右" : "左") + " 約" + toDisp1(xYd) + unitName());
+      if (yYd >= 0.25) hp.push((shiftY > 0 ? "手前" : "奥") + " 約" + toDisp1(yYd) + unitName());
       head = "ピンの" + hp.join("・") + "を狙う";
-      state.penalties.forEach(function (side) {
-        var need = curveYd + hazPts(side);
-        var e = edgeYd(pin, side);
-        if (e + 0.01 < need) {
-          why.push(SIDE_NAME[side] + "のグリーンの端から約" + fmtD(need) + "内側（曲がり幅" + cvTxt + "＋点数" + hazPts(side) + "）");
-        }
-      });
-      if (conflictX || conflictY) why.push("両側とも余裕が足りないので、その間の真ん中を狙います");
-    } else if (state.penalties.length === 0) {
-      head = "ピンをそのまま狙えます";
-      why.push("障害物が選ばれていません（③で選ぶと狙いが変わります）");
+      if (rows.some(function (r) { return r.bind && r.v <= 0; })) why.push("点数0でも、曲がり幅のぶんは端から離します（球をグリーンに残すため）。");
+      if (conflictX || conflictY) why.push("両側とも要る距離が取れないので、その間の真ん中を狙います。");
     } else {
       head = "ピンをそのまま狙えます";
-      // いちばん余裕が小さい向きを根拠に示す
-      var tight = null, tightGap = Infinity;
-      state.penalties.forEach(function (side) {
-        var gap = edgeYd(pin, side) - (curveYd + hazPts(side));
-        if (gap < tightGap) { tightGap = gap; tight = side; }
-      });
-      if (tight) {
-        var nd = curveYd + hazPts(tight);
-        why.push(SIDE_NAME[tight] + "のグリーンの端まで" + fmtD(edgeYd(pin, tight)) + "あるので、曲がり幅" + cvTxt + "＋点数" + hazPts(tight) + "＝" + fmtD(nd) + "より離れています");
-      }
+      why.push("4方向とも、ピンから端までが要る距離（曲がり幅＋点数）以上あります。");
     }
-    if (state.penalties.some(function (sd) { return hazPts(sd) === 0; }) && shift > 0.5) {
-      why.push("点数0でも、曲がり幅のぶんは離します（球をグリーンに残すため）");
-    }
+    var fmtN = function (v) { return (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""); };
+    $("aimBreak").innerHTML = "<div class='ab-h'>内訳（曲がり幅" + cvTxt + unitName() + "）</div><table><thead><tr><th>方向</th><th>点数</th><th>要る距離<br><small>曲がり幅＋点数</small></th><th>狙う1点から端まで</th></tr></thead><tbody>" +
+      ["back", "front", "left", "right"].map(function (sd) {
+        var r = rows.filter(function (x) { return x.side === sd; })[0];
+        return "<tr" + (r.bind ? " class='bind'" : "") + "><td><b>" + SIDE_NAME[sd] + "</b></td><td><span class='ptb " + ptCls(r.v) + "'>" + (r.v < 0 ? "−" + (-r.v) : r.v) + "</span></td><td>" + fmtN(curveYd) + (r.v < 0 ? "−" + (-r.v) : "＋" + r.v) + "＝" + fmtN(r.need) + "</td><td class='d'>" + fmtN(r.aimE) + (r.bind ? " <span class='why'>ずらした理由</span>" : "") + "</td></tr>";
+      }).join("") + "</tbody></table>";
     $("aimHead").textContent = head;
     var lsc2 = lsCfg();
     if (lsc2) {
@@ -4791,15 +4839,15 @@
 
     // メモ（期待打数の比較 + 目標別アドバイス）
     if (shift > 0.5) {
-      var maxPts = 0;
-      state.penalties.forEach(function (sd) {
-        if (edgeYd(pin, sd) < curveYd + hazPts(sd)) maxPts = Math.max(maxPts, hazPts(sd));
+      var maxPts = -2;
+      SIDES4.forEach(function (sd) {
+        if (edgeYd(pin, sd) < needYd(curveYd, sd)) maxPts = Math.max(maxPts, hazPts(sd));
       });
       var frac = Math.min(0.5, shift / (2 * rPx) + 0.05);
       var pct = Math.round(frac * 100);
-      var lossPer = { 3: 1.5, 2: 0.8, 1: 0.5, 0: 0.2 }[maxPts];
+      var lossPer = HAZ[maxPts].loss;
       var lossStrokes = Math.round(frac * lossPer * 10) / 10;
-      var where = maxPts === 0 ? "グリーンを外れ" : HAZ[maxPts].name + (maxPts === 1 ? "に入り" : "につかまり");
+      var where = maxPts <= 0 ? "グリーンを外れ" : maxPts === 1 ? "バンカーなどに入り" : maxPts === 2 ? "寄せにくい所につかまり" : "ペナルティになり";
       note.textContent = "ピン直狙いは約" + pct + "%で" + where + "ます" + (lossStrokes >= 0.1 ? "（期待+" + lossStrokes + "打の損）" : "") + "。 " + goalAdvice(state.distance);
     } else {
       note.textContent = goalAdvice(state.distance);
@@ -4815,20 +4863,23 @@
     var horiz = Math.abs(dx) / GA > Math.abs(dy) / GB;
     var side = horiz ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
     if (insideGreen(x, y)) {
-      var p = (Math.abs(dx) < GA * 0.3 && Math.abs(dy) < GB * 0.3) ? "center" : side;
+      var nx = dx / GA, ny = dy / GB;
+      var p = pinKey9(nx > 0.33 ? 1 : nx < -0.33 ? -1 : 0, ny < -0.33 ? -1 : ny > 0.33 ? 1 : 0);
       state.pin = p;
       setPinUI(p);
       markActive("pinCard");
       update();
     } else {
       markActive("penaltyCard");
-      togglePenalty(side);
+      selectDir(side);
+      try { if (state.onePage && state.tab === "shot") pager.go("shot", 1, true); } catch (e) {}
+      update();
     }
   });
 
   // ---- ステップの要約と「選択中」 ----
   function renderSteps() {
-    var pinName = state.pin ? (state.pin === "center" ? "真ん中" : SIDE_NAME[state.pin]) : "未選択";
+    var pinName = state.pin ? (PIN_NAME[state.pin] || "未選択") : "未選択";
     $("sum1").textContent = pinName + "・" + fmtD(state.distance);
     var cv = curveYdVal();
     var scl = shotClub(), sk = scl ? skillOf(scl.id) : "";
@@ -4839,10 +4890,8 @@
     var skTxt = ck !== 1 ? " × " + ck + "（" + why2.join("・") + "）" : "";
     $("curveFormula").innerHTML = toDisp(state.distance) + unitName() + " × " + Math.round(goalCfg().curve * 100) + "%" + skTxt + " ＝ <strong>曲がり幅 約" + toDisp1(cv) + unitName() + "</strong>" +
       "<small>" + goalCfg().name + "の散らばり（片側）" + (scl ? "。使う番手：" + clubLabel(scl.id) : "") + "。目標スコアを変えると%が変わります（100切り7%・90切り6%・80切り5%）。マイ番手で◎得意・△苦手を付けると、散らばりが変わります</small>";
-    $("sum3").textContent = state.penalties.length
-      ? state.penalties.map(function (sd) { return SIDE_NAME[sd] + HAZ[hazPts(sd)].mark; }).join("・")
-      : "なし";
-    $("mapModelNote").textContent = "図のグリーンは横35・縦32ヤードの楕円で、ピンは端から約5ヤード内側に置いています。狙う1点は、障害物がある向きだけを見て、端までの距離が「曲がり幅＋点数」に足りないぶんだけピンからずらしています。点数はペナルティ3・寄せにくい2・バンカー1・寄せやすい0。曲がり幅は残り距離×目標別の%（" + goalCfg().name + "は" + Math.round(goalCfg().curve * 100) + "%）です。";
+    $("sum3").textContent = SIDES4.map(function (sd) { return SIDE_NAME[sd] + HAZ[hazPts(sd)].mark; }).join("・");
+    $("mapModelNote").textContent = "要る距離は「曲がり幅＋点数」。狙う1点から端までは、狙う1点を通る縦と横の線に沿って測ります。狙う1点は、4方向とも要る距離が取れる所のうち、ピンにいちばん近い所です（点数0でも曲がり幅のぶんは離す）。点数は 3＝ペナルティ、2＝かなり難しいアプローチ、1＝上手く打てれば寄る、0＝普通に寄る、−1＝簡単に寄る、−2＝片手でも寄る。図のグリーンは横30・縦24ヤードの楕円で、ピンは9か所（端から約3ヤード内側）。まわりの帯は、グリーンを囲む四角の対角線で奥・手前・左・右に分けています。曲がり幅は残り距離×目標別の%（" + goalCfg().name + "は" + Math.round(goalCfg().curve * 100) + "%）。考え方はshun氏「ターゲットナビ」を参考にしています。";
   }
   function markActive(id) {
     document.querySelectorAll(".step-card").forEach(function (c) { c.classList.toggle("active", c.id === id); });
@@ -5174,8 +5223,10 @@
     setDistance(Math.min(250, Math.max(50, Math.round(rem / 5) * 5)));
     // マイコースノート：このホールのペナルティ記憶を復元
     var note = state.holeNotes[holeKey()];
-    state.penalties = note && Array.isArray(note.penalties) ? note.penalties.slice() : [];
-    state.penaltyPts = note && note.penaltyPts ? JSON.parse(JSON.stringify(note.penaltyPts)) : {};
+    state.penaltyPts = {};
+    if (note && note.penaltyPts) Object.keys(note.penaltyPts).forEach(function (sd) { if (note.penalties && note.penalties.indexOf(sd) < 0 && note.penalties.length) return; if (typeof note.penaltyPts[sd] === "number" && note.penaltyPts[sd] !== 0) state.penaltyPts[sd] = note.penaltyPts[sd]; });
+    else if (note && Array.isArray(note.penalties)) note.penalties.forEach(function (sd) { state.penaltyPts[sd] = 3; });
+    syncPenalties();
     setPenaltyUI();
     document.querySelectorAll(".hole-chip").forEach(function (c) {
       c.setAttribute("aria-pressed", c.id === "hole-" + n ? "true" : "false");
@@ -5184,7 +5235,7 @@
     info.hidden = false;
     info.innerHTML = "<strong>" + cd.name + " " + n + "番</strong>　Par" + par + "・" + fmtD(yd) + "（HCP " + (h[2] || "未入力") + "）<br>" +
       "<span style='font-size:12px;'>" + remTxt + "：<strong>" + fmtD(rem) + "</strong>｜" + holeStrategy(par, yd, hcp) + "</span>" +
-      (state.penalties.length ? "<br><span style='font-size:11px;'>📝 このホールのペナルティ位置を復元しました</span>" : "");
+      (state.penalties.length ? "<br><span style='font-size:11px;'>📝 このホールの点数（" + state.penalties.map(function (sd) { return SIDE_NAME[sd] + HAZ[hazPts(sd)].mark; }).join("・") + "）を復元しました</span>" : "");
     setTeeDangerUI();
     drawTeeMap();
     try { var po = pinOffset(); if (po) { state.pin = pinChipFrom(po); setPinUI(state.pin); } } catch (e) {}
@@ -6014,10 +6065,11 @@
     var p = o.raw, lr = p.lat > 0 ? "右" + p.lat : p.lat < 0 ? "左" + (-p.lat) : "中";
     return (p.mode === "center" ? "C" + (p.v > 0 ? "+" : "") + p.v : p.v) + "/" + lr;
   }
-  function pinChipFrom(o) {
-    if (Math.abs(o.along) < 4 && Math.abs(o.lat) < 4) return "center";
-    if (Math.abs(o.along) / 15 >= Math.abs(o.lat) / 15) return o.along > 0 ? "back" : "front";
-    return o.lat > 0 ? "right" : "left";
+  function pinChipFrom(o) { // 奥行きの1/3・左右4yd以上で、奥／手前・左／右とみなす
+    var third = Math.max(4, depthNow() / 6);
+    var row = o.along > third ? -1 : o.along < -third ? 1 : 0;
+    var col = o.lat >= 4 ? 1 : o.lat <= -4 ? -1 : 0;
+    return pinKey9(col, row);
   }
   var pinLatSign = 0;
   function renderPinIn() {
@@ -7825,8 +7877,7 @@
       if (inp && typeof state.clubDist[c[0]] === "number") inp.value = toDisp(state.clubDist[c[0]]);
     });
     setPenaltyUI();
-    setHazTypeUI(String(state.hazType));
-    $("hazTypeNote").textContent = HAZ[state.hazType].note;
+
     if (state.pin) setPinUI(state.pin);
     setWindUI(state.windDir);
     setSlopeUI(state.slope);
