@@ -1072,7 +1072,7 @@
 
 <div class="app">
   <header class="top">
-    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.7</button></h1>
+    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.8.1</button></h1>
     <button type="button" class="help-link" id="helpBtn" aria-label="使い方ガイドと取扱説明書">？</button>
     <p id="ctxLine">①ピンと距離 → ②曲がり幅 → ③障害物の点数 → ④狙う1点</p>
     <button type="button" class="club-now" id="clubNow" hidden><span class="cn-club" id="cnClub"></span><span class="cn-txt"><b id="cnHead"></b><small id="cnSub"></small></span><span class="cn-go">▶</span></button>
@@ -1968,7 +1968,7 @@
     </ul></details>
   </section>
 
-  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.8.0（2026/9/29）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
+  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.8.1（2026/9/29）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
 </div>
 
 <div class="rm" id="rm" hidden role="dialog" aria-label="ラウンド画面（プレーファースト）">
@@ -5756,8 +5756,9 @@
   })();
 
   // ---------- バージョンと更新内容 ----------
-  var APP_VER = "1.8.0", APP_DATE = "2026-09-29";
+  var APP_VER = "1.8.1", APP_DATE = "2026-09-29";
   var CHANGELOG = [
+    { v: "1.8.1", d: "9/29", t: "スマホに古い版が残らないように：アプリを開いたとき・戻ったときに新しい版を自動で確認し、「最新版にする」を押すだけで切り替わるように" },
     { v: "1.8", d: "9/29", t: "新機能「弾道トレーサー（実験版）」：後ろから撮った動画でボールを自動で追い、テレビ中継のような赤い線を表示。おおよそのキャリー（幅つき）・打ち出し方向・曲がり（フェード／ドロー等）・初速を推定し、マイ番手のいつもの飛距離と比べます。見失ったときは手動で指定、線入り動画の保存にも対応。60コマ/秒の動画にも自動で合わせます。比べる画面の線がずれることがある不具合も修正" },
     { v: "1.7", d: "9/28", t: "新機能「2本を並べて比べる（先生モード）」：2本の動画を同時に再生・スロー・コマ送り、右だけずらして合わせる。AIでアドレス・トップ・インパクトを自動でそろえ、骨格・背骨・アドレスの頭を重ねて表示し、先生のように違いと練習方法を説明" },
     { v: "1.6.2", d: "9/28", t: "3Dスイングを分かりやすく：元の動画を小窓で同時表示、場面ボタン（アドレス・トップ・インパクト・フィニッシュ）、アドレスの形を白く残す、見どころカード（◎○△と一言。押すとその場面を見やすい向きで）、色の説明" },
@@ -5778,6 +5779,7 @@
     document.body.appendChild(bg);
     bg.addEventListener("click", function (e) { if (e.target === bg || e.target.closest(".tm-close")) bg.remove(); });
   }
+  document.getElementById("verBadge").textContent = "v" + APP_VER.replace(/\.0$/, "");
   document.getElementById("verBadge").addEventListener("click", function () { showVersions(); });
   function checkNewVersion() { // アップロード後に初めて開いたとき、一度だけ知らせる
     var last = null; try { last = localStorage.getItem("nerai1ten_ver"); if (!last && localStorage.getItem("nerai1ten")) last = "1.6"; } catch (e) {} // 番号を持つ前の版から来た人にも知らせる
@@ -5790,6 +5792,25 @@
     d.querySelector(".go").onclick = function () { d.remove(); showVersions("v" + last + " → v" + APP_VER + " に更新されました。"); };
     setTimeout(function () { if (d.parentNode) d.remove(); }, 12000);
   }
+
+  // ---------- 新しい版の自動チェック（スマホに古い版が残らないように） ----------
+  function verNum(v) { return String(v).split(".").map(function (x) { return +x || 0; }).reduce(function (a, x, i) { return a + x * Math.pow(1000, 2 - i); }, 0); }
+  var updLast = 0;
+  function checkServerVersion() {
+    if (!/^https?:/.test(location.protocol) || !window.fetch) return;
+    if (Date.now() - updLast < 5 * 60 * 1000) return; updLast = Date.now();
+    fetch(location.pathname + "?nocache=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+      var m = /APP_VER = "([0-9.]+)"/.exec(t || ""); if (!m || verNum(m[1]) <= verNum(APP_VER)) return;
+      if (document.getElementById("updBar")) return;
+      var d = document.createElement("div"); d.id = "updBar"; d.className = "tour-invite"; d.setAttribute("role", "status");
+      d.innerHTML = "<b>新しい版 v" + m[1] + " があります</b><br>押すと最新版に切り替わります（記録はそのまま残ります）。<div><button type='button' class='later'>あとで</button><button type='button' class='go'>最新版にする</button></div>";
+      document.body.appendChild(d);
+      d.querySelector(".later").onclick = function () { d.remove(); };
+      d.querySelector(".go").onclick = function () { location.replace(location.pathname + "?v=" + m[1] + location.hash); };
+    }).catch(function () {});
+  }
+  setTimeout(checkServerVersion, 2500);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) checkServerVersion(); });
 
   // ---------- 手順ガイド（光る所を順番に案内） ----------
   var TOURS = [
