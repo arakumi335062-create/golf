@@ -1072,7 +1072,7 @@
 
 <div class="app">
   <header class="top">
-    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.8.1</button></h1>
+    <h1>⛳ 狙う1点マップ <button type="button" class="ver-badge" id="verBadge" aria-label="バージョンと更新内容">v1.8.2</button></h1>
     <button type="button" class="help-link" id="helpBtn" aria-label="使い方ガイドと取扱説明書">？</button>
     <p id="ctxLine">①ピンと距離 → ②曲がり幅 → ③障害物の点数 → ④狙う1点</p>
     <button type="button" class="club-now" id="clubNow" hidden><span class="cn-club" id="cnClub"></span><span class="cn-txt"><b id="cnHead"></b><small id="cnSub"></small></span><span class="cn-go">▶</span></button>
@@ -1861,7 +1861,7 @@
     <div class="s3-bar"><i id="s3Bar"></i></div>
     <div id="s3Out" hidden>
       <div class="s3-view" id="s3View"><canvas id="s3Cv" width="720" height="792"></canvas><div class="s3-hud" id="s3Hud"></div><video id="s3Pip" class="s3-pip" playsinline muted preload="auto" hidden></video><div class="s3-phase" id="s3Phase"></div></div>
-      <div class="s3-legend"><span><i style="background:#ffb347"></i>左手・左足</span><span><i style="background:#9be28f"></i>右手・右足</span><span><i style="background:#7cc4ff"></i>体</span><span><i style="background:rgba(255,255,255,.6)"></i>アドレスの形</span><span><i style="background:linear-gradient(90deg,#a64dff,#ffd23f)"></i>手の通り道</span></div>
+      <div class="s3-legend"><span><i style="background:#ffb347"></i>左腕・左足</span><span><i style="background:#9be28f"></i>右腕・右足</span><span><i style="background:#5aa0ee"></i>胸（前）</span><span><i style="background:#2f5f9e"></i>背中</span><span><i style="background:#fff;border:1px solid #999"></i>左手（手袋）・ボール</span><span><i style="background:rgba(255,255,255,.6)"></i>アドレスの形</span><span><i style="background:linear-gradient(90deg,#a64dff,#ffd23f)"></i>手の通り道</span></div>
       <div class="s3-row" role="group" aria-label="場面へ移動">
         <button type="button" data-s3k="addr">アドレス</button><button type="button" data-s3k="top">トップ</button><button type="button" data-s3k="imp">インパクト</button><button type="button" data-s3k="fin">フィニッシュ</button>
       </div>
@@ -1968,7 +1968,7 @@
     </ul></details>
   </section>
 
-  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.8.1（2026/9/29）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
+  <footer class="note" id="storageNote" data-tabs="prep">狙う1点マップ v1.8.2（2026/10/2）｜端末内保存で動作中｜曲がり幅＝距離×目標別%（100切り7%・90切り6%・80切り5%）</footer>
 </div>
 
 <div class="rm" id="rm" hidden role="dialog" aria-label="ラウンド画面（プレーファースト）">
@@ -4579,66 +4579,128 @@
     var BONES = [[11, 12, "t"], [11, 23, "t"], [12, 24, "t"], [23, 24, "t"], [11, 13, "l"], [13, 15, "l"], [12, 14, "r"], [14, 16, "r"], [23, 25, "l"], [25, 27, "l"], [27, 31, "l"], [24, 26, "r"], [26, 28, "r"], [28, 32, "r"]];
     var COL = { t: "#7cc4ff", l: "#ffb347", r: "#9be28f" };
     function proj(p, W, H) {
-      var c = Math.cos(yaw), s = Math.sin(yaw), x1 = p[0] * c + p[2] * s, z1 = -p[0] * s + p[2] * c;
-      var cp = Math.cos(pitch), sp = Math.sin(pitch), y2 = p[1] * cp - z1 * sp, z2 = p[1] * sp + z1 * cp;
-      var dist = 4.2, f = 3.3 / (dist - z2), sc = Math.min(W, H) * 0.34 * zoom;
-      return { x: W / 2 + x1 * f * sc, y: H * 0.52 - (y2 + 0.1) * f * sc, z: z2, f: f };
+      var c = Math.cos(yaw), s = Math.sin(yaw), x1 = (p[0] - ctrX) * c + (p[2] - ctrZ) * s, z1 = -(p[0] - ctrX) * s + (p[2] - ctrZ) * c;
+      var cp = Math.cos(pitch), sp = Math.sin(pitch), y2 = (p[1] - ctrY) * cp - z1 * sp, z2 = (p[1] - ctrY) * sp + z1 * cp;
+      var dist = 4.2, f = 3.3 / (dist - z2), sc = Math.min(W, H) * 0.5 * zoom;
+      return { x: W / 2 + x1 * f * sc, y: H * 0.5 - y2 * f * sc, z: z2, f: f, s: f * sc };
+    }
+    var ctrX = 0, ctrY = 0, ctrZ = 0, shCv = null;
+    function shade(hex, k) { // k<1 で暗く、k>1 で明るく
+      var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+      var f = function (v) { return Math.max(0, Math.min(255, Math.round(k <= 1 ? v * k : v + (255 - v) * (k - 1)))); };
+      return "rgb(" + f(r) + "," + f(g) + "," + f(b) + ")";
+    }
+    function headC(fr) { var e = mid(fr[7], fr[8]); if (Math.hypot(e[0] - fr[0][0], e[1] - fr[0][1], e[2] - fr[0][2]) > 0.3) return [fr[0][0], fr[0][1] + 0.02, fr[0][2] - 0.06]; return [e[0] * 0.75 + fr[0][0] * 0.25, e[1] * 0.75 + fr[0][1] * 0.25 + 0.03, e[2] * 0.75 + fr[0][2] * 0.25]; }
+    function mid(a, b) { return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]; }
+    // 人形の部品：[始点, 終点, 太さ(m), 色, 種類]
+    var LIMBS = [
+      [11, 13, 0.05, "#ffb347", "l"], [13, 15, 0.04, "#f2c9a5", "l"], [12, 14, 0.05, "#9be28f", "r"], [14, 16, 0.04, "#f2c9a5", "r"],
+      [23, 25, 0.08, "#ffb347", "l"], [25, 27, 0.06, "#ffb347", "l"], [24, 26, 0.08, "#9be28f", "r"], [26, 28, 0.06, "#9be28f", "r"],
+      [27, 31, 0.045, "#f4f6f8", "l"], [28, 32, 0.045, "#f4f6f8", "r"]
+    ];
+    function capsule(a, b, r, col, lightK) {
+      var w = Math.max(3, 2 * r * (a.s + b.s) / 2);
+      cx.lineCap = "round";
+      cx.strokeStyle = "rgba(0,0,0,.45)"; cx.lineWidth = w + 3; cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
+      cx.strokeStyle = shade(col, lightK); cx.lineWidth = w; cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
+      // つや（上側に細い明るい線）
+      cx.strokeStyle = "rgba(255,255,255,.28)"; cx.lineWidth = Math.max(1.5, w * 0.28); cx.beginPath(); cx.moveTo(a.x - w * 0.18, a.y - w * 0.18); cx.lineTo(b.x - w * 0.18, b.y - w * 0.18); cx.stroke();
+    }
+    function ball3(p, r, col, lightK) {
+      var rr = Math.max(3, r * p.s), gr = cx.createRadialGradient(p.x - rr * 0.35, p.y - rr * 0.35, rr * 0.15, p.x, p.y, rr);
+      gr.addColorStop(0, shade(col, Math.min(1.6, lightK * 1.35))); gr.addColorStop(1, shade(col, lightK * 0.75));
+      cx.fillStyle = "rgba(0,0,0,.45)"; cx.beginPath(); cx.arc(p.x, p.y, rr + 1.5, 0, Math.PI * 2); cx.fill();
+      cx.fillStyle = gr; cx.beginPath(); cx.arc(p.x, p.y, rr, 0, Math.PI * 2); cx.fill();
     }
     function draw() {
       var W = cv.width, H = cv.height; cx.clearRect(0, 0, W, H);
       if (!D) return;
       var i = Math.max(0, Math.min(D.n - 1, Math.round(t * D.fps))), f = D.F[i];
-      var feet = Infinity; D.F.forEach(function (fr) { feet = Math.min(feet, fr[27][1], fr[28][1], fr[31][1], fr[32][1]); });
-      // 地面のマス目と目標方向
-      cx.lineWidth = 1.5; cx.strokeStyle = "rgba(255,255,255,.14)";
+      var feet = Infinity, top = -Infinity, sx = 0, sz = 0;
+      D.F.forEach(function (fr) { feet = Math.min(feet, fr[27][1], fr[28][1], fr[31][1], fr[32][1]); top = Math.max(top, fr[0][1], fr[15][1], fr[16][1]); sx += (fr[23][0] + fr[24][0]) / 2; sz += (fr[23][2] + fr[24][2]) / 2; });
+      ctrX = sx / D.n; ctrZ = sz / D.n; ctrY = (feet + Math.min(top, feet + 2.1)) / 2;
+      var am = D.met ? D.F[D.met.addr] : f, ah = mid(am[15], am[16]);
+      var ballP = [ah[0] + 0.03 * hand, feet, Math.max(ah[2] + 0.12, 0.3)];
+      // 芝生（まるい台）
+      var gc = proj([ctrX, feet, ctrZ], W, H), pts = [];
+      for (var a = 0; a < 48; a++) { var an = a / 48 * Math.PI * 2; pts.push(proj([ctrX + Math.cos(an) * 1.25, feet, ctrZ + Math.sin(an) * 1.25], W, H)); }
+      var tg = cx.createRadialGradient(gc.x, gc.y, 10, gc.x, gc.y, Math.max(W, H) * 0.5);
+      tg.addColorStop(0, "rgba(96,170,96,.75)"); tg.addColorStop(1, "rgba(40,90,50,.35)");
+      cx.fillStyle = tg; cx.beginPath(); pts.forEach(function (q, k) { if (k) cx.lineTo(q.x, q.y); else cx.moveTo(q.x, q.y); }); cx.closePath(); cx.fill();
+      cx.lineWidth = 1; cx.strokeStyle = "rgba(255,255,255,.13)";
       for (var g = -1; g <= 1.0001; g += 0.25) {
-        var a1 = proj([g, feet, -1], W, H), a2 = proj([g, feet, 1], W, H), b1 = proj([-1, feet, g], W, H), b2 = proj([1, feet, g], W, H);
+        var a1 = proj([ctrX + g, feet, ctrZ - 1], W, H), a2 = proj([ctrX + g, feet, ctrZ + 1], W, H), b1 = proj([ctrX - 1, feet, ctrZ + g], W, H), b2 = proj([ctrX + 1, feet, ctrZ + g], W, H);
         cx.beginPath(); cx.moveTo(a1.x, a1.y); cx.lineTo(a2.x, a2.y); cx.stroke(); cx.beginPath(); cx.moveTo(b1.x, b1.y); cx.lineTo(b2.x, b2.y); cx.stroke();
       }
-      var t1 = proj([-0.2 * hand, feet, 0.45], W, H), t2 = proj([1.1 * hand, feet, 0.45], W, H);
-      cx.strokeStyle = "rgba(255,214,90,.8)"; cx.lineWidth = 4; cx.beginPath(); cx.moveTo(t1.x, t1.y); cx.lineTo(t2.x, t2.y); cx.stroke();
-      cx.fillStyle = "rgba(255,214,90,.9)"; cx.font = "800 22px system-ui, sans-serif"; cx.fillText("目標 →", t2.x - 10, t2.y - 10);
-      // 影
-      cx.strokeStyle = "rgba(0,0,0,.35)"; cx.lineWidth = 10; cx.lineCap = "round";
-      BONES.forEach(function (bn) { var p1 = proj([f[bn[0]][0], feet, f[bn[0]][2]], W, H), p2 = proj([f[bn[1]][0], feet, f[bn[1]][2]], W, H); cx.beginPath(); cx.moveTo(p1.x, p1.y); cx.lineTo(p2.x, p2.y); cx.stroke(); });
+      // 目標の線（ボールを通る）
+      var t1 = proj([ballP[0] - 0.9 * hand, feet, ballP[2]], W, H), t2 = proj([ballP[0] + 1.3 * hand, feet, ballP[2]], W, H);
+      cx.strokeStyle = "rgba(255,214,90,.85)"; cx.lineWidth = 4; cx.setLineDash([14, 10]); cx.beginPath(); cx.moveTo(t1.x, t1.y); cx.lineTo(t2.x, t2.y); cx.stroke(); cx.setLineDash([]);
+      cx.fillStyle = "rgba(255,214,90,.95)"; cx.font = "800 24px system-ui, sans-serif"; cx.fillText("目標 →", Math.max(8, Math.min(W - 96, t2.x - 20)), Math.max(30, Math.min(H - 10, t2.y - 12)));
+      // 影（体を地面に落とす。小さく描いて引き伸ばし、ふんわりさせる）
+      if (!shCv) { shCv = document.createElement("canvas"); }
+      var sw = Math.round(W / 4), sh2 = Math.round(H / 4); if (shCv.width !== sw) { shCv.width = sw; shCv.height = sh2; }
+      var sc2 = shCv.getContext("2d"); sc2.clearRect(0, 0, sw, sh2); sc2.strokeStyle = "#000"; sc2.lineCap = "round";
+      LIMBS.concat([[11, 12, 0.1], [23, 24, 0.12], [11, 23, 0.12], [12, 24, 0.12], [11, 24, 0.12], [12, 23, 0.12]]).forEach(function (bn) { var p1 = proj([f[bn[0]][0], feet, f[bn[0]][2]], W, H), p2 = proj([f[bn[1]][0], feet, f[bn[1]][2]], W, H); sc2.lineWidth = 2 * bn[2] * p1.s / 4; sc2.beginPath(); sc2.moveTo(p1.x / 4, p1.y / 4); sc2.lineTo(p2.x / 4, p2.y / 4); sc2.stroke(); });
+      cx.save(); cx.globalAlpha = 0.25; cx.imageSmoothingEnabled = true; cx.drawImage(shCv, 0, 0, W, H); cx.restore();
+      // ボール
+      var bp = proj(ballP, W, H); ball3(bp, 0.035, "#ffffff", 1);
       // 手の軌道
       if (trail) {
-        cx.lineWidth = 4;
+        cx.lineCap = "round";
         for (var k = 1; k <= i; k++) {
-          var q0 = D.F[k - 1], q1 = D.F[k];
-          var h0 = proj([(q0[15][0] + q0[16][0]) / 2, (q0[15][1] + q0[16][1]) / 2, (q0[15][2] + q0[16][2]) / 2], W, H), h1 = proj([(q1[15][0] + q1[16][0]) / 2, (q1[15][1] + q1[16][1]) / 2, (q1[15][2] + q1[16][2]) / 2], W, H);
-          var tt = k / D.n; cx.strokeStyle = "hsla(" + Math.round(280 - tt * 240) + ",90%,60%,.9)";
+          var h0 = proj(mid(D.F[k - 1][15], D.F[k - 1][16]), W, H), h1 = proj(mid(D.F[k][15], D.F[k][16]), W, H);
+          var tt = k / D.n; cx.strokeStyle = "hsla(" + Math.round(280 - tt * 240) + ",95%,62%,.95)"; cx.lineWidth = 6;
           cx.beginPath(); cx.moveTo(h0.x, h0.y); cx.lineTo(h1.x, h1.y); cx.stroke();
         }
       }
       // アドレスの形（白く薄く）
       if (ghost && D.met && i !== D.met.addr) {
         var gf = D.F[D.met.addr];
-        cx.strokeStyle = "rgba(255,255,255,.28)"; cx.lineCap = "round";
-        BONES.forEach(function (bn) { var g1 = proj(gf[bn[0]], W, H), g2 = proj(gf[bn[1]], W, H); cx.lineWidth = 10 * zoom; cx.beginPath(); cx.moveTo(g1.x, g1.y); cx.lineTo(g2.x, g2.y); cx.stroke(); });
-        var gh = proj([gf[0][0], gf[0][1] + 0.02, gf[0][2] - 0.04], W, H), gr0 = 0.12 * gh.f * Math.min(W, H) * 0.34 * zoom;
-        cx.fillStyle = "rgba(255,255,255,.22)"; cx.beginPath(); cx.arc(gh.x, gh.y, gr0, 0, Math.PI * 2); cx.fill();
+        cx.strokeStyle = "rgba(255,255,255,.22)"; cx.lineCap = "round"; cx.lineJoin = "round";
+        LIMBS.forEach(function (bn) { var g1 = proj(gf[bn[0]], W, H), g2 = proj(gf[bn[1]], W, H); cx.lineWidth = 2 * bn[2] * g1.s; cx.beginPath(); cx.moveTo(g1.x, g1.y); cx.lineTo(g2.x, g2.y); cx.stroke(); });
+        var q = [11, 12, 24, 23].map(function (k2) { return proj(gf[k2], W, H); });
+        cx.fillStyle = "rgba(255,255,255,.16)"; cx.beginPath(); q.forEach(function (o, k2) { if (k2) cx.lineTo(o.x, o.y); else cx.moveTo(o.x, o.y); }); cx.closePath(); cx.fill();
+        var ghd = proj(headC(gf), W, H); cx.fillStyle = "rgba(255,255,255,.2)"; cx.beginPath(); cx.arc(ghd.x, ghd.y, 0.11 * ghd.s, 0, Math.PI * 2); cx.fill();
       }
-      // 体（奥から順に）
-      var parts = BONES.map(function (bn) { var p1 = proj(f[bn[0]], W, H), p2 = proj(f[bn[1]], W, H); return { p1: p1, p2: p2, z: (p1.z + p2.z) / 2, c: COL[bn[2]], w: bn[2] === "t" ? 16 : 13 }; });
-      var nose = f[0], head = proj([nose[0], nose[1] + 0.02, nose[2] - 0.04], W, H);
-      parts.push({ head: true, p: head, z: head.z });
-      parts.sort(function (a, b) { return a.z - b.z; });
-      parts.forEach(function (pt) {
-        if (pt.head) {
-          var r = 0.12 * pt.p.f * Math.min(W, H) * 0.34 * zoom;
-          var gr = cx.createRadialGradient(pt.p.x - r * 0.3, pt.p.y - r * 0.3, r * 0.2, pt.p.x, pt.p.y, r);
-          gr.addColorStop(0, "#ffe7cf"); gr.addColorStop(1, "#d99a6c");
-          cx.fillStyle = gr; cx.beginPath(); cx.arc(pt.p.x, pt.p.y, r, 0, Math.PI * 2); cx.fill();
-          return;
-        }
-        var lw = pt.w * (pt.p1.f + pt.p2.f) / 2 * zoom;
-        cx.strokeStyle = "rgba(0,0,0,.35)"; cx.lineWidth = lw + 4; cx.beginPath(); cx.moveTo(pt.p1.x, pt.p1.y); cx.lineTo(pt.p2.x, pt.p2.y); cx.stroke();
-        cx.strokeStyle = pt.c; cx.lineWidth = lw; cx.beginPath(); cx.moveTo(pt.p1.x, pt.p1.y); cx.lineTo(pt.p2.x, pt.p2.y); cx.stroke();
-      });
+      // 人形（奥から順に描く）
+      var vd = [Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)]; // 見る人の方向（だいたい）
+      var zs = [], zmin = Infinity, zmax = -Infinity;
+      for (var k3 = 0; k3 < 33; k3++) { var pz = proj(f[k3], W, H).z; zmin = Math.min(zmin, pz); zmax = Math.max(zmax, pz); }
+      var light = function (z) { return 0.72 + 0.38 * (zmax > zmin ? (z - zmin) / (zmax - zmin) : 1); }; // 手前ほど明るく
+      var parts = [];
+      LIMBS.forEach(function (bn) { var p1 = proj(f[bn[0]], W, H), p2 = proj(f[bn[1]], W, H); parts.push({ z: (p1.z + p2.z) / 2, d: function () { capsule(p1, p2, bn[2], bn[3], light((p1.z + p2.z) / 2)); } }); });
+      // 胴体：胸側は明るい青、背中側は濃い青（体がどちらを向いているか分かる）
+      var S1 = f[11], S2 = f[12], H1 = f[23], H2 = f[24], sm = mid(S1, S2), hm = mid(H1, H2);
+      var ax = [S1[0] - S2[0], S1[1] - S2[1], S1[2] - S2[2]], up = [sm[0] - hm[0], sm[1] - hm[1], sm[2] - hm[2]];
+      var nrm = [ax[1] * up[2] - ax[2] * up[1], ax[2] * up[0] - ax[0] * up[2], ax[0] * up[1] - ax[1] * up[0]];
+      var nl = Math.hypot(nrm[0], nrm[1], nrm[2]) || 1, facing = (nrm[0] * vd[0] + nrm[1] * vd[1] + nrm[2] * vd[2]) / nl * hand;
+      var tq = [S1, S2, H2, H1].map(function (k4) { return proj(k4, W, H); }), tz = (tq[0].z + tq[1].z + tq[2].z + tq[3].z) / 4;
+      parts.push({ z: tz - 0.01, d: function () {
+        var col = facing > 0 ? "#5aa0ee" : "#2f5f9e", lk = light(tz);
+        cx.lineJoin = "round"; cx.lineWidth = 0.09 * tq[0].s;
+        cx.strokeStyle = "rgba(0,0,0,.45)"; cx.fillStyle = shade(col, lk);
+        cx.beginPath(); tq.forEach(function (o, k5) { if (k5) cx.lineTo(o.x, o.y); else cx.moveTo(o.x, o.y); }); cx.closePath(); cx.stroke();
+        cx.strokeStyle = shade(col, lk); cx.stroke(); cx.fill();
+        // 肩の線・腰のベルト
+        cx.lineCap = "round"; cx.strokeStyle = shade(col, lk * 1.15); cx.lineWidth = 0.1 * tq[0].s; cx.beginPath(); cx.moveTo(tq[0].x, tq[0].y); cx.lineTo(tq[1].x, tq[1].y); cx.stroke();
+        cx.strokeStyle = shade("#3a3f4a", lk); cx.lineWidth = 0.13 * tq[2].s; cx.beginPath(); cx.moveTo(tq[2].x, tq[2].y); cx.lineTo(tq[3].x, tq[3].y); cx.stroke();
+      } });
+      // 首と頭（顔の向きが分かるように目と鼻）
+      var hc = headC(f), hp = proj(hc, W, H), np = proj(f[0], W, H), sp2 = proj(sm, W, H);
+      parts.push({ z: (hp.z + sp2.z) / 2 - 0.02, d: function () { capsule(sp2, hp, 0.045, "#f2c9a5", light(hp.z)); } });
+      parts.push({ z: hp.z, d: function () {
+        ball3(hp, 0.11, "#f2c9a5", light(hp.z));
+        var dx = np.x - hp.x, dy = np.y - hp.y, front = np.z > hp.z;
+        if (front) { var ex = -dy * 0.35, ey = dx * 0.35; cx.fillStyle = "#3a2a20"; [[1], [-1]].forEach(function (sg) { cx.beginPath(); cx.arc(hp.x + dx * 0.55 + ex * sg[0] - dy * 0.15, hp.y + dy * 0.55 + ey * sg[0] - 0.02 * hp.s, Math.max(2, 0.014 * hp.s), 0, Math.PI * 2); cx.fill(); }); }
+        cx.fillStyle = front ? "#c98a5c" : "rgba(0,0,0,0)"; cx.beginPath(); cx.arc(hp.x + dx * 0.9, hp.y + dy * 0.9, Math.max(2.5, 0.022 * hp.s), 0, Math.PI * 2); cx.fill();
+        // 帽子のつば（顔の向き）
+        cx.strokeStyle = "rgba(30,40,60,.85)"; cx.lineWidth = Math.max(3, 0.03 * hp.s); cx.lineCap = "round";
+        cx.beginPath(); cx.moveTo(hp.x - dy * 0.0, hp.y - 0.06 * hp.s); cx.lineTo(hp.x + dx * 1.15, hp.y + dy * 1.15 - 0.07 * hp.s); cx.stroke();
+      } });
       // 手（グリップ）
-      var hd = proj([(f[15][0] + f[16][0]) / 2, (f[15][1] + f[16][1]) / 2, (f[15][2] + f[16][2]) / 2], W, H);
-      cx.fillStyle = "#fff"; cx.beginPath(); cx.arc(hd.x, hd.y, 8, 0, Math.PI * 2); cx.fill();
+      [[15, "#ffffff"], [16, "#f2c9a5"]].forEach(function (hh) { var k6 = hand > 0 ? hh[0] : (hh[0] === 15 ? 16 : 15), p6 = proj(f[k6], W, H); parts.push({ z: p6.z + 0.001, d: function () { ball3(p6, 0.045, hh[1], light(p6.z)); } }); });
+      parts.sort(function (a, b) { return a.z - b.z; });
+      parts.forEach(function (pt) { pt.d(); });
       var m = D.met, ph = i < m.addr ? "構え" : i <= m.top ? (i === m.top ? "トップ" : "バックスイング") : i <= m.imp ? (i === m.imp ? "インパクト" : "ダウンスイング") : "フォロー";
       $("s3Hud").textContent = (i / D.fps).toFixed(2) + "秒" + (playing ? "　" + (speed === 1 ? "等速" : speed + "×") : "");
       $("s3Phase").textContent = i === m.addr ? "アドレス" : i === m.top ? "トップ" : i === m.imp ? "インパクト" : ph;
@@ -5756,8 +5818,9 @@
   })();
 
   // ---------- バージョンと更新内容 ----------
-  var APP_VER = "1.8.1", APP_DATE = "2026-09-29";
+  var APP_VER = "1.8.2", APP_DATE = "2026-10-02";
   var CHANGELOG = [
+    { v: "1.8.2", d: "10/2", t: "3Dスイングを見やすく：棒人間から立体の人形に（太さ・つや・影つき、手前ほど明るく）。胸は明るい青・背中は濃い青で体の向きが一目で分かる、顔（目・鼻・帽子のつば）で頭の向き、白い手袋＝左手、ボールと目標線を表示。人形が大きく真ん中に来るように自動で合わせる" },
     { v: "1.8.1", d: "9/29", t: "スマホに古い版が残らないように：アプリを開いたとき・戻ったときに新しい版を自動で確認し、「最新版にする」を押すだけで切り替わるように" },
     { v: "1.8", d: "9/29", t: "新機能「弾道トレーサー（実験版）」：後ろから撮った動画でボールを自動で追い、テレビ中継のような赤い線を表示。おおよそのキャリー（幅つき）・打ち出し方向・曲がり（フェード／ドロー等）・初速を推定し、マイ番手のいつもの飛距離と比べます。見失ったときは手動で指定、線入り動画の保存にも対応。60コマ/秒の動画にも自動で合わせます。比べる画面の線がずれることがある不具合も修正" },
     { v: "1.7", d: "9/28", t: "新機能「2本を並べて比べる（先生モード）」：2本の動画を同時に再生・スロー・コマ送り、右だけずらして合わせる。AIでアドレス・トップ・インパクトを自動でそろえ、骨格・背骨・アドレスの頭を重ねて表示し、先生のように違いと練習方法を説明" },
