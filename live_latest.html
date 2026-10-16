@@ -1506,6 +1506,19 @@
     </div>
     <div class="miss-label">今日のラウンド</div>
     <div id="roundSum"></div>
+    <div class="miss-label">📺 実況リーダーボード（同伴者とバトル）</div>
+    <div id="lbSetup">
+      <p class="map-note" style="margin-top:0;">同伴者の名前を入れて開始すると、ホールごとの順位表とTV中継風の実況が出ます。自分のスコアは上の入力から自動で反映。</p>
+      <input type="text" id="lbP1" maxlength="8" placeholder="同伴者1（例：Aさん）" style="width:100%; margin-bottom:6px;">
+      <input type="text" id="lbP2" maxlength="8" placeholder="同伴者2（いなければ空欄）" style="width:100%; margin-bottom:6px;">
+      <input type="text" id="lbP3" maxlength="8" placeholder="同伴者3（いなければ空欄）" style="width:100%; margin-bottom:6px;">
+      <button type="button" class="bag-toggle" id="lbStart">📺 バトル開始</button>
+      <p class="map-note" id="lbMsg" style="margin:4px 0 0;"></p>
+    </div>
+    <div id="lbIn" hidden></div>
+    <div id="lbBoard" hidden></div>
+    <div class="tip-now" id="lbLive" hidden style="margin-top:8px;"></div>
+    <button type="button" class="stepper" id="lbEnd" hidden style="width:100%; margin-top:8px;">バトル終了（リセット）</button>
   </section>
 
   <section class="card" id="missCard" data-tabs="hole">
@@ -2083,7 +2096,8 @@
     tees: {},          // コースごとに選んだティー { コースID: 番号 }
     customCourses: {}, // 自分で登録したコース { id: {name, lat, lng, holes:[[par,yd,hcp],...]} }
     clubSkill: {},     // 得意・苦手 { 番手: "fav" | "weak" }
-    sim: null          // コースシミュ（打ちっぱなし練習ゲーム）の進行状態
+    sim: null,         // コースシミュ（打ちっぱなし練習ゲーム）の進行状態
+    liveGame: null     // 実況リーダーボード（同伴者バトル）{players:[名前], h:{番:{名前:[打数,パット]}}}
   };
   // アプローチのクラブ：base = ラン/キャリー比（平坦・9.5ft・中心時）、h = 弾道の高さ倍率
   var AP_CLUBS = [
@@ -9026,6 +9040,7 @@
     $("scRel").className = "sc-rel" + (h && diff >= 2 ? " bad" : h && diff <= 0 ? " good" : "");
     document.querySelectorAll("#scFw button").forEach(function (b) { b.setAttribute("aria-pressed", h && h.fw === b.dataset.fw ? "true" : "false"); b.disabled = par === 3; });
     renderRoundSum();
+    try { renderLb(); } catch (e) {}
   }
   function scoreStep(field, d) {
     var h = holeRec(true); if (!h) return;
@@ -9084,6 +9099,134 @@
     b.addEventListener("click", function () { var h = holeRec(true); if (!h) return; h.fw = h.fw === b.dataset.fw ? "" : b.dataset.fw; saveState(); renderScore(); renderHoleReview(); });
   });
   $("roundHistBox").addEventListener("toggle", renderRounds);
+
+  // ======== 実況リーダーボード（同伴者バトル） ========
+  function lbPars() { var cd = COURSE_DATA[state.course]; return cd ? cd.holes.map(function (h) { return h[0]; }) : []; }
+  function lbMyScores() {
+    var r = (state.rounds || []).filter(function (x) { return x.d === todayStr() && x.course === state.course; })[0];
+    return r ? r.h : {};
+  }
+  function lbStats(upTo) { // 全員の成績（upTo=そのホールまで。0なら全部）
+    var g = state.liveGame; if (!g) return [];
+    var pars = lbPars(), out = [], my = lbMyScores();
+    var me = { name: "自分", tot: 0, par: 0, putts: 0, n: 0 };
+    Object.keys(my).forEach(function (k) {
+      if (upTo && +k > upTo) return;
+      me.n++; me.tot += my[k].s; me.par += pars[k - 1] || 4; me.putts += my[k].p;
+    });
+    out.push(me);
+    g.players.forEach(function (nm) {
+      var p2 = { name: nm, tot: 0, par: 0, putts: 0, n: 0 };
+      Object.keys(g.h || {}).forEach(function (k) {
+        if (upTo && +k > upTo) return;
+        var e = g.h[k] && g.h[k][nm];
+        if (!e) return;
+        p2.n++; p2.tot += e[0]; p2.par += pars[k - 1] || 4; p2.putts += e[1];
+      });
+      out.push(p2);
+    });
+    out.forEach(function (p2) { p2.diff = p2.tot - p2.par; });
+    out.sort(function (a, b2) { return (a.n ? a.diff : 999) - (b2.n ? b2.diff : 999) || a.putts - b2.putts; });
+    return out;
+  }
+  function lbDiffTxt(d) { return d > 0 ? "+" + d : d === 0 ? "±0" : String(d); }
+  function lbCommentary() {
+    var g = state.liveGame; if (!g) return "";
+    var pars = lbPars(), my = lbMyScores();
+    var holes = {};
+    Object.keys(my).forEach(function (k) { holes[k] = 1; });
+    Object.keys(g.h || {}).forEach(function (k) { if (Object.keys(g.h[k] || {}).length) holes[k] = 1; });
+    var hs = Object.keys(holes).map(Number).sort(function (a, b2) { return a - b2; });
+    if (!hs.length) return "";
+    var H = hs[hs.length - 1], par = pars[H - 1] || 4;
+    var lines = [], res = [];
+    if (my[H]) res.push("自分 " + scoreName(my[H].s - par) + (my[H].p === 1 ? "（1パット！）" : ""));
+    g.players.forEach(function (nm) {
+      var e = g.h[H] && g.h[H][nm];
+      if (e) res.push(escHtml(nm) + " " + scoreName(e[0] - par) + (e[1] === 1 ? "（1パット！）" : ""));
+    });
+    if (res.length) lines.push("📣 " + H + "番：" + res.join("、"));
+    var before = lbStats(H - 1).filter(function (p2) { return p2.n; });
+    var after = lbStats(0).filter(function (p2) { return p2.n; });
+    if (after.length >= 2) {
+      if (before.length >= 2 && before[0].name !== after[0].name) {
+        lines.push("👑 首位交代！" + escHtml(after[0].name) + "がトップに立った！");
+      } else {
+        var gap = after[1].diff - after[0].diff;
+        lines.push("👑 首位 " + escHtml(after[0].name) + "（" + lbDiffTxt(after[0].diff) + "）" + (gap === 0 ? "。同スコアの大接戦！" : "。2位との差は" + gap + "打"));
+      }
+      var withPutts = after.filter(function (p2) { return p2.n >= 2; });
+      if (withPutts.length >= 2) {
+        var pk = withPutts.slice().sort(function (a, b2) { return a.putts / a.n - b2.putts / b2.n; })[0];
+        lines.push("⛳ パット王：" + escHtml(pk.name) + "（平均" + (pk.putts / pk.n).toFixed(1) + "パット）");
+      }
+    }
+    return lines.join("<br>");
+  }
+  function renderLb() {
+    var setup = $("lbSetup"); if (!setup) return;
+    var g = state.liveGame;
+    var inBox = $("lbIn"), board = $("lbBoard"), live = $("lbLive");
+    setup.hidden = !!g;
+    $("lbEnd").hidden = !g;
+    inBox.hidden = board.hidden = !g;
+    if (!g) { live.hidden = true; return; }
+    var cd = COURSE_DATA[state.course];
+    if (!cd) { inBox.innerHTML = "<p class='map-note'>コースを選ぶと入力できます。</p>"; board.innerHTML = ""; live.hidden = true; return; }
+    var pars = lbPars();
+    if (state.hole) {
+      var hNo = state.hole, par = pars[hNo - 1] || 4;
+      g.h = g.h || {};
+      var hh = g.h[hNo] = g.h[hNo] || {};
+      inBox.innerHTML = "<div class='miss-label'>" + hNo + "番（Par" + par + "）同伴者のスコア</div>" +
+        g.players.map(function (nm, i) {
+          var e = hh[nm];
+          return "<div class='sc-in-row'><span>" + escHtml(nm) + "</span>" +
+            "<button type='button' class='pin-step' data-lb='" + i + ",s,-1' aria-label='打数を減らす'>−</button><b class='sc-v'>" + (e ? e[0] : "-") + "</b><button type='button' class='pin-step' data-lb='" + i + ",s,1' aria-label='打数を増やす'>＋</button>" +
+            "<small style='opacity:.75;'>Ｐ</small><button type='button' class='pin-step' data-lb='" + i + ",p,-1' aria-label='パットを減らす'>−</button><b class='sc-v'>" + (e ? e[1] : "-") + "</b><button type='button' class='pin-step' data-lb='" + i + ",p,1' aria-label='パットを増やす'>＋</button></div>";
+        }).join("") +
+        "<p class='map-note' style='margin:4px 0 0;'>＋を1回押すとPar・2パットから始まります。</p>";
+      inBox.querySelectorAll("[data-lb]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var a = b.dataset.lb.split(","), nm = g.players[+a[0]], f = a[1], d = +a[2];
+          var e = hh[nm] || (hh[nm] = [par, 2]);
+          if (f === "s") e[0] = Math.max(1, Math.min(15, e[0] + d));
+          else { e[1] = Math.max(0, Math.min(8, e[1] + d)); if (e[1] > e[0]) e[0] = e[1]; }
+          saveState(); renderLb();
+        });
+      });
+    } else {
+      inBox.innerHTML = "<p class='map-note'>ホールを選ぶと同伴者のスコアを入力できます。</p>";
+    }
+    var st = lbStats(0);
+    board.innerHTML = "<div class='miss-label'>🏆 リーダーボード</div>" + st.map(function (p2, i) {
+      var medal = ["🥇", "🥈", "🥉", "4位"][i] || "";
+      return "<div class='rh-row'><span>" + medal + " " + escHtml(p2.name) + "</span><b>" + (p2.n ? lbDiffTxt(p2.diff) : "-") + "</b><small>" + (p2.n ? p2.tot + "打・" + p2.n + "H・パット" + p2.putts : "未入力") + "</small></div>";
+    }).join("");
+    var cm = lbCommentary();
+    live.innerHTML = cm;
+    live.hidden = !cm;
+  }
+  $("lbStart").addEventListener("click", function () {
+    var ps = ["lbP1", "lbP2", "lbP3"].map(function (id) { return $(id).value.trim(); }).filter(Boolean);
+    if (!ps.length) { $("lbMsg").textContent = "同伴者の名前を1人以上入れてください。"; return; }
+    $("lbMsg").textContent = "";
+    state.liveGame = { players: ps.slice(0, 3), h: {} };
+    saveState(); renderLb();
+  });
+  var lbEndArm = false;
+  $("lbEnd").addEventListener("click", function () {
+    if (!lbEndArm) {
+      lbEndArm = true;
+      $("lbEnd").textContent = "⚠️ もう一度押すと削除します";
+      setTimeout(function () { lbEndArm = false; $("lbEnd").textContent = "バトル終了（リセット）"; }, 3000);
+      return;
+    }
+    state.liveGame = null; lbEndArm = false;
+    $("lbEnd").textContent = "バトル終了（リセット）";
+    ["lbP1", "lbP2", "lbP3"].forEach(function (id) { $(id).value = ""; });
+    saveState(); renderLb();
+  });
 
   // ======== 3. 実測飛距離でマイ番手を更新 ========
   var lastMeasured = null;
